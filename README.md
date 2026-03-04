@@ -60,7 +60,7 @@ Below are screenshots demonstrating the current state of the application UI and 
   - What the client requested next
 
 Weekly meeting notes can be found here:
-<br>https://github.com/MichaelHaddad47/Portfolio_Risk_Management/tree/main/docs/meetings
+<br>https://github.com/PortfolioRiskManagement/Portfolio_Risk_Management/tree/main/docs/meetings
 
 <a name="cont"></a>
 ## Contributors

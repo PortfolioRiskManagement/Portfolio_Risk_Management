@@ -1,21 +1,16 @@
 import PageShell from "../../../components/layout/PageShell"
 import { usePortfolio } from "../hooks/usePortfolio"
-import PortfolioHeader from "../components/PortfolioHeader"
-import BestNextMoves from "../components/BestNextMoves"
 import PortfolioProfile from "../components/PortfolioProfile"
-import ContributionPlanSection from "../components/ContributionPlanSection"
 import PortfolioStructureCharts from "../components/PortfolioStructureCharts"
 import AccountCard from "../components/AccountCard"
-import PortfolioInsights from "../components/PortfolioInsights"
+import Card from "../../../components/ui/Card"
+import { formatCurrency } from "../../../utils/formatCurrency"
 
 export default function PortfolioAccountsPage() {
   const {
     accounts,
     profile,
     summary,
-    recommendations,
-    contributionPlans,
-    insights,
     isLoading,
     updateProfile,
   } = usePortfolio()
@@ -43,33 +38,27 @@ export default function PortfolioAccountsPage() {
 
   return (
     <PageShell title="">
-      <div className="space-y-0">
-        {/* 1. Portfolio Header with Summary Metrics */}
-        <PortfolioHeader summary={summary} />
-
-        {/* 2. Best Next Moves */}
-        <BestNextMoves recommendations={recommendations} />
-
-        {/* 3. Portfolio Profile */}
-        <PortfolioProfile profile={profile} onUpdate={updateProfile} />
-
-        {/* 4. Recommended Contribution Plan */}
-        <ContributionPlanSection
-          contributionPlans={contributionPlans}
-          monthlyBudget={profile.monthlyContributionBudget || 0}
-        />
-
-        {/* 5. Portfolio Structure & Allocation */}
-        <PortfolioStructureCharts accounts={accounts} />
-
-        {/* 6. Detailed Account Intelligence Modules */}
-        <div className="mb-8">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-white mb-1">Account Intelligence</h2>
-            <p className="text-sm text-zinc-400">
-              Detailed breakdown of each account with optimization insights
-            </p>
+      <div className="space-y-8">
+        {/* 1. ACCOUNTS SECTION - HERO */}
+        <div>
+          {/* Header with Quick Stats */}
+          <div className="mb-6">
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">Your Accounts</h1>
+                <p className="text-zinc-400">Manage and monitor your investment accounts</p>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-zinc-400 mb-1">Total Portfolio</div>
+                <div className="text-3xl font-bold text-white">{formatCurrency(summary.totalValue)}</div>
+                <div className={`text-sm font-medium ${summary.totalGain >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {summary.totalGain >= 0 ? '+' : ''}{formatCurrency(summary.totalGain)}
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* Account Cards Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {accounts.map((account) => (
               <AccountCard key={account.id} account={account} />
@@ -77,28 +66,11 @@ export default function PortfolioAccountsPage() {
           </div>
         </div>
 
-        {/* 7. Portfolio Opportunities & Friction */}
-        <PortfolioInsights insights={insights} />
+        {/* 2. PORTFOLIO STRUCTURE & ANALYTICS */}
+        <PortfolioStructureCharts accounts={accounts} />
 
-        {/* Bottom CTA */}
-        <div className="mt-8 p-6 bg-gradient-to-r from-blue-900/20 to-emerald-900/20 border border-blue-800/30 rounded-xl">
-          <div className="max-w-3xl mx-auto text-center">
-            <h3 className="text-xl font-bold text-white mb-2">
-              Ready to optimize your portfolio structure?
-            </h3>
-            <p className="text-zinc-400 mb-4">
-              Complete your profile to unlock personalized contribution strategies and account recommendations
-            </p>
-            <div className="flex justify-center gap-3">
-              <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                Update Profile
-              </button>
-              <button className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-lg transition-colors">
-                View Full Analysis
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* 3. PROFILE SECTION */}
+        <PortfolioProfile profile={profile} onUpdate={updateProfile} />
       </div>
     </PageShell>
   )

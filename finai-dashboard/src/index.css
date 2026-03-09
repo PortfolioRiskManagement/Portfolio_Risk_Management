@@ -1,43 +1,70 @@
 @import "tailwindcss";
 
 html {
-  background-color: #000000;
+  background-color: #0b0b0c;
 }
 
 body {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: #0b0b0c;
+  color: #e6eef8;
   margin: 0;
   padding: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-/* Scenario Lab Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+:root {
+  --card-border: rgba(255,255,255,0.04);
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out forwards;
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px) scale(0.998); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.animate-slideUp {
-  animation: slideUp 0.4s ease-out forwards;
+/* small helper for smooth focus rings */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+  border-radius: 9999px;
 }
+
+/* Polished card and UI helpers */
+.card {
+  background: linear-gradient(180deg, rgba(20,20,22,0.72), rgba(12,12,14,0.7));
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.metric-card {
+  background: linear-gradient(180deg, rgba(24,24,26,0.6), rgba(12,12,14,0.5));
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 12px;
+  padding: 14px;
+  transition: transform .18s cubic-bezier(.2,.9,.2,1), box-shadow .18s;
+}
+.metric-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(2,6,23,0.6); }
+
+.pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  color: #d7e7ef;
+  font-size: 12px;
+}
+
+.price-large { font-weight: 700; }
+.price-change { font-size: 14px; }
+
+.fade-up { animation: fadeUp 320ms cubic-bezier(.2,.9,.2,1) both }
+
+.ai-panel .reason { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 10px; }
+

@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom"
 import DashboardPage from "../features/dashboard/pages/DashboardPage"
 import PortfolioPage from "../features/portfolio/pages/PortfolioPage"
+import AddStockPage from "../features/portfolio/pages/AddStockPage"
+import AssetDetailsPage from "../features/portfolio/pages/AssetDetailsPage"
 import PortfolioAccountsPage from "../features/portfolio/pages/PortfolioAccountsPage"
 import RiskDetailsPage from "../features/risk/pages/RiskDetailsPage"
 import PageShell from "../components/layout/PageShell"
@@ -26,6 +28,9 @@ export default function AppRoutes() {
 			<Route path="/" element={<DashboardPage />} />
 			<Route path="/portfolio" element={<PortfolioAccountsPage />} />
 			<Route path="/assets" element={<PortfolioPage />} />
+			<Route path="/portfolio/add" element={<AddStockPage />} />
+			<Route path="/portfolio/:id" element={<AssetDetailsPage />} />
+			<Route path="/assets/:id" element={<AssetDetailsPage />} />
 			<Route path="/risk" element={<RiskDetailsPage />} />
 			<Route
 				path="/advisor"

@@ -5,6 +5,7 @@ import PortfolioAccountsPage from "../features/portfolio/pages/PortfolioAccounts
 import RiskDetailsPage from "../features/risk/pages/RiskDetailsPage"
 import PageShell from "../components/layout/PageShell"
 import AdvisorPage from "../features/advisor/pages/AdvisorPage"
+import ScenarioLabPage from "../features/scenario/pages/ScenarioLabPage"
 
 type StubProps = {
 	title: string
@@ -41,12 +42,7 @@ export default function AppRoutes() {
 			/>
 			<Route
 				path="/scenario"
-				element={
-					<StubPage
-						title="Scenario Lab"
-						subtitle="Scenario analysis tools will appear here soon."
-					/>
-				}
+				element={<ScenarioLabPage />}
 			/>
 			<Route
 				path="/alerts"

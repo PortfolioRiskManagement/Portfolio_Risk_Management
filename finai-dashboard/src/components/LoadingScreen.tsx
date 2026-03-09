@@ -22,7 +22,7 @@ export default function LoadingScreen({ isVisible }: LoadingScreenProps) {
 
 		let step = 0
 		const totalSteps = 20
-		const stepInterval = 7500 / totalSteps // ~7.5 seconds total
+		const stepInterval = 2000 / totalSteps // ~2 seconds total
 
 		const interval = setInterval(() => {
 			step++

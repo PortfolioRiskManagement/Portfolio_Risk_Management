@@ -72,9 +72,17 @@ export function PortfolioEditorForScenario({ holdings, onUpdateHoldings, totalVa
 	]
 
 	if (!isEditing) {
+		const averagePosition = holdings.length ? totalValue / holdings.length : 0
+		const largestHolding = holdings.reduce((max, h) => (h.currentValue > max.currentValue ? h : max), holdings[0] ?? {
+			symbol: '--',
+			quantity: 0,
+			currentValue: 0,
+			assetClass: 'stock' as const,
+		})
+
 		return (
-			<div className="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-xl p-6">
-				<div className="flex items-center justify-between mb-4">
+			<div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6">
+				<div className="flex items-center justify-between mb-5">
 					<div>
 						<div className="text-zinc-500 text-sm mb-1">Portfolio for Testing</div>
 						<div className="text-3xl font-bold text-white">
@@ -83,26 +91,46 @@ export function PortfolioEditorForScenario({ holdings, onUpdateHoldings, totalVa
 					</div>
 					<button
 						onClick={handleStartEdit}
-						className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors font-medium"
+						className="px-4 py-2.5 bg-gradient-to-r from-zinc-700 to-zinc-600 hover:from-zinc-600 hover:to-zinc-500 border border-zinc-500/70 text-white rounded-lg transition-all font-semibold shadow-md"
 					>
 						Edit Portfolio
 					</button>
 				</div>
 
-				<div className="flex gap-2 flex-wrap">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+					<div className="bg-zinc-950/70 border border-zinc-800 rounded-xl p-3">
+						<div className="text-xs text-zinc-500 mb-1">Assets</div>
+						<div className="text-xl font-bold text-white">{holdings.length}</div>
+					</div>
+					<div className="bg-zinc-950/70 border border-zinc-800 rounded-xl p-3">
+						<div className="text-xs text-zinc-500 mb-1">Avg Position</div>
+						<div className="text-xl font-bold text-white">
+							${averagePosition.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+						</div>
+					</div>
+					<div className="bg-zinc-950/70 border border-zinc-800 rounded-xl p-3">
+						<div className="text-xs text-zinc-500 mb-1">Largest Holding</div>
+						<div className="text-xl font-bold text-white">{largestHolding.symbol}</div>
+					</div>
+				</div>
+
+				<div className="flex gap-2.5 flex-wrap justify-center">
 					{holdings.slice(0, 10).map(holding => (
 						<div 
 							key={holding.symbol}
-							className="px-3 py-1.5 bg-zinc-800 rounded-lg text-sm"
+							className="inline-flex items-center gap-2.5 px-3 py-2 bg-gradient-to-t from-black to-zinc-800 border border-zinc-700 rounded-full text-sm transition-transform duration-200 hover:-translate-y-1"
 						>
+							<span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-zinc-900 text-[11px] font-semibold text-zinc-200 border border-zinc-700">
+								{holding.symbol.slice(0, 3)}
+							</span>
 							<span className="font-semibold text-white">{holding.symbol}</span>
-							<span className="text-zinc-500 ml-2">
+							<span className="text-zinc-500">
 								${(holding.currentValue / 1000).toFixed(0)}K
 							</span>
 						</div>
 					))}
 					{holdings.length > 10 && (
-						<div className="px-3 py-1.5 bg-zinc-800 rounded-lg text-sm text-zinc-400">
+						<div className="px-3 py-2 bg-gradient-to-t from-black to-zinc-800 border border-zinc-700 rounded-full text-sm text-zinc-400">
 							+{holdings.length - 10} more
 						</div>
 					)}

@@ -41,7 +41,7 @@ export default function LoadingScreen({ isVisible }: LoadingScreenProps) {
 	if (!isVisible) return null
 
 	return (
-		<div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+		<div className="fixed inset-0 bg-black flex items-center justify-center z-[200]">
 			<style>{`
 				@keyframes spinCoin {
 					from {

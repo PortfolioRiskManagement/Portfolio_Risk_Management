@@ -175,7 +175,7 @@ class ScenarioService {
 	 * Creates data points that show gradual change with acceleration/deceleration
 	 */
 	private generateTimeline(startValue: number, endValue: number, scenarioId: string): any[] {
-		const points = 60 // 60 frames for smooth animation
+		const points = 180 // denser timeline for smoother animation and inspection
 		const timeline = []
 		const change = endValue - startValue
 		const isCrash = change < 0

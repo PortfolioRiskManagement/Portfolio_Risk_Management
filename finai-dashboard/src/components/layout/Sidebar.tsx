@@ -12,18 +12,18 @@ export default function Sidebar() {
 
 	return (
 		<aside 
-			className={`bg-zinc-900 border-r border-zinc-800 text-white transition-all duration-300 relative overflow-x-hidden ${
+			className={`bg-zinc-900 border-r border-zinc-800 text-white transition-all duration-300 relative overflow-visible z-30 ${
 				isCollapsed ? 'w-16' : 'w-64'
 			}`}
 		>
 			{/* Toggle Button */}
 			<button
 				onClick={() => setIsCollapsed(!isCollapsed)}
-				className="absolute -right-3 top-6 z-50 w-6 h-6 bg-zinc-800 border border-zinc-700 rounded-full flex items-center justify-center hover:bg-zinc-700 transition-colors shadow-lg"
+				className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-[60] w-7 h-7 bg-zinc-800 border border-zinc-700 rounded-full flex items-center justify-center hover:bg-zinc-700 transition-colors shadow-xl"
 				title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
 			>
 				<svg 
-					className={`w-3 h-3 text-white transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+					className={`w-3.5 h-3.5 text-white transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
 					fill="none" 
 					viewBox="0 0 24 24" 
 					stroke="currentColor"

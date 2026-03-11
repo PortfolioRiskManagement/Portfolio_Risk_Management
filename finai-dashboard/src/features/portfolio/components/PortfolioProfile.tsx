@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { UserProfile } from '../types/portfolio.types'
 import Card from '../../../components/ui/Card'
 
@@ -8,13 +8,23 @@ interface Props {
 }
 
 export default function PortfolioProfile({ profile, onUpdate }: Props) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   const profileCompleteness = calculateCompleteness(profile)
 
   const handleChange = (field: keyof UserProfile, value: any) => {
     onUpdate({ ...profile, [field]: value })
   }
+
+  useEffect(() => {
+    if (!isEditing) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isEditing])
 
   return (
     <div className="mb-8">
@@ -30,15 +40,15 @@ export default function PortfolioProfile({ profile, onUpdate }: Props) {
           </p>
         </div>
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => setIsEditing(true)}
           className="ml-4 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg text-sm font-semibold transition-all duration-300 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50"
         >
-          {isExpanded ? 'Collapse' : 'Edit Profile'}
+          Edit Profile
         </button>
       </div>
 
       {/* Profile Completeness Card */}
-      <Card className={`mb-6 transition-all duration-300 ${isExpanded ? 'border-blue-600/50' : ''}`}>
+      <Card className="mb-6 transition-all duration-300">
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-3">
@@ -69,9 +79,32 @@ export default function PortfolioProfile({ profile, onUpdate }: Props) {
         </div>
       </Card>
 
-      {/* Expandable Form */}
-      {isExpanded && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+      {/* Edit Modal */}
+      {isEditing && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setIsEditing(false)}
+          />
+          <div className="relative w-full max-w-6xl max-h-[90vh] bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="sticky top-0 z-10 px-6 py-4 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white">Edit Investment Profile</h3>
+                <p className="text-sm text-zinc-400">Update the same profile fields in a focused popup.</p>
+              </div>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                title="Close"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-132px)]">
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
           {/* Investor Profile */}
           <Card className="border-blue-600/30">
             <h3 className="text-white font-bold mb-5 text-lg flex items-center gap-2">
@@ -329,6 +362,19 @@ export default function PortfolioProfile({ profile, onUpdate }: Props) {
               </div>
             </div>
           </Card>
+
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 px-6 py-4 bg-zinc-950/95 backdrop-blur border-t border-zinc-800 flex justify-end">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

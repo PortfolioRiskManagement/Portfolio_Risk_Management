@@ -24,86 +24,113 @@ export default function ScenarioLabPage() {
 
 	const [showResults, setShowResults] = useState(false)
 	const [hasProceeded, setHasProceeded] = useState(false)
+	const [showInfoPanel, setShowInfoPanel] = useState(true)
+	const [canOpenResults, setCanOpenResults] = useState(false)
 
 	const selectedScenario = HISTORICAL_SCENARIOS.find(s => s.id === selectedScenarioId)
 	const initialValue = holdings.reduce((sum, h) => sum + h.currentValue, 0)
 
 	const handleScenarioSelect = (scenarioId: string) => {
 		if (isAnimating) return
+		setCanOpenResults(false)
+		setShowResults(false)
 		runScenario(scenarioId)
 	}
 
 	const handleAnimationComplete = () => {
 		setIsAnimating(false)
-		setShowResults(true)
+		setCanOpenResults(true)
 	}
 
 	const handleCloseResults = () => {
 		setShowResults(false)
+	}
+
+	const handleBackToScenarios = () => {
+		setShowResults(false)
+		setCanOpenResults(false)
 		resetScenario()
 	}
+
+	const handleReturnToInfo = () => {
+		setShowResults(false)
+		setCanOpenResults(false)
+		setHasProceeded(false)
+		setShowInfoPanel(true)
+		resetScenario()
+	}
+
+	const infoItems = [
+		{
+			title: 'Real Historical Data',
+			description: 'Simulations use real market behavior from yfinance-backed data.',
+		},
+		{
+			title: 'Asset-Specific Impact',
+			description: 'Each holding reacts differently based on real asset performance patterns.',
+		},
+		{
+			title: 'Live Animation',
+			description: 'Watch portfolio movement continuously from left to right over the scenario timeline.',
+		},
+		{
+			title: 'Detailed Breakdown',
+			description: 'Get per-asset impact, drawdown, and risk context in a focused report.',
+		},
+	]
 
 	return (
 		<PageShell title="Scenario Lab">
 			<div className="space-y-6">
-				{/* Info Section */}
-				<div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-xl overflow-hidden shadow-lg">
-					<div className="p-6">
-						<div className="flex items-center gap-4 text-left mb-4">
-							<div className="text-4xl">💡</div>
-							<div>
-								<h3 className="text-xl font-bold text-white mb-1">How Scenario Lab Works</h3>
-								<p className="text-sm text-zinc-400">
-									Test your portfolio against historical market events
-								</p>
-							</div>
+				{hasProceeded && (
+					<div className="flex justify-center">
+						<button
+							onClick={handleReturnToInfo}
+							className="group relative flex items-center justify-center w-10 hover:w-28 h-10 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 transition-all duration-300 ease-out overflow-hidden"
+							title="Go back to info"
+						>
+							<span className="shrink-0 text-lg">💡</span>
+							<span className="max-w-0 opacity-0 -translate-x-1 group-hover:max-w-16 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-sm font-medium whitespace-nowrap">
+								Info
+							</span>
+						</button>
+					</div>
+				)}
+
+				{(!hasProceeded || showInfoPanel) && (
+					<div className="max-w-5xl mx-auto w-full bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 md:p-8 shadow-lg">
+						<div className="text-center mb-6">
+							<div className="text-4xl mb-2">💡</div>
+							<h3 className="text-2xl font-bold text-white mb-2">How Scenario Lab Works</h3>
+							<p className="text-sm text-zinc-400">
+								Test your portfolio against historical market events using real backend data.
+							</p>
 						</div>
-						<div className="space-y-2">
-							<div className="group cursor-default">
-								<div className="flex items-start gap-3 p-4 rounded-lg hover:bg-purple-500/10 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 border border-transparent hover:border-purple-500/30">
-									<span className="text-purple-400 mt-1 text-xl group-hover:scale-125 transition-transform">▸</span>
-									<span className="text-zinc-300 group-hover:text-white transition-colors text-sm leading-relaxed">
-										<strong>Real Historical Data:</strong> Simulations use actual market data from yfinance to show how your portfolio would have performed
-									</span>
+
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							{infoItems.map((item) => (
+								<div key={item.title} className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-4 text-center">
+									<div className="text-sm font-semibold text-white mb-1">{item.title}</div>
+									<div className="text-xs leading-relaxed text-zinc-400">{item.description}</div>
 								</div>
-							</div>
-							<div className="group cursor-default">
-								<div className="flex items-start gap-3 p-4 rounded-lg hover:bg-blue-500/10 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 border border-transparent hover:border-blue-500/30">
-									<span className="text-blue-400 mt-1 text-xl group-hover:scale-125 transition-transform">▸</span>
-									<span className="text-zinc-300 group-hover:text-white transition-colors text-sm leading-relaxed">
-										<strong>Asset-Specific Impact:</strong> Different assets react differently - Bitcoin soared during COVID recovery while bonds stayed stable
-									</span>
-								</div>
-							</div>
-							<div className="group cursor-default">
-								<div className="flex items-start gap-3 p-4 rounded-lg hover:bg-purple-500/10 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20 border border-transparent hover:border-purple-500/30">
-									<span className="text-purple-400 mt-1 text-xl group-hover:scale-125 transition-transform">▸</span>
-									<span className="text-zinc-300 group-hover:text-white transition-colors text-sm leading-relaxed">
-										<strong>Live Animation:</strong> Watch your portfolio value change in real-time with dramatic pause points showing key moments
-									</span>
-								</div>
-							</div>
-							<div className="group cursor-default">
-								<div className="flex items-start gap-3 p-4 rounded-lg hover:bg-blue-500/10 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 border border-transparent hover:border-blue-500/30">
-									<span className="text-blue-400 mt-1 text-xl group-hover:scale-125 transition-transform">▸</span>
-									<span className="text-zinc-300 group-hover:text-white transition-colors text-sm leading-relaxed">
-										<strong>Detailed Breakdown:</strong> Get per-asset analysis, volatility metrics, and actionable insights after each simulation
-									</span>
-								</div>
-							</div>
+							))}
 						</div>
+
 						{!hasProceeded && (
-							<div className="mt-5">
+							<div className="mt-6 flex justify-center">
 								<button
-									onClick={() => setHasProceeded(true)}
-									className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 transition-all"
+									onClick={() => {
+										setHasProceeded(true)
+										setShowInfoPanel(false)
+									}}
+									className="px-7 py-3 rounded-lg font-semibold text-white bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
 								>
 									Proceed
 								</button>
 							</div>
 						)}
 					</div>
-				</div>
+				)}
 
 				{hasProceeded && !selectedScenarioId && currentPortfolio && (
 					<PortfolioEditorForScenario
@@ -123,7 +150,7 @@ export default function ScenarioLabPage() {
 				{/* Main Content Area */}
 				{!hasProceeded ? null : !selectedScenarioId ? (
 					/* Scenario Selection */
-					<div>
+					<div className="max-w-6xl mx-auto w-full">
 						<ScenarioGrid 
 							onSelectScenario={handleScenarioSelect}
 							selectedScenarioId={selectedScenarioId}
@@ -136,7 +163,7 @@ export default function ScenarioLabPage() {
 						{/* Back Button */}
 						<div className="flex items-center justify-between">
 							<button
-								onClick={handleCloseResults}
+								onClick={handleBackToScenarios}
 								disabled={isAnimating}
 								className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
@@ -163,6 +190,26 @@ export default function ScenarioLabPage() {
 								scenarioName={selectedScenario.name}
 								scenarioIcon={selectedScenario.icon}
 							/>
+						)}
+
+						{selectedScenario && isLoading && !scenarioImpact && (
+							<div className="w-full h-[500px] bg-zinc-900/50 rounded-xl border border-zinc-800 p-6 animate-pulse">
+								<div className="h-6 w-56 bg-zinc-800 rounded mb-3" />
+								<div className="h-4 w-80 bg-zinc-800 rounded mb-8" />
+								<div className="h-[380px] w-full bg-gradient-to-t from-zinc-950 to-zinc-900 rounded-xl border border-zinc-800" />
+								<div className="mt-4 text-sm text-zinc-400">Loading scenario timeline... this can take a moment.</div>
+							</div>
+						)}
+
+						{scenarioImpact && selectedScenario && !isAnimating && canOpenResults && (
+							<div className="flex justify-center">
+								<button
+									onClick={() => setShowResults(true)}
+									className="px-6 py-3 rounded-lg font-semibold text-white bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+								>
+									See Key Insights & Report
+								</button>
+							</div>
 						)}
 
 						{/* Quick Stats During Animation */}

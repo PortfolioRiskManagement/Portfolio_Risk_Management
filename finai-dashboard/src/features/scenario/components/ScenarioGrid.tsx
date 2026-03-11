@@ -9,10 +9,10 @@ interface ScenarioCardProps {
 
 export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: ScenarioCardProps) {
 	const categoryColors = {
-		crash: 'from-red-500/20 to-orange-500/20 border-red-500/30',
-		bull_run: 'from-green-500/20 to-emerald-500/20 border-green-500/30',
-		volatility: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/30',
-		recovery: 'from-blue-500/20 to-cyan-500/20 border-blue-500/30'
+		crash: 'from-zinc-900 to-zinc-900 border-zinc-800',
+		bull_run: 'from-zinc-900 to-zinc-900 border-zinc-800',
+		volatility: 'from-zinc-900 to-zinc-900 border-zinc-800',
+		recovery: 'from-zinc-900 to-zinc-900 border-zinc-800'
 	}
 
 	const categoryTextColors = {
@@ -36,9 +36,9 @@ export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: Scena
 			className={`
 				relative p-6 rounded-xl border-2 transition-all duration-300
 				bg-gradient-to-br ${categoryColors[scenario.category]}
-				hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20
+				hover:border-zinc-700 hover:-translate-y-0.5
 				disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-				${isSelected ? 'ring-4 ring-purple-500 scale-105' : ''}
+				${isSelected ? 'ring-2 ring-zinc-600 border-zinc-600' : ''}
 				text-left w-full
 			`}
 		>
@@ -91,7 +91,7 @@ export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: Scena
 			{/* Selected Indicator */}
 			{isSelected && (
 				<div className="absolute top-3 right-3">
-					<div className="w-3 h-3 rounded-full bg-purple-500 animate-pulse" />
+					<div className="w-2.5 h-2.5 rounded-full bg-zinc-300" />
 				</div>
 			)}
 		</button>

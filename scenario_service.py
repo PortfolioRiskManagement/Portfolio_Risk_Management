@@ -61,15 +61,116 @@ class ScenarioService:
     
     # Proxy tickers for asset classes when specific ticker isn't available
     PROXY_TICKERS = {
-        'stock': 'SPY',      # S&P 500 as proxy for general stocks
-        'etf': 'SPY',        # S&P 500 as proxy for ETFs
-        'bond': 'TLT',       # Long-term Treasury bonds
+        'stock': '^GSPC',    # S&P 500 index with deep history
+        'etf': '^GSPC',      # ETF fallback to market index for older periods
+        'bond': '^TNX',      # 10Y Treasury yield proxy with older history
         'crypto': 'BTC-USD', # Bitcoin (available from ~2014)
-        'commodity': 'GLD'   # Gold
+        'commodity': 'GC=F'  # Gold futures with older history
+    }
+
+    CRYPTO_SYMBOL_MAP = {
+        'BTC': 'BTC-USD',
+        'ETH': 'ETH-USD',
+        'SOL': 'SOL-USD',
+        'ADA': 'ADA-USD',
+        'DOT': 'DOT-USD',
+        'BNB': 'BNB-USD',
+        'XRP': 'XRP-USD',
+        'DOGE': 'DOGE-USD',
+    }
+
+    KNOWN_INCEPTION_DATES = {
+        'SPY': '1993-01-29',
+        'QQQ': '1999-03-10',
+        'NVDA': '1999-01-22',
+        'TSLA': '2010-06-29',
+        'BTC-USD': '2014-09-17',
+        'ETH-USD': '2017-11-09',
+        'SOL-USD': '2020-04-10',
+        'ADA-USD': '2017-10-01',
+        'DOT-USD': '2020-08-20',
+        'BNB-USD': '2017-10-01',
+        'XRP-USD': '2014-09-17',
+        'DOGE-USD': '2014-09-17',
     }
     
     def __init__(self):
-        pass
+        self._price_cache = {}
+
+    def _is_before_symbol_inception(self, symbol, start_date, end_date):
+        inception = self.KNOWN_INCEPTION_DATES.get(symbol)
+        if not inception:
+            return False
+
+        period_end = datetime.strptime(end_date, '%Y-%m-%d').date()
+        inception_date = datetime.strptime(inception, '%Y-%m-%d').date()
+        return period_end < inception_date
+
+    def _normalize_symbol(self, symbol, asset_class):
+        s = str(symbol).strip().upper()
+
+        if asset_class == 'crypto':
+            if s.endswith('-USD'):
+                return s
+            return self.CRYPTO_SYMBOL_MAP.get(s, f"{s}-USD")
+
+        return s
+
+    def _extract_close_series(self, data):
+        if data is None or data.empty:
+            return None
+
+        close_data = data.get('Close')
+        if close_data is None:
+            return None
+
+        if isinstance(close_data, pd.DataFrame):
+            # yfinance may return a single-column DataFrame or MultiIndex columns.
+            close_series = close_data.iloc[:, 0]
+        else:
+            close_series = close_data
+
+        close_series = pd.to_numeric(close_series, errors='coerce').dropna()
+        if close_series.empty:
+            return None
+
+        return close_series
+
+    def _download_close_series(self, symbol, start_date, end_date):
+        cache_key = (symbol, start_date, end_date)
+        if cache_key in self._price_cache:
+            return self._price_cache[cache_key]
+
+        if self._is_before_symbol_inception(symbol, start_date, end_date):
+            self._price_cache[cache_key] = None
+            return None
+
+        data = yf.download(
+            symbol,
+            start=start_date,
+            end=end_date,
+            progress=False,
+            auto_adjust=True,
+            threads=False,
+        )
+        close_series = self._extract_close_series(data)
+        self._price_cache[cache_key] = close_series
+        return close_series
+
+    def _get_effective_series(self, symbol, asset_class, start_date, end_date):
+        normalized_symbol = self._normalize_symbol(symbol, asset_class)
+        symbol_series = self._download_close_series(normalized_symbol, start_date, end_date)
+
+        if symbol_series is not None and len(symbol_series) >= 2:
+            return symbol_series, normalized_symbol, False
+
+        proxy = self.PROXY_TICKERS.get(asset_class, 'SPY')
+        proxy_series = self._download_close_series(proxy, start_date, end_date)
+
+        if proxy_series is not None and len(proxy_series) >= 2:
+            return proxy_series, proxy, True
+
+        return None, normalized_symbol, True
     
     def calculate_scenario(self, holdings, scenario_id):
         """
@@ -88,18 +189,21 @@ class ScenarioService:
         scenario = self.SCENARIOS[scenario_id]
         start_date = scenario['start']
         end_date = scenario['end']
+
+        # Reset request-scoped cache to keep repeated downloads low and deterministic.
+        self._price_cache = {}
         
         # Calculate initial portfolio value
-        initial_value = sum(h['currentValue'] for h in holdings)
+        initial_value = float(sum(float(h.get('currentValue', 0) or 0) for h in holdings))
+        if initial_value <= 0:
+            raise ValueError("Portfolio total value must be greater than zero")
         
         # Fetch historical data for all holdings
         affected_assets = []
-        timeline_data = []
-        
         for holding in holdings:
             symbol = holding['symbol']
             asset_class = holding['assetClass']
-            current_value = holding['currentValue']
+            current_value = float(holding['currentValue'])
             
             # Get historical performance
             asset_impact = self._calculate_asset_impact(
@@ -129,9 +233,12 @@ class ScenarioService:
         max_drawdown = self._calculate_max_drawdown(portfolio_values, initial_value)
         
         # Calculate volatility
-        returns = [(portfolio_values[i] - portfolio_values[i-1]) / portfolio_values[i-1] 
-                   for i in range(1, len(portfolio_values))]
-        volatility = np.std(returns) * np.sqrt(252) * 100  # Annualized
+        returns = [
+            (portfolio_values[i] - portfolio_values[i - 1]) / portfolio_values[i - 1]
+            for i in range(1, len(portfolio_values))
+            if portfolio_values[i - 1] != 0
+        ]
+        volatility = float(np.std(returns) * np.sqrt(252) * 100) if returns else 0.0  # Annualized
         
         # Estimate recovery days (simplified)
         recovery_days = max(0, abs(int(total_return * 5)))
@@ -149,51 +256,64 @@ class ScenarioService:
     def _calculate_asset_impact(self, symbol, asset_class, start_date, end_date, current_value):
         """Calculate impact on a single asset"""
         try:
-            # Try to fetch actual historical data
-            data = yf.download(
-                symbol, 
-                start=start_date, 
-                end=end_date, 
-                progress=False,
-                auto_adjust=True
+            series, used_symbol, used_proxy = self._get_effective_series(
+                symbol,
+                asset_class,
+                start_date,
+                end_date
             )
-            
-            if data.empty or len(data) < 2:
-                # Use proxy if data not available
-                return self._use_proxy_calculation(
-                    symbol, 
-                    asset_class, 
-                    start_date, 
-                    end_date, 
-                    current_value
-                )
-            
-            # Calculate return for this period
-            first_price = data['Close'].iloc[0]
-            last_price = data['Close'].iloc[-1]
+
+            if series is None:
+                return {
+                    'symbol': symbol,
+                    'name': symbol,
+                    'initialValue': float(current_value),
+                    'finalValue': float(current_value),
+                    'percentChange': 0.0,
+                    'contribution': 0.0
+                }
+
+            first_price = float(series.iloc[0])
+            last_price = float(series.iloc[-1])
+            if first_price == 0:
+                return {
+                    'symbol': symbol,
+                    'name': symbol,
+                    'initialValue': float(current_value),
+                    'finalValue': float(current_value),
+                    'percentChange': 0.0,
+                    'contribution': 0.0
+                }
+
             percent_change = ((last_price - first_price) / first_price) * 100
+
+            # Add extra volatility only when crypto falls back to proxy.
+            if used_proxy and asset_class == 'crypto':
+                percent_change *= 1.5
             
             final_value = current_value * (1 + percent_change / 100)
             contribution = ((final_value - current_value) / current_value) * 100
             
             return {
                 'symbol': symbol,
-                'name': symbol,  # In production, fetch full name
-                'initialValue': current_value,
-                'finalValue': final_value,
-                'percentChange': percent_change,
-                'contribution': contribution
+                'name': symbol,
+                'initialValue': float(current_value),
+                'finalValue': float(final_value),
+                'percentChange': float(percent_change),
+                'contribution': float(contribution),
+                'sourceSymbol': used_symbol
             }
             
         except Exception as e:
             print(f"Error fetching {symbol}: {e}")
-            return self._use_proxy_calculation(
-                symbol, 
-                asset_class, 
-                start_date, 
-                end_date, 
-                current_value
-            )
+            return {
+                'symbol': symbol,
+                'name': symbol,
+                'initialValue': float(current_value),
+                'finalValue': float(current_value),
+                'percentChange': 0.0,
+                'contribution': 0.0
+            }
     
     def _use_proxy_calculation(self, symbol, asset_class, start_date, end_date, current_value):
         """Use proxy ticker when asset data not available"""
@@ -246,50 +366,43 @@ class ScenarioService:
     def _generate_timeline(self, holdings, start_date, end_date, initial_value):
         """Generate timeline with 60 points for smooth animation"""
         timeline = []
-        
-        # Fetch historical data for all holdings
-        all_data = {}
+
+        # Build aligned value paths for each holding.
+        all_paths = []
         for holding in holdings:
             symbol = holding['symbol']
             asset_class = holding['assetClass']
-            
+
             try:
-                data = yf.download(
-                    symbol, 
-                    start=start_date, 
-                    end=end_date, 
-                    progress=False,
-                    auto_adjust=True
+                series, _, used_proxy = self._get_effective_series(
+                    symbol,
+                    asset_class,
+                    start_date,
+                    end_date
                 )
-                
-                if not data.empty:
-                    all_data[symbol] = {
-                        'data': data,
-                        'weight': holding['currentValue'] / initial_value
-                    }
-                else:
-                    # Use proxy
-                    proxy = self.PROXY_TICKERS.get(asset_class, 'SPY')
-                    proxy_data = yf.download(
-                        proxy, 
-                        start=start_date, 
-                        end=end_date, 
-                        progress=False,
-                        auto_adjust=True
-                    )
-                    if not proxy_data.empty:
-                        all_data[symbol] = {
-                            'data': proxy_data,
-                            'weight': holding['currentValue'] / initial_value
-                        }
+
+                if series is None or len(series) < 2:
+                    continue
+
+                start_price = float(series.iloc[0])
+                if start_price == 0:
+                    continue
+
+                normalized = series / start_price
+                value_path = normalized * float(holding['currentValue'])
+
+                if used_proxy and asset_class == 'crypto':
+                    # Increase movement around start value when crypto uses proxy path.
+                    value_path = float(holding['currentValue']) + (value_path - float(holding['currentValue'])) * 1.5
+
+                all_paths.append(value_path.rename(symbol))
             except Exception as e:
                 print(f"Error in timeline for {symbol}: {e}")
                 continue
-        
-        if not all_data:
+
+        if not all_paths:
             # Fallback: linear interpolation
             for i in range(60):
-                t = i / 59
                 timeline.append({
                     'date': start_date,
                     'portfolioValue': initial_value,
@@ -297,16 +410,9 @@ class ScenarioService:
                     'timestamp': int(datetime.now().timestamp() * 1000) + i * 50
                 })
             return timeline
-        
-        # Get common date index
-        all_dates = None
-        for symbol_data in all_data.values():
-            if all_dates is None:
-                all_dates = symbol_data['data'].index
-            else:
-                all_dates = all_dates.intersection(symbol_data['data'].index)
-        
-        if len(all_dates) == 0:
+
+        combined = pd.concat(all_paths, axis=1, join='inner').dropna()
+        if combined.empty:
             # Fallback
             for i in range(60):
                 timeline.append({
@@ -316,37 +422,34 @@ class ScenarioService:
                     'timestamp': int(datetime.now().timestamp() * 1000) + i * 50
                 })
             return timeline
-        
+
+        portfolio_series = combined.sum(axis=1)
+
         # Sample 60 points evenly across the timeline
-        indices = np.linspace(0, len(all_dates) - 1, min(60, len(all_dates)), dtype=int)
-        
+        indices = np.linspace(0, len(portfolio_series) - 1, min(60, len(portfolio_series)), dtype=int)
+
         for idx in indices:
-            date = all_dates[idx]
-            portfolio_value = 0
-            
-            for symbol, info in all_data.items():
-                if date in info['data'].index:
-                    first_price = info['data']['Close'].iloc[0]
-                    current_price = info['data'].loc[date, 'Close']
-                    return_pct = (current_price - first_price) / first_price
-                    portfolio_value += initial_value * info['weight'] * (1 + return_pct)
-            
+            date = portfolio_series.index[idx]
+            portfolio_value = float(portfolio_series.iloc[idx])
             percent_change = ((portfolio_value - initial_value) / initial_value) * 100
-            
+
             timeline.append({
                 'date': date.strftime('%Y-%m-%d'),
                 'portfolioValue': portfolio_value,
-                'percentChange': percent_change,
+                'percentChange': float(percent_change),
                 'timestamp': int(date.timestamp() * 1000)
             })
-        
+
         return timeline
     
     def _calculate_max_drawdown(self, values, initial_value):
         """Calculate maximum drawdown as percentage"""
-        min_value = min(values)
+        numeric_values = np.asarray(values, dtype=float)
+        if numeric_values.size == 0:
+            return 0.0
+        min_value = float(np.min(numeric_values))
         max_drawdown = ((min_value - initial_value) / initial_value) * 100
-        return max_drawdown
+        return float(max_drawdown)
 
 
 # Singleton instance

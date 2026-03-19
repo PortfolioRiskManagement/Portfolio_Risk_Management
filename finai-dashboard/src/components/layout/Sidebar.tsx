@@ -1,10 +1,13 @@
 import { NavLink } from "react-router-dom"
 import { useLoading } from "../../contexts/LoadingContext"
-import { useState } from "react"
 
-export default function Sidebar() {
+interface SidebarProps {
+	isCollapsed: boolean
+	onToggle: () => void
+}
+
+export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 	const { triggerLoading } = useLoading()
-	const [isCollapsed, setIsCollapsed] = useState(false)
 
 	const handleLogoClick = () => {
 		triggerLoading()
@@ -12,13 +15,13 @@ export default function Sidebar() {
 
 	return (
 		<aside 
-			className={`bg-zinc-900 border-r border-zinc-800 text-white transition-all duration-300 relative overflow-visible z-30 ${
+			className={`fixed left-0 top-0 h-screen bg-zinc-900 border-r border-zinc-800 text-white transition-all duration-300 overflow-visible z-30 ${
 				isCollapsed ? 'w-16' : 'w-64'
 			}`}
 		>
 			{/* Toggle Button */}
 			<button
-				onClick={() => setIsCollapsed(!isCollapsed)}
+				onClick={onToggle}
 				className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-[60] w-7 h-7 bg-zinc-800 border border-zinc-700 rounded-full flex items-center justify-center hover:bg-zinc-700 transition-colors shadow-xl"
 				title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
 			>

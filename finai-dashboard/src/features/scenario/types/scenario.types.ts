@@ -51,6 +51,12 @@ export interface PortfolioHolding {
 	assetClass: 'stock' | 'crypto' | 'bond' | 'etf' | 'commodity'
 }
 
+export interface AssetSearchResult {
+	symbol: string
+	name: string
+	type: 'stock' | 'crypto' | 'bond' | 'etf' | 'commodity'
+}
+
 export const HISTORICAL_SCENARIOS: HistoricalScenario[] = [
 	{
 		id: '2008-financial-crisis',

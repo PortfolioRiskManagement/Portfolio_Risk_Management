@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import json
+from urllib.parse import quote
+from urllib.request import urlopen, Request
 
 from dataload.data_loader import PortfolioLoader
 from dataload.portfolio_analyzer import PortfolioAnalyzer
@@ -109,57 +112,58 @@ def search_stock():
         return "", 204
     
     try:
-        query = request.args.get('q', '').upper().strip()
+        query = request.args.get('q', '').strip()
         
         if not query:
             return jsonify({"success": False, "error": "No search query provided"}), 400
-        
-        # Simple search - in production, use a proper API like yfinance Ticker.info
-        # For now, return the query as a valid symbol
+
+        encoded_query = quote(query)
+        search_url = f"https://query1.finance.yahoo.com/v1/finance/search?q={encoded_query}&quotesCount=10&newsCount=0"
+        req = Request(search_url, headers={"User-Agent": "Mozilla/5.0"})
+
+        with urlopen(req, timeout=6) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+
+        quotes = payload.get('quotes', []) if isinstance(payload, dict) else []
+
+        def classify_asset(quote_entry):
+            quote_type = (quote_entry.get('quoteType') or '').lower()
+            symbol = (quote_entry.get('symbol') or '').upper()
+            exchange = (quote_entry.get('exchange') or '').upper()
+
+            if quote_type == 'cryptocurrency' or symbol.endswith('-USD'):
+                return 'crypto'
+            if quote_type == 'etf':
+                return 'etf'
+            if quote_type in ['mutualfund', 'money market']:
+                return 'bond'
+            if exchange in ['CBT', 'CMX', 'NYM']:
+                return 'commodity'
+            return 'stock'
+
         results = []
-        
-        # Common symbols that might match
-        common_stocks = {
-            'AAPL': {'name': 'Apple Inc.', 'type': 'stock'},
-            'MSFT': {'name': 'Microsoft Corporation', 'type': 'stock'},
-            'GOOGL': {'name': 'Alphabet Inc.', 'type': 'stock'},
-            'AMZN': {'name': 'Amazon.com Inc.', 'type': 'stock'},
-            'TSLA': {'name': 'Tesla Inc.', 'type': 'stock'},
-            'BTC-USD': {'name': 'Bitcoin USD', 'type': 'crypto'},
-            'ETH-USD': {'name': 'Ethereum USD', 'type': 'crypto'},
-            'VOO': {'name': 'Vanguard S&P 500 ETF', 'type': 'etf'},
-            'SPY': {'name': 'SPDR S&P 500 ETF Trust', 'type': 'etf'},
-            'GLD': {'name': 'SPDR Gold Shares', 'type': 'commodity'},
-            'BND': {'name': 'Vanguard Total Bond Market ETF', 'type': 'bond'},
-            'TLT': {'name': 'iShares 20+ Year Treasury Bond ETF', 'type': 'bond'}
-        }
-        
-        # Exact match
-        if query in common_stocks:
+        seen_symbols = set()
+
+        for quote_entry in quotes:
+            symbol = (quote_entry.get('symbol') or '').upper().strip()
+            if not symbol or symbol in seen_symbols:
+                continue
+
+            name = (quote_entry.get('shortname') or quote_entry.get('longname') or symbol).strip()
             results.append({
-                'symbol': query,
-                'name': common_stocks[query]['name'],
-                'type': common_stocks[query]['type']
+                'symbol': symbol,
+                'name': name,
+                'type': classify_asset(quote_entry)
             })
-        
-        # Partial matches
-        for symbol, info in common_stocks.items():
-            if query in symbol or query in info['name'].upper():
-                if symbol != query:  # Don't duplicate exact match
-                    results.append({
-                        'symbol': symbol,
-                        'name': info['name'],
-                        'type': info['type']
-                    })
-        
-        # If no matches, assume it's a valid symbol
+            seen_symbols.add(symbol)
+
         if not results:
             results.append({
-                'symbol': query,
-                'name': query,
+                'symbol': query.upper(),
+                'name': query.upper(),
                 'type': 'stock'
             })
-        
+
         return jsonify({"success": True, "results": results[:10]}), 200
         
     except Exception as e:

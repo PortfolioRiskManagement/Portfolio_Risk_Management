@@ -2,11 +2,13 @@ import apiClient from '../../../services/apiClient'
 import type { 
 	ScenarioImpact, 
 	ScenarioRequest,
-	PortfolioHolding 
+	PortfolioHolding,
+	AssetSearchResult
 } from '../types/scenario.types'
 
 class ScenarioService {
 	private readonly baseUrl = '/api/scenario'
+	private readonly searchUrl = '/api/search'
 
 	/**
 	 * Calculate scenario impact on portfolio
@@ -54,6 +56,26 @@ class ScenarioService {
 		} catch (error) {
 			console.error('Error fetching asset historical data:', error)
 			throw error
+		}
+	}
+
+	async searchAssets(query: string): Promise<AssetSearchResult[]> {
+		const normalized = query.trim()
+		if (!normalized) return []
+
+		try {
+			const response = await apiClient.get<{ success: boolean; results: AssetSearchResult[] }>(
+				`${this.searchUrl}?q=${encodeURIComponent(normalized)}`
+			)
+
+			if (response.data.success && Array.isArray(response.data.results)) {
+				return response.data.results
+			}
+
+			return []
+		} catch (error) {
+			console.error('Error searching assets:', error)
+			return []
 		}
 	}
 

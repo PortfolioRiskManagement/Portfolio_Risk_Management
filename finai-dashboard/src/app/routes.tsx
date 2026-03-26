@@ -5,6 +5,7 @@ import PortfolioAccountsPage from "../features/portfolio/pages/PortfolioAccounts
 import RiskDetailsPage from "../features/risk/pages/RiskDetailsPage"
 import PageShell from "../components/layout/PageShell"
 import AdvisorPage from "../features/advisor/pages/AdvisorPage"
+import AlertsPage from "../features/alerts/pages/AlertsPage"
 
 type StubProps = {
 	title: string
@@ -26,10 +27,7 @@ export default function AppRoutes() {
 			<Route path="/portfolio" element={<PortfolioAccountsPage />} />
 			<Route path="/assets" element={<PortfolioPage />} />
 			<Route path="/risk" element={<RiskDetailsPage />} />
-			<Route
-				path="/advisor"
-				element={<AdvisorPage />}
-			/>
+			<Route path="/advisor" element={<AdvisorPage />} />
 			<Route
 				path="/news"
 				element={
@@ -51,10 +49,20 @@ export default function AppRoutes() {
 			<Route
 				path="/alerts"
 				element={
-					<StubPage
-						title="Alerts"
-						subtitle="Alerts and monitoring will appear here soon."
-					/>
+					<PageShell title="My News">
+						<AlertsPage
+							portfolioTickers={["AAPL", "MSFT", "GOOGL", "TSLA", "NVDA", "META", "GLD"]}
+							portfolioHoldings={[
+								{ ticker: "AAPL", shares: 100, value: 18000, percentageOfPortfolio: 15 },
+								{ ticker: "MSFT", shares: 50, value: 20000, percentageOfPortfolio: 17 },
+								{ ticker: "GOOGL", shares: 30, value: 8000, percentageOfPortfolio: 7 },
+								{ ticker: "TSLA", shares: 25, value: 5000, percentageOfPortfolio: 4 },
+								{ ticker: "NVDA", shares: 20, value: 6000, percentageOfPortfolio: 5 },
+								{ ticker: "META", shares: 15, value: 3000, percentageOfPortfolio: 2 },
+								{ ticker: "GLD", shares: 10, value: 2200, percentageOfPortfolio: 3, companyName: "SPDR Gold Shares", sector: "Commodities" },
+							]}
+						/>
+					</PageShell>
 				}
 			/>
 			<Route

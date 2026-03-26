@@ -2,9 +2,81 @@ import PageShell from "../../../components/layout/PageShell"
 import Card from "../../../components/ui/Card"
 import Metric from "../../../components/ui/Metric"
 import PortfolioChart from "../components/PortfolioChart"
+import { useMemo } from "react"
+import { useHoldings } from "../../portfolio/hooks/useHoldings"
+
+const PRICES: Record<string, number> = {
+  AAPL: 185.4,
+  TSLA: 198.5,
+  BTC: 62500,
+  ETH: 3100,
+  SPY: 485.2,
+  MSFT: 410.5,
+  NVDA: 720.3,
+}
+
+function inferPrice(symbol: string, fallback: number) {
+  const normalized = symbol.toUpperCase()
+  if (PRICES[normalized]) return PRICES[normalized]
+  return fallback
+}
+
+function inferType(symbol: string, rawType?: string) {
+  if (rawType) return rawType.toLowerCase()
+  const s = symbol.toUpperCase()
+  if (s === "BTC" || s === "ETH" || s.endsWith("-USD")) return "crypto"
+  if (s === "SPY" || s === "VTI" || s === "VOO") return "etf"
+  return "stock"
+}
 
 
 export default function DashboardPage() {
+  const { holdings } = useHoldings()
+
+  const metrics = useMemo(() => {
+    const investedValue = holdings.reduce((sum, h) => sum + h.entry * h.quantity, 0)
+    const totalValue = holdings.reduce((sum, h) => sum + inferPrice(h.symbol, h.entry) * h.quantity, 0)
+    const gain = totalValue - investedValue
+    const gainPct = investedValue > 0 ? (gain / investedValue) * 100 : 0
+    const platforms = new Set(holdings.map((h) => h.platform).filter(Boolean)).size
+
+    const weights = holdings
+      .map((h) => inferPrice(h.symbol, h.entry) * h.quantity)
+      .filter((v) => v > 0)
+    const valueSum = weights.reduce((sum, value) => sum + value, 0)
+    const hhi = valueSum > 0
+      ? weights.reduce((sum, value) => {
+          const w = value / valueSum
+          return sum + (w * w)
+        }, 0)
+      : 1
+
+    const diversificationScore = weights.length > 1
+      ? Math.max(0, Math.min(100, Math.round(((1 - hhi) / (1 - (1 / weights.length))) * 100)))
+      : 0
+
+    const cryptoWeight = valueSum > 0
+      ? holdings.reduce((sum, h) => {
+          const isCrypto = inferType(h.symbol, h.type) === "crypto"
+          return sum + (isCrypto ? inferPrice(h.symbol, h.entry) * h.quantity : 0)
+        }, 0) / valueSum
+      : 0
+
+    const concentrationPenalty = Math.min(35, Math.max(0, (hhi - 0.2) * 120))
+    const cryptoPenalty = Math.min(25, cryptoWeight * 100 * 0.6)
+    const riskScore = Math.round(Math.max(1, Math.min(100, 35 + concentrationPenalty + cryptoPenalty)))
+
+    return {
+      totalValue,
+      gain,
+      gainPct,
+      platforms,
+      riskScore,
+      diversificationScore,
+      assetsCount: holdings.length,
+    }
+  }, [holdings])
+
   return (
     <PageShell title="Unified Intelligence Dashboard">
       {/* Status bar */}
@@ -22,8 +94,8 @@ export default function DashboardPage() {
         <Card>
           <Metric
             label="Total Portfolio Value"
-            value="$132,622"
-            subtext="+28,114.5 (26.9%)"
+            value={`$${metrics.totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+            subtext={`${metrics.gain >= 0 ? '+' : ''}${metrics.gain.toLocaleString(undefined, { maximumFractionDigits: 1 })} (${metrics.gainPct.toFixed(1)}%)`}
             trend="up"
           />
         </Card>
@@ -31,7 +103,7 @@ export default function DashboardPage() {
         <Card>
           <Metric
             label="Portfolio Risk Score"
-            value="66"
+            value={`${metrics.riskScore}`}
             subtext="Moderate risk"
             trend="neutral"
           />
@@ -40,7 +112,7 @@ export default function DashboardPage() {
         <Card>
           <Metric
             label="Diversification Score"
-            value="100"
+            value={`${metrics.diversificationScore}`}
             subtext="Well diversified"
             trend="up"
           />
@@ -49,8 +121,8 @@ export default function DashboardPage() {
         <Card>
           <Metric
             label="Total Assets"
-            value="7"
-            subtext="4 platforms"
+            value={`${metrics.assetsCount}`}
+            subtext={`${metrics.platforms || 1} platforms`}
             trend="up"
           />
         </Card>

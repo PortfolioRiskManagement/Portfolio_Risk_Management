@@ -1,11 +1,14 @@
 import { Routes, Route } from "react-router-dom"
 import DashboardPage from "../features/dashboard/pages/DashboardPage"
 import PortfolioPage from "../features/portfolio/pages/PortfolioPage"
+import AddStockPage from "../features/portfolio/pages/AddStockPage"
+import AssetDetailsPage from "../features/portfolio/pages/AssetDetailsPage"
 import PortfolioAccountsPage from "../features/portfolio/pages/PortfolioAccountsPage"
 import RiskDetailsPage from "../features/risk/pages/RiskDetailsPage"
 import PageShell from "../components/layout/PageShell"
 import AdvisorPage from "../features/advisor/pages/AdvisorPage"
 import AlertsPage from "../features/alerts/pages/AlertsPage"
+import ScenarioLabPage from "../features/scenario/pages/ScenarioLabPage"
 
 type StubProps = {
 	title: string
@@ -26,6 +29,9 @@ export default function AppRoutes() {
 			<Route path="/" element={<DashboardPage />} />
 			<Route path="/portfolio" element={<PortfolioAccountsPage />} />
 			<Route path="/assets" element={<PortfolioPage />} />
+			<Route path="/portfolio/add" element={<AddStockPage />} />
+			<Route path="/portfolio/:id" element={<AssetDetailsPage />} />
+			<Route path="/assets/:id" element={<AssetDetailsPage />} />
 			<Route path="/risk" element={<RiskDetailsPage />} />
 			<Route path="/advisor" element={<AdvisorPage />} />
 			<Route
@@ -39,12 +45,7 @@ export default function AppRoutes() {
 			/>
 			<Route
 				path="/scenario"
-				element={
-					<StubPage
-						title="Scenario Lab"
-						subtitle="Scenario analysis tools will appear here soon."
-					/>
-				}
+				element={<ScenarioLabPage />}
 			/>
 			<Route
 				path="/alerts"

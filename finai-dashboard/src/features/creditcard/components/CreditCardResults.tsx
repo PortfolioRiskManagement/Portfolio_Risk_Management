@@ -1,235 +1,234 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import CreditCardCard from "./CreditCardCard"
-import { getCardsByInstitution, getInstitutions } from "../services/creditCardService"
-import type { CreditCardFilterResult, Institution } from "../types"
+import { getCardsByInstitution, getTopPicks } from "../services/creditCardService"
+import type { CreditCard, UserProfile } from "../types"
 
 interface CreditCardResultsProps {
-	results: CreditCardFilterResult[]
-	hasProfile: boolean
-	onReset: () => void
-	onEditProfile: () => void
+	profile: UserProfile | null
+	onAdjustProfile: () => void
+	onNewSearch: () => void
 }
 
-export default function CreditCardResults({
-	results,
-	hasProfile,
-	onReset,
-	onEditProfile
-}: CreditCardResultsProps) {
-	const [expandedInstitution, setExpandedInstitution] = useState<Institution | null>(null)
-	const [sortBy, setSortBy] = useState<"relevance" | "fee" | "welcome">("relevance")
+type SortBy = "relevance" | "annual_fee" | "welcome_bonus"
 
-	// Group results by institution
-	const resultsByInstitution: Record<Institution, CreditCardFilterResult[]> = {}
-	const institutions = getInstitutions()
+function parseWelcomeValue(value: string | null): number {
+	if (!value) return 0
+	const matched = value.match(/[\d,.]+/)
+	if (!matched) return 0
+	return parseFloat(matched[0].replace(/,/g, ""))
+}
 
-	institutions.forEach((institution) => {
-		resultsByInstitution[institution] = results.filter((r) => r.card.institution === institution)
-	})
+function sortCards(cards: CreditCard[], sortBy: SortBy): CreditCard[] {
+	if (sortBy === "annual_fee") return [...cards].sort((a, b) => a.annualFee - b.annualFee)
+	if (sortBy === "welcome_bonus") return [...cards].sort((a, b) => parseWelcomeValue(b.welcomeBonusValue) - parseWelcomeValue(a.welcomeBonusValue))
+	return [...cards].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+}
 
-	// Get top recommendations (highest score)
-	const topRecommendations = results.slice(0, 3)
+export default function CreditCardResults({ profile, onAdjustProfile, onNewSearch }: CreditCardResultsProps) {
+	const [sortBy, setSortBy] = useState<SortBy>(profile ? "relevance" : "annual_fee")
 
-	// Sort function
-	const sortResults = (cards: CreditCardFilterResult[]) => {
-		const sorted = [...cards]
-		switch (sortBy) {
-			case "fee":
-				return sorted.sort((a, b) => a.card.annualFee - b.card.annualFee)
-			case "welcome":
-				return sorted.sort((a, b) => {
-					const aBonus = a.card.welcomeBonus ? parseInt(a.card.welcomeBonus.match(/\d+/)?.[0] || "0") : 0
-					const bBonus = b.card.welcomeBonus ? parseInt(b.card.welcomeBonus.match(/\d+/)?.[0] || "0") : 0
-					return bBonus - aBonus
-				})
-			default:
-				return sorted
-		}
-	}
+	const institutions = useMemo(() => getCardsByInstitution(profile), [profile])
+	const totalCards = useMemo(() => institutions.reduce((sum, inst) => sum + inst.cards.length, 0), [institutions])
+	const topPicks = useMemo(() => (profile ? getTopPicks(profile, 3) : []), [profile])
+	const accentMap = useMemo(() => Object.fromEntries(institutions.map((inst) => [inst.id, inst.accentColor])), [institutions])
+
+	const rows = useMemo(() => {
+		return institutions.map((inst) => {
+			const cards = profile ? sortCards(inst.cards, sortBy) : [...inst.cards].sort((a, b) => a.annualFee - b.annualFee)
+			return { ...inst, cards }
+		})
+	}, [institutions, profile, sortBy])
 
 	return (
-		<div className="space-y-8">
-			{/* Header with Actions */}
-			<div className="flex items-center justify-between mb-6">
+		<div className="creditcard-scroll space-y-8">
+			<header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 				<div>
-					<h2 className="text-3xl font-bold text-white">
-						{hasProfile ? "Your Personalized Recommendations" : "Explore All Credit Cards"}
+					<h2 className="m-0" style={{ fontSize: 28, fontWeight: 750, color: "#f2f6fb", textShadow: "0 0 18px rgba(121,192,255,0.14)" }}>
+						Your Recommendations
 					</h2>
-					<p className="text-zinc-400 mt-2">
-						{hasProfile
-							? "Cards matched to your profile and spending habits"
-							: "Browse all available credit cards organized by bank"}
+					<p className="m-0 mt-1" style={{ fontSize: 13, color: "#8b949e" }}>
+						{profile ? `${totalCards} cards matched to your profile` : "Showing all cards"}
 					</p>
 				</div>
-				<div className="flex gap-2">
-					{hasProfile && (
+				<div className="flex items-center gap-2">
+					{profile && (
 						<button
-							onClick={onEditProfile}
-							className="px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white transition text-sm"
+							type="button"
+							onClick={onAdjustProfile}
+							style={{
+								border: "1px solid #30363d",
+								background: "transparent",
+								borderRadius: 6,
+								padding: "6px 14px",
+								fontSize: 13,
+								color: "#8b949e",
+							}}
+							onMouseEnter={(event) => {
+								event.currentTarget.style.borderColor = "#484f58"
+								event.currentTarget.style.color = "#e6edf3"
+							}}
+							onMouseLeave={(event) => {
+								event.currentTarget.style.borderColor = "#30363d"
+								event.currentTarget.style.color = "#8b949e"
+							}}
 						>
 							Adjust Profile
 						</button>
 					)}
 					<button
-						onClick={onReset}
-						className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition text-sm"
+						type="button"
+						onClick={onNewSearch}
+						style={{
+							border: "1px solid #30363d",
+							background: "transparent",
+							borderRadius: 6,
+							padding: "6px 14px",
+							fontSize: 13,
+							color: "#8b949e",
+						}}
+						onMouseEnter={(event) => {
+							event.currentTarget.style.borderColor = "#484f58"
+							event.currentTarget.style.color = "#e6edf3"
+						}}
+						onMouseLeave={(event) => {
+							event.currentTarget.style.borderColor = "#30363d"
+							event.currentTarget.style.color = "#8b949e"
+						}}
 					>
 						New Search
 					</button>
 				</div>
-			</div>
+			</header>
 
-			{/* Top Recommendations */}
-			{hasProfile && topRecommendations.length > 0 && (
-				<div>
-					<h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-						<span>⭐ Top Matches For You</span>
-						<span className="text-sm text-zinc-400 font-normal">({topRecommendations.length} cards)</span>
-					</h3>
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-						{topRecommendations.map((result, idx) => (
+			<section className="creditcard-legend">
+				<span className="creditcard-legend-chip creditcard-legend-chip-now">✅ NOW · No/minimal income req</span>
+				<span className="creditcard-legend-chip creditcard-legend-chip-student">🎓 STUDENT · Student-specific version available</span>
+				<span className="creditcard-legend-chip creditcard-legend-chip-postgrad">💼 POST-GRAD · Entry professional tier</span>
+				<span className="creditcard-legend-chip creditcard-legend-chip-premium">👑 PREMIUM · Target tier after graduation</span>
+				<span className="creditcard-legend-chip">✈️ No FX Fee badge shown on cards</span>
+			</section>
+
+			{profile && topPicks.length > 0 && (
+				<section>
+					<div style={{ borderBottom: "1px solid #21262d", paddingBottom: 10, marginBottom: 20 }}>
+						<p
+							className="m-0"
+							style={{
+								fontSize: 12,
+								letterSpacing: "2px",
+								textTransform: "uppercase",
+								color: "#c9d1d9",
+								textShadow: "0 0 10px rgba(121,192,255,0.16)",
+							}}
+						>
+							Top Matches For You
+						</p>
+					</div>
+					<div className="grid grid-cols-1 gap-3">
+						{topPicks.map((card, index) => (
 							<CreditCardCard
-								key={result.card.id}
-								card={result.card}
-								filterResult={result}
-								index={idx}
+								key={card.id}
+								card={card}
+								accentColor={accentMap[card.institutionId] ?? "#30363d"}
+								showTopPick
+								compact
+								employment={profile.employment}
+								animationDelayMs={60 + index * 50}
 							/>
 						))}
 					</div>
-				</div>
+				</section>
 			)}
 
-			{/* Sort Controls */}
-			{!hasProfile && (
-				<div className="flex items-center gap-4">
-					<label className="text-sm text-zinc-400">Sort by:</label>
-					<div className="flex gap-2">
-						{(
-							[
-								["relevance", "Relevance"],
-								["fee", "Annual Fee"],
-								["welcome", "Welcome Bonus"]
-							] as const
-						).map(([value, label]) => (
-							<button
-								key={value}
-								onClick={() => setSortBy(value)}
-								className={`px-3 py-1 rounded text-sm transition ${
-									sortBy === value
-										? "bg-purple-600 text-white"
-										: "bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
-								}`}
-							>
-								{label}
-							</button>
-						))}
-					</div>
-				</div>
-			)}
-
-			{/* Cards by Institution */}
-			<div className="space-y-6">
-				{institutions.map((institution) => {
-					const institutionResults = resultsByInstitution[institution]
-					if (institutionResults.length === 0) return null
-
-					const sortedCards = sortResults(institutionResults)
-					const isExpanded = expandedInstitution === institution
-
-					return (
-						<div key={institution}>
-							{/* Institution Header */}
-							<button
-								onClick={() =>
-									setExpandedInstitution(isExpanded ? null : institution)
-								}
-								className="w-full group text-left mb-4 p-4 rounded-lg bg-gradient-to-r from-zinc-800 to-zinc-900 hover:from-zinc-700 hover:to-zinc-800 border border-zinc-700 transition"
-							>
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-3">
-										<span className="text-2xl">
-											{institution === "Amex" && "💳"}
-											{institution === "Scotiabank" && "🏦"}
-											{institution === "BMO" && "🏛️"}
-											{institution === "TD" && "🌍"}
-											{institution === "RBC" && "👑"}
-											{institution === "CIBC" && "🏢"}
-											{institution === "National Bank" && "🏭"}
-											{institution === "Tangerine" && "🍊"}
-											{institution === "PC Financial" && "💼"}
-										</span>
-										<div>
-											<h3 className="font-bold text-white text-lg">{institution}</h3>
-											<p className="text-sm text-zinc-400">
-												{institutionResults.length} card
-												{institutionResults.length !== 1 ? "s" : ""}
-											</p>
-										</div>
-									</div>
-									<div className="flex items-center gap-2">
-										<span className="text-zinc-400">
-											{isExpanded ? "▼" : "▶"}
-										</span>
-									</div>
-								</div>
-							</button>
-
-							{/* Institution Cards */}
-							{isExpanded && (
-								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pl-4 animate-in fade-in slide-in-from-top-2">
-									{sortedCards.map((result, idx) => (
-										<CreditCardCard
-											key={result.card.id}
-											card={result.card}
-											filterResult={hasProfile ? result : undefined}
-											index={idx}
-										/>
-									))}
-								</div>
-							)}
-						</div>
-					)
-				})}
-			</div>
-
-			{/* Empty State */}
-			{results.length === 0 && (
-				<div className="text-center py-12">
-					<div className="text-6xl mb-4">🔍</div>
-					<h3 className="text-xl font-semibold text-white mb-2">No cards found</h3>
-					<p className="text-zinc-400 mb-6">Try adjusting your preferences</p>
-					<button
-						onClick={onReset}
-						className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition"
+			<section className="space-y-4">
+				<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+					<p
+						className="m-0"
+						style={{
+							fontSize: 11,
+							letterSpacing: "2px",
+							textTransform: "uppercase",
+							color: "#6e7681",
+						}}
 					>
-						Start Over
-					</button>
+						All Cards By Institution
+					</p>
+					<div className="flex items-center gap-2">
+						<label htmlFor="credit-sort" style={{ fontSize: 12, color: "#6e7681" }}>
+							Sort
+						</label>
+						<select
+							id="credit-sort"
+							value={sortBy}
+							onChange={(event) => setSortBy(event.target.value as SortBy)}
+							style={{
+								background: "#161b22",
+								border: "1px solid #30363d",
+								color: "#e6edf3",
+								borderRadius: 6,
+								padding: "6px 12px",
+								fontSize: 13,
+							}}
+							onFocus={(event) => {
+								event.currentTarget.style.borderColor = "#58a6ff"
+							}}
+							onBlur={(event) => {
+								event.currentTarget.style.borderColor = "#30363d"
+							}}
+						>
+							<option value="relevance">Relevance</option>
+							<option value="annual_fee">Annual Fee ↑</option>
+							<option value="welcome_bonus">Welcome Bonus</option>
+						</select>
+					</div>
 				</div>
-			)}
 
-			{/* Footer Info */}
-			<div className="border-t border-zinc-700 pt-8 mt-8">
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-zinc-400">
-					<div>
-						<p className="font-semibold text-white mb-2">💡 Tip</p>
-						<p>
-							Compare multiple cards before applying. Your credit utilization affects your credit
-							score.
-						</p>
-					</div>
-					<div>
-						<p className="font-semibold text-white mb-2">📍 Note</p>
-						<p>
-							Information is accurate as of March 2026. Card benefits and features change
-							frequently—verify with the issuer.
-						</p>
-					</div>
-					<div>
-						<p className="font-semibold text-white mb-2">⚖️ Disclaimer</p>
-						<p>This is not financial advice. Please review terms and conditions before applying.</p>
-					</div>
+				<div className="space-y-4">
+					{rows.map((institution) => (
+						<div key={institution.id} className="creditcard-institution-section">
+							<div className="mb-4 flex items-center gap-2 border-b border-[#30363d] pb-3">
+								<span
+									aria-hidden="true"
+									style={{
+										width: 9,
+										height: 9,
+										borderRadius: "50%",
+										background: institution.accentColor,
+										display: "inline-block",
+									}}
+								/>
+								<h3 className="m-0" style={{ fontSize: 18, fontWeight: 600, color: "#e6edf3" }}>
+									{institution.name}
+								</h3>
+								<span style={{ fontSize: 12, color: "#8b949e" }}>{institution.cards.length} cards</span>
+							</div>
+							<div className="mb-2 hidden border-b border-[#2a2f37] pb-2 md:grid md:grid-cols-[2.2fr_0.9fr_1.3fr_1fr_0.9fr] md:gap-3">
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Card</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Fee</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Top Earn</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Bonus</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Rating</p>
+							</div>
+							<div className="grid grid-cols-1 gap-2">
+								{institution.cards.map((card, index) => (
+									<div key={card.id} className="creditcard-accordion-card-in" style={{ animationDelay: `${40 + index * 40}ms` }}>
+										<CreditCardCard card={card} accentColor={institution.accentColor} employment={profile?.employment ?? null} compact />
+									</div>
+								))}
+							</div>
+						</div>
+					))}
 				</div>
-			</div>
+			</section>
+
+			<footer className="pt-2">
+				<p className="m-0" style={{ fontSize: 12, color: "#8b949e" }}>
+					Information accurate as of March 2026. Verify terms directly with each issuer before applying.
+				</p>
+				<p className="m-0 mt-1" style={{ fontSize: 12, color: "#6e7681" }}>
+					This is not financial advice.
+				</p>
+			</footer>
 		</div>
 	)
 }

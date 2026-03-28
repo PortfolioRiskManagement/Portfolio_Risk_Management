@@ -1,45 +1,46 @@
-export type EmploymentStatus = "student" | "employed" | "self-employed" | "unemployed" | "retired"
-export type IncomeRange = "$0-30k" | "$30-50k" | "$50-75k" | "$75-100k" | "$100k+"
-export type SpendingCategory = "travel" | "dining" | "shopping" | "groceries" | "streaming" | "balance"
+export type EmploymentStatus = "student" | "employed" | "self_employed" | "seeking" | "retired"
+export type IncomeRange = "under_30k" | "30k_60k" | "60k_80k" | "80k_plus"
+export type SpendingPriority = "groceries" | "dining" | "travel" | "gas" | "streaming" | "cashback" | "no_fee"
 
 export interface UserProfile {
-	employmentStatus?: EmploymentStatus
-	incomeRange?: IncomeRange
-	spendingCategories?: SpendingCategory[]
-	isStudent?: boolean
+	employment: EmploymentStatus | null
+	income: IncomeRange | null
+	priorities: SpendingPriority[]
 }
 
-export interface CreditCardBenefit {
-	name: string
-	description: string
-	value?: string
+export type RewardType = "points" | "cashback" | "hybrid"
+export type AccessTier = "now" | "student" | "post_grad" | "premium"
+
+export interface EarnRate {
+	category: string
+	rate: string
 }
 
 export interface CreditCard {
 	id: string
 	name: string
-	institution: Institution
+	institution: string
+	institutionId: string
 	annualFee: number
-	minIncome?: string
-	welcomeBonus?: string
-	topEarnRates: CreditCardBenefit[]
+	feeWaivable: boolean
+	feeWaiverNote: string | null
+	minIncome: number | null
+	rewardType: RewardType
+	rewardProgram: string
+	topEarnRates: EarnRate[]
 	baseRate: string
-	program: string
-	foreignExchangeFee: string
-	keyPerks: CreditCardBenefit[]
-	studentRating?: number
-	isStudentOptimized?: boolean
-	isPremium?: boolean
-	isPostGrad?: boolean
-	highlights?: string[]
-	specialConditions?: string[]
+	welcomeBonus: string | null
+	welcomeBonusValue: string | null
+	noForeignTransactionFee: boolean
+	accessTier: AccessTier
+	keyPerks: string[]
+	studentNote: string | null
+	score?: number
 }
 
-export type Institution = "Amex" | "Scotiabank" | "BMO" | "TD" | "RBC" | "CIBC" | "National Bank" | "Tangerine" | "PC Financial"
-
-export interface CreditCardFilterResult {
-	card: CreditCard
-	matchScore: number
-	relevantBenefits: string[]
-	whyRecommended: string
+export interface Institution {
+	id: string
+	name: string
+	accentColor: string
+	cards: CreditCard[]
 }

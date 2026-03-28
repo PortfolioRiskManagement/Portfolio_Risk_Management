@@ -1,263 +1,265 @@
-import { useState, useEffect } from "react"
-import type { EmploymentStatus, IncomeRange, SpendingCategory, UserProfile } from "../types"
+import { useMemo, useState } from "react"
+import type { EmploymentStatus, IncomeRange, SpendingPriority, UserProfile } from "../types"
 
 interface ProfileQuestionnaireFlowProps {
 	onComplete: (profile: UserProfile) => void
 	onSkipAll: () => void
 }
 
-const questions = [
-	{
-		id: "employment",
-		title: "What's your employment status?",
-		type: "single",
-		options: [
-			{ value: "student", label: "👨‍🎓 Student", icon: "👨‍🎓" },
-			{ value: "employed", label: "💼 Employed Full-Time", icon: "💼" },
-			{ value: "self-employed", label: "🚀 Self-Employed", icon: "🚀" },
-			{ value: "unemployed", label: "🔍 Currently Seeking", icon: "🔍" },
-			{ value: "retired", label: "🌴 Retired", icon: "🌴" }
-		]
-	},
-	{
-		id: "income",
-		title: "What's your estimated annual income?",
-		type: "single",
-		options: [
-			{ value: "$0-30k", label: "Under $30k", icon: "💰" },
-			{ value: "$30-50k", label: "$30k - $50k", icon: "💵" },
-			{ value: "$50-75k", label: "$50k - $75k", icon: "💴" },
-			{ value: "$75-100k", label: "$75k - $100k", icon: "💶" },
-			{ value: "$100k+", label: "$100k+", icon: "💸" }
-		]
-	},
-	{
-		id: "spending",
-		title: "What are your main spending categories? (Select all that apply)",
-		type: "multi",
-		options: [
-			{ value: "groceries", label: "🛒 Groceries & Food", icon: "🛒" },
-			{ value: "dining", label: "🍽️ Dining Out & Restaurants", icon: "🍽️" },
-			{ value: "travel", label: "✈️ Travel & Flights", icon: "✈️" },
-			{ value: "shopping", label: "🛍️ Shopping & Retail", icon: "🛍️" },
-			{ value: "streaming", label: "📺 Streaming & Subscriptions", icon: "📺" },
-			{ value: "balance", label: "⚖️ Balanced Across Categories", icon: "⚖️" }
-		]
-	}
+type Step = 0 | 1 | 2 | 3
+
+type AnimationPhase = "idle" | "enter" | "exit"
+
+type SlideDirection = "next" | "back"
+
+interface Option<TValue extends string> {
+	value: TValue
+	label: string
+}
+
+const employmentOptions: Option<EmploymentStatus>[] = [
+	{ value: "student", label: "Student" },
+	{ value: "employed", label: "Employed" },
+	{ value: "self_employed", label: "Self-Employed" },
+	{ value: "seeking", label: "Seeking" },
+	{ value: "retired", label: "Retired" },
 ]
 
+const incomeOptions: Option<IncomeRange>[] = [
+	{ value: "under_30k", label: "Under $30,000" },
+	{ value: "30k_60k", label: "$30,000 - $60,000" },
+	{ value: "60k_80k", label: "$60,000 - $80,000" },
+	{ value: "80k_plus", label: "$80,000+" },
+]
+
+const spendOptions: Option<SpendingPriority>[] = [
+	{ value: "groceries", label: "Groceries" },
+	{ value: "dining", label: "Dining" },
+	{ value: "travel", label: "Travel" },
+	{ value: "gas", label: "Gas & Transit" },
+	{ value: "streaming", label: "Streaming" },
+]
+
+const preferenceOptions: Option<SpendingPriority>[] = [
+	{ value: "cashback", label: "Cash Back" },
+	{ value: "no_fee", label: "No Annual Fee" },
+]
+
+const emptyProfile: UserProfile = {
+	employment: null,
+	income: null,
+	priorities: [],
+}
+
+const transitionMs = 220
+
+function getQuestion(step: Step): { title: string; subtitle?: string; isMulti: boolean } {
+	if (step === 0) return { title: "Employment status", isMulti: false }
+	if (step === 1) return { title: "Annual income", isMulti: false }
+	if (step === 2) return { title: "Main spending", subtitle: "Select all", isMulti: true }
+	return { title: "Card preferences", subtitle: "Select all", isMulti: true }
+}
+
+function stepClass(phase: AnimationPhase, direction: SlideDirection): string {
+	if (phase === "idle") return ""
+	if (phase === "exit") return direction === "next" ? "creditcard-step-out-next" : "creditcard-step-out-back"
+	return direction === "next" ? "creditcard-step-in-next" : "creditcard-step-in-back"
+}
+
+function updatePriorities(current: SpendingPriority[], value: SpendingPriority): SpendingPriority[] {
+	if (current.includes(value)) return current.filter((item) => item !== value)
+	return [...current, value]
+}
+
 export default function ProfileQuestionnaireFlow({ onComplete, onSkipAll }: ProfileQuestionnaireFlowProps) {
-	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-	const [profile, setProfile] = useState<UserProfile>({})
-	const [answered, setAnswered] = useState(new Set<string>())
-	const [fadeOut, setFadeOut] = useState(false)
+	const [step, setStep] = useState<Step>(0)
+	const [profile, setProfile] = useState<UserProfile>(emptyProfile)
+	const [phase, setPhase] = useState<AnimationPhase>("enter")
+	const [direction, setDirection] = useState<SlideDirection>("next")
 
-	const currentQuestion = questions[currentQuestionIndex]
-	const isLastQuestion = currentQuestionIndex === questions.length - 1
+	const question = useMemo(() => getQuestion(step), [step])
+	const totalSteps = 4
+	const progress = ((step + 1) / totalSteps) * 100
+	const options = step === 0 ? employmentOptions : step === 1 ? incomeOptions : step === 2 ? spendOptions : preferenceOptions
+	const isMulti = step >= 2
 
-	const handleAnswer = (value: string | string[]) => {
-		const newAnswered = new Set(answered)
-		newAnswered.add(currentQuestion.id)
-		setAnswered(newAnswered)
+	const canGoNext = useMemo(() => {
+		if (step === 0) return profile.employment !== null
+		if (step === 1) return profile.income !== null
+		if (step === 2) return profile.priorities.some((p) => spendOptions.map((o) => o.value).includes(p))
+		return true
+	}, [profile, step])
 
-		const newProfile = { ...profile }
+	const runTransition = (nextStep: Step, nextDirection: SlideDirection) => {
+		setDirection(nextDirection)
+		setPhase("exit")
+		window.setTimeout(() => {
+			setStep(nextStep)
+			setPhase("enter")
+			window.setTimeout(() => setPhase("idle"), transitionMs)
+		}, transitionMs)
+	}
 
-		if (currentQuestion.id === "employment") {
-			newProfile.employmentStatus = value as EmploymentStatus
-		} else if (currentQuestion.id === "income") {
-			newProfile.incomeRange = value as IncomeRange
-		} else if (currentQuestion.id === "spending") {
-			newProfile.spendingCategories = Array.isArray(value) ? (value as SpendingCategory[]) : [value as SpendingCategory]
+	const applySingleSelect = (value: string) => {
+		if (step === 0) setProfile((prev) => ({ ...prev, employment: value as EmploymentStatus }))
+		if (step === 1) setProfile((prev) => ({ ...prev, income: value as IncomeRange }))
+	}
+
+	const applyMultiSelect = (value: SpendingPriority) => {
+		setProfile((prev) => ({ ...prev, priorities: updatePriorities(prev.priorities, value) }))
+	}
+
+	const handleNext = () => {
+		if (!canGoNext) return
+		if (step === 3) {
+			onComplete(profile)
+			return
 		}
-
-		setProfile(newProfile)
-
-		// Animate to next question
-		setFadeOut(true)
-		setTimeout(() => {
-			if (isLastQuestion) {
-				onComplete(newProfile)
-			} else {
-				setCurrentQuestionIndex(currentQuestionIndex + 1)
-				setFadeOut(false)
-			}
-		}, 300)
-	}
-
-	const handleSkip = () => {
-		const newAnswered = new Set(answered)
-		newAnswered.add(currentQuestion.id)
-		setAnswered(newAnswered)
-
-		setFadeOut(true)
-		setTimeout(() => {
-			if (isLastQuestion) {
-				onComplete(profile)
-			} else {
-				setCurrentQuestionIndex(currentQuestionIndex + 1)
-				setFadeOut(false)
-			}
-		}, 300)
-	}
-
-	const handleSkipAll = () => {
-		onSkipAll()
+		runTransition((step + 1) as Step, "next")
 	}
 
 	const handleBack = () => {
-		if (currentQuestionIndex > 0) {
-			const newAnswered = new Set(answered)
-			newAnswered.delete(currentQuestion.id)
-
-			// Remove the answer for current question
-			const newProfile = { ...profile }
-			if (currentQuestion.id === "employment") {
-				delete newProfile.employmentStatus
-			} else if (currentQuestion.id === "income") {
-				delete newProfile.incomeRange
-			} else if (currentQuestion.id === "spending") {
-				delete newProfile.spendingCategories
-			}
-
-			setProfile(newProfile)
-			setAnswered(newAnswered)
-			setFadeOut(true)
-			setTimeout(() => {
-				setCurrentQuestionIndex(currentQuestionIndex - 1)
-				setFadeOut(false)
-			}, 300)
-		}
+		if (step === 0) return
+		runTransition((step - 1) as Step, "back")
 	}
 
-	const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100
+	const handleSkipThis = () => {
+		if (step === 3) {
+			onComplete(profile)
+			return
+		}
+		runTransition((step + 1) as Step, "next")
+	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-black flex items-center justify-center p-4">
-			<div className="w-full max-w-2xl">
-				{/* Header */}
-				<div className="mb-8">
-					<div className="flex items-center justify-between mb-4">
-						<h1 className="text-4xl font-bold text-white">Find Your Perfect Card</h1>
-						<button
-							onClick={handleSkipAll}
-							className="text-sm text-zinc-400 hover:text-white transition px-3 py-1 rounded hover:bg-zinc-700"
-							title="Skip to see generic recommendations"
-						>
-							Skip All —
-						</button>
-					</div>
-					<p className="text-zinc-400 mb-6">
-						Answer a few quick questions to get personalized credit card recommendations
+		<div className="mx-auto w-full max-w-[560px] px-4">
+			<div className="creditcard-panel creditcard-questionnaire-in p-10">
+				<div className="creditcard-panel-header mb-2">
+					<p className="m-0" style={{ fontSize: 11, color: "#6e7681", letterSpacing: "1px" }}>
+						Step {step + 1} of {totalSteps}
 					</p>
-
-					{/* Progress Bar */}
-					<div className="w-full h-1 bg-zinc-700 rounded-full overflow-hidden">
-						<div
-							className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
-							style={{ width: `${progressPercentage}%` }}
-						/>
-					</div>
+					<button type="button" onClick={onSkipAll} className="creditcard-skip-all-btn">
+						Skip All Questions
+					</button>
+				</div>
+				<div className="mb-7 h-[3px] rounded-[2px]" style={{ background: "rgba(48,54,61,0.8)" }}>
+					<div
+						className="h-[3px] rounded-[2px]"
+						style={{
+							width: `${progress}%`,
+							background: "linear-gradient(90deg, #58a6ff, #79c0ff)",
+							transition: "width 400ms cubic-bezier(0.4, 0, 0.2, 1)",
+						}}
+					/>
 				</div>
 
-				{/* Question Card */}
-				<div
-					className={`bg-zinc-800 rounded-lg border border-zinc-700 p-8 transition-all duration-300 ${
-						fadeOut ? "opacity-0 scale-95" : "opacity-100 scale-100"
-					}`}
-				>
-					<h2 className="text-2xl font-semibold text-white mb-8">{currentQuestion.title}</h2>
-
-					{/* Options */}
-					{currentQuestion.type === "single" ? (
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-							{currentQuestion.options.map((option, index) => (
-								<button
-									key={option.value}
-									onClick={() => handleAnswer(option.value)}
-									className="group relative p-4 rounded-lg border-2 border-zinc-600 hover:border-purple-500 hover:bg-zinc-700/50 transition-all duration-200 text-left animate-in fade-in slide-in-from-bottom-2"
-									style={{
-										animationDelay: `${index * 50}ms`,
-										animationFillMode: "both"
-									}}
-								>
-									<span className="text-2xl mr-3">{option.icon}</span>
-									<span className="text-white font-medium">{option.label}</span>
-									<div className="absolute inset-0 rounded-lg border-2 border-purple-500 opacity-0 group-hover:opacity-20 transition-opacity" />
-								</button>
-							))}
-						</div>
-					) : (
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-							{currentQuestion.options.map((option, index) => (
-								<button
-									key={option.value}
-									onClick={() => {
-										const current = profile.spendingCategories || []
-										const isSelected = current.includes(option.value as SpendingCategory)
-										const newSpending = isSelected
-											? current.filter((s) => s !== option.value)
-											: [...current, option.value as SpendingCategory]
-										setProfile({ ...profile, spendingCategories: newSpending })
-										setAnswered(new Set(answered).add(currentQuestion.id))
-									}}
-									className={`group relative p-4 rounded-lg border-2 transition-all duration-200 text-left animate-in fade-in slide-in-from-bottom-2 ${
-										(profile.spendingCategories || []).includes(option.value as SpendingCategory)
-											? "border-purple-500 bg-purple-500/20 text-white"
-											: "border-zinc-600 hover:border-purple-500 hover:bg-zinc-700/50 text-zinc-300"
-									}`}
-									style={{
-										animationDelay: `${index * 50}ms`,
-										animationFillMode: "both"
-									}}
-								>
-									<span className="text-2xl mr-3">{option.icon}</span>
-									<span className="font-medium">{option.label}</span>
-									{(profile.spendingCategories || []).includes(option.value as SpendingCategory) && (
-										<span className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-400">✓</span>
-									)}
-								</button>
-							))}
-						</div>
+				<div className={stepClass(phase, direction)}>
+					<h2 className="m-0" style={{ fontSize: 20, fontWeight: 600, color: "#e6edf3" }}>
+						{question.title}
+					</h2>
+					{question.subtitle && (
+						<p className="m-0 mt-[6px]" style={{ fontSize: 13, color: "#8b949e" }}>
+							{question.subtitle}
+						</p>
 					)}
 
-					{/* Action Buttons */}
-					<div className="flex gap-3 pt-6 border-t border-zinc-700">
-						<button
-							onClick={handleBack}
-							disabled={currentQuestionIndex === 0}
-							className="flex-1 px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
-						>
-							← Back
-						</button>
+					<div className="creditcard-options-sun mt-6 mb-8 p-3 sm:p-4">
+						<div className={`grid gap-3 ${step === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
+						{options.map((option, index) => {
+							const isSelected =
+								(step === 0 && profile.employment === option.value) ||
+								(step === 1 && profile.income === option.value) ||
+								(step >= 2 && profile.priorities.includes(option.value as SpendingPriority))
 
+							return (
+								<button
+									key={option.value}
+									type="button"
+									onClick={() => {
+										if (isMulti) {
+											applyMultiSelect(option.value as SpendingPriority)
+										} else {
+											applySingleSelect(option.value)
+										}
+									}}
+									className={`creditcard-option creditcard-option-in text-left active:scale-[0.97] ${isSelected ? "creditcard-option-selected" : ""}`}
+									style={{ animationDelay: `${80 + index * 60}ms` }}
+								>
+									<div className="flex items-center justify-between gap-3">
+										<span style={{ fontSize: 14, fontWeight: 500, color: isSelected ? "#79c0ff" : "#e6edf3" }}>{option.label}</span>
+										{step < 2 ? (
+											isSelected ? (
+												<span style={{ color: "#79c0ff", fontSize: 14 }}>✓</span>
+											) : null
+										) : (
+											<span
+												style={{
+													width: 18,
+													height: 18,
+													borderRadius: 4,
+													border: isSelected ? "1.5px solid #58a6ff" : "1.5px solid #30363d",
+													background: isSelected ? "#58a6ff" : "transparent",
+													color: "#ffffff",
+													fontSize: 12,
+													display: "inline-flex",
+													alignItems: "center",
+													justifyContent: "center",
+												}}
+											>
+												{isSelected ? "✓" : ""}
+											</span>
+										)}
+									</div>
+								</button>
+							)
+						})}
+						</div>
+					</div>
+
+					<div className="flex items-center justify-between border-t pt-5" style={{ borderColor: "#30363d" }}>
+						<div className="w-28 text-left">
+							{step > 0 && (
+								<button
+									type="button"
+									onClick={handleBack}
+									className="bg-transparent p-0"
+									style={{ color: "#6e7681", border: "none", fontSize: 13 }}
+								>
+									Back
+								</button>
+							)}
+						</div>
 						<button
-							onClick={handleSkip}
-							className="flex-1 px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white transition"
+							type="button"
+							onClick={handleSkipThis}
+							className="creditcard-skip-this-btn"
 						>
 							Skip This
 						</button>
-
 						<button
-							onClick={() => {
-								if (currentQuestion.type === "multi" && profile.spendingCategories && profile.spendingCategories.length > 0) {
-									handleAnswer(profile.spendingCategories)
-								} else if (currentQuestion.type === "single") {
-									// Already handled by option click
-								}
+							type="button"
+							onClick={handleNext}
+							disabled={!canGoNext}
+							className="creditcard-next-btn"
+							style={{
+								border: "none",
+								borderRadius: 8,
+								padding: "10px 24px",
+								fontWeight: 500,
+								fontSize: 14,
+								color: "#ffffff",
+								opacity: canGoNext ? 1 : 0.45,
+								cursor: canGoNext ? "pointer" : "not-allowed",
 							}}
-							disabled={currentQuestion.type === "multi" && (!profile.spendingCategories || profile.spendingCategories.length === 0)}
-							className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
 						>
-							{isLastQuestion ? "Complete ✓" : "Next →"}
+							{step === 3 ? "Finish →" : "Next →"}
 						</button>
 					</div>
 				</div>
-
-				{/* Help Text */}
-				<p className="text-center text-zinc-500 text-sm mt-6">
-					💡 Your information helps us find cards tailored to your spending patterns and financial goals
-				</p>
 			</div>
+			<p className="m-0 pt-4 text-center" style={{ fontSize: 12, color: "#8b949e" }}>
+				No pressure: answers are optional, and you can skip everything anytime.
+			</p>
 		</div>
 	)
 }

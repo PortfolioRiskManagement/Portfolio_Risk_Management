@@ -211,6 +211,20 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 					</span>
 				</NavLink>
 				<NavLink
+					to="/creditcard"
+					className={({ isActive }) =>
+						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
+							isActive ? "bg-zinc-800 text-white font-medium" : ""
+						}`
+					}
+					title="Credit Card Assistant"
+				>
+					<span className="flex items-center gap-2">
+						<span>💳</span>
+						{!isCollapsed && <span>Credit Cards</span>}
+					</span>
+				</NavLink>
+				<NavLink
 					to="/alerts"
 					className={({ isActive }) =>
 						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${

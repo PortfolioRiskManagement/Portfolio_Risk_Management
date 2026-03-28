@@ -9,6 +9,7 @@ import PageShell from "../components/layout/PageShell"
 import AdvisorPage from "../features/advisor/pages/AdvisorPage"
 import AlertsPage from "../features/alerts/pages/AlertsPage"
 import ScenarioLabPage from "../features/scenario/pages/ScenarioLabPage"
+import CreditCardPage from "../features/creditcard/pages/CreditCardPage"
 
 type StubProps = {
 	title: string
@@ -46,6 +47,10 @@ export default function AppRoutes() {
 			<Route
 				path="/scenario"
 				element={<ScenarioLabPage />}
+			/>
+			<Route
+				path="/creditcard"
+				element={<CreditCardPage />}
 			/>
 			<Route
 				path="/alerts"

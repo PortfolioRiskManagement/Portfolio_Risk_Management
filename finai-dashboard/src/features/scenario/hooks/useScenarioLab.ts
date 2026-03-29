@@ -61,7 +61,7 @@ function buildPortfolioViewModel(nextHoldings: PortfolioHolding[]): PortfolioVie
 }
 
 export function useScenarioLab() {
-	const { holdings: sharedHoldings, replaceHoldings } = useHoldings()
+	const { holdings: sharedHoldings } = useHoldings()
 	const [currentPortfolio, setCurrentPortfolio] = useState<PortfolioViewModel | null>(null)
 	const [holdings, setHoldings] = useState<PortfolioHolding[]>([])
 	const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
@@ -114,27 +114,6 @@ export function useScenarioLab() {
 	const updateHoldings = (newHoldings: PortfolioHolding[]) => {
 		setHoldings(newHoldings)
 		setCurrentPortfolio(buildPortfolioViewModel(newHoldings))
-
-		const mergedShared = newHoldings.map((scenarioHolding, index) => {
-			const existing = sharedHoldings.find(
-				(h) => h.symbol.toUpperCase() === scenarioHolding.symbol.toUpperCase()
-			)
-
-			const quantity = existing?.quantity && existing.quantity > 0 ? existing.quantity : scenarioHolding.quantity || 1
-			const entry = quantity > 0 ? scenarioHolding.currentValue / quantity : scenarioHolding.currentValue
-
-			return {
-				id: existing?.id ?? `scenario-${scenarioHolding.symbol}-${index}`,
-				symbol: scenarioHolding.symbol.toUpperCase(),
-				name: existing?.name ?? scenarioHolding.symbol.toUpperCase(),
-				quantity,
-				entry,
-				platform: existing?.platform,
-				type: existing?.type ?? scenarioHolding.assetClass.toUpperCase()
-			}
-		})
-
-		replaceHoldings(mergedShared)
 	}
 
 	return {

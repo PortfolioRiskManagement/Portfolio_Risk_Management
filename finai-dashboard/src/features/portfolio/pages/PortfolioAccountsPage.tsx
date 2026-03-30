@@ -3,7 +3,7 @@ import { usePortfolio } from "../hooks/usePortfolio"
 import PortfolioProfile from "../components/PortfolioProfile"
 import PortfolioStructureCharts from "../components/PortfolioStructureCharts"
 import AccountCard from "../components/AccountCard"
-import Card from "../../../components/ui/Card"
+// Card import removed (unused)
 import { formatCurrency } from "../../../utils/formatCurrency"
 
 export default function PortfolioAccountsPage() {
@@ -45,12 +45,12 @@ export default function PortfolioAccountsPage() {
           <div className="mb-6">
             <div className="flex items-end justify-between mb-4">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">Your Accounts</h1>
-                <p className="text-zinc-400">Manage and monitor your investment accounts</p>
+                <h1 className="mb-2 text-4xl font-bold text-zinc-900 dark:text-white">Your Accounts</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">Manage and monitor your investment accounts</p>
               </div>
               <div className="text-right">
-                <div className="text-sm text-zinc-400 mb-1">Total Portfolio</div>
-                <div className="text-3xl font-bold text-white">{formatCurrency(summary.totalValue)}</div>
+                <div className="mb-1 text-sm text-zinc-500 dark:text-zinc-400">Total Portfolio</div>
+                <div className="text-3xl font-bold text-zinc-900 dark:text-white">{formatCurrency(summary.totalValue)}</div>
                 <div className={`text-sm font-medium ${summary.totalGain >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {summary.totalGain >= 0 ? '+' : ''}{formatCurrency(summary.totalGain)}
                 </div>

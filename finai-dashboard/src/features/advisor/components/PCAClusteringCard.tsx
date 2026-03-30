@@ -22,10 +22,10 @@ export default function PCAClusteringCard({ report }: Props) {
 	]
 
 	return (
-		<div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 space-y-6">
+		<div className="space-y-6 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
 			<div>
-				<h3 className="text-sm font-semibold text-zinc-100 mb-2">🧠 AI Pattern Recognition</h3>
-				<p className="text-xs text-zinc-400">
+				<h3 className="mb-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">🧠 AI Pattern Recognition</h3>
+				<p className="text-xs text-zinc-600 dark:text-zinc-400">
 					Machine learning analysis of your portfolio's hidden risk factors and behavioral patterns.
 				</p>
 			</div>
@@ -38,13 +38,13 @@ export default function PCAClusteringCard({ report }: Props) {
 				</p>
 				<div className="space-y-3">
 					{pca.explained_variance.map((variance: number, idx: number) => (
-						<div key={idx} className="bg-zinc-800/50 rounded p-3">
+						<div key={idx} className="rounded border border-zinc-200 bg-white/80 p-3 dark:border-zinc-700 dark:bg-zinc-800/50">
 							<div className="flex items-start justify-between mb-2">
 								<div className="flex-1">
 									<p className="text-xs font-semibold text-blue-300">
 										{factorNames[idx] || `Factor ${idx + 1}`}
 									</p>
-									<p className="text-xs text-zinc-400 mt-1">
+									<p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
 										{factorDescriptions[idx] || "Hidden market factor"}
 									</p>
 								</div>
@@ -52,7 +52,7 @@ export default function PCAClusteringCard({ report }: Props) {
 									{(variance * 100).toFixed(1)}%
 								</span>
 							</div>
-							<div className="w-full bg-zinc-700 rounded h-2">
+							<div className="h-2 w-full rounded bg-zinc-200 dark:bg-zinc-700">
 								<div
 									className="h-2 rounded bg-blue-500"
 									style={{ width: `${variance * 100}%` }}
@@ -81,16 +81,16 @@ export default function PCAClusteringCard({ report }: Props) {
 				</p>
 				<div className="space-y-2">
 					{Object.entries(pca.clusters).map(([clusterId, assets]: any) => (
-						<div key={clusterId} className="bg-zinc-800/50 rounded">
+						<div key={clusterId} className="rounded border border-zinc-200 bg-white/80 dark:border-zinc-700 dark:bg-zinc-800/50">
 							<button
 								onClick={() =>
 									setExpandedCluster(
 										expandedCluster === clusterId ? null : clusterId
 									)
 								}
-								className="w-full text-left p-2 hover:bg-zinc-700/50 transition flex justify-between items-center"
+								className="flex w-full items-center justify-between p-2 text-left transition hover:bg-zinc-100 dark:hover:bg-zinc-700/50"
 							>
-								<p className="text-xs font-medium text-zinc-300">
+								<p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
 									Group {clusterId} ({assets.length} assets)
 								</p>
 								<span className="text-xs">
@@ -98,7 +98,7 @@ export default function PCAClusteringCard({ report }: Props) {
 								</span>
 							</button>
 							{expandedCluster === clusterId && (
-								<div className="p-2 border-t border-zinc-700">
+								<div className="border-t border-zinc-200 p-2 dark:border-zinc-700">
 									<div className="flex flex-wrap gap-1 mb-2">
 										{assets.map((asset: string) => (
 											<span
@@ -109,7 +109,7 @@ export default function PCAClusteringCard({ report }: Props) {
 											</span>
 										))}
 									</div>
-									<p className="text-xs text-zinc-400">
+									<p className="text-xs text-zinc-600 dark:text-zinc-400">
 										These assets tend to move together. If one drops, others likely will too.
 									</p>
 								</div>

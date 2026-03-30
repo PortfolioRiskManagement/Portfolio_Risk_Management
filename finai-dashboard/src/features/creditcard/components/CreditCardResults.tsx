@@ -43,10 +43,10 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 		<div className="creditcard-scroll space-y-8">
 			<header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 				<div>
-					<h2 className="m-0" style={{ fontSize: 28, fontWeight: 750, color: "#f2f6fb", textShadow: "0 0 18px rgba(121,192,255,0.14)" }}>
+					<h2 className="m-0" style={{ fontSize: 28, fontWeight: 750, color: "var(--cc-text-strong)", textShadow: "var(--cc-heading-shadow)" }}>
 						Your Recommendations
 					</h2>
-					<p className="m-0 mt-1" style={{ fontSize: 13, color: "#8b949e" }}>
+					<p className="m-0 mt-1" style={{ fontSize: 13, color: "var(--cc-text-muted)" }}>
 						{profile ? `${totalCards} cards matched to your profile` : "Showing all cards"}
 					</p>
 				</div>
@@ -56,20 +56,20 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 							type="button"
 							onClick={onAdjustProfile}
 							style={{
-								border: "1px solid #30363d",
+								border: "1px solid var(--cc-border)",
 								background: "transparent",
 								borderRadius: 6,
 								padding: "6px 14px",
 								fontSize: 13,
-								color: "#8b949e",
+								color: "var(--cc-text-muted)",
 							}}
 							onMouseEnter={(event) => {
-								event.currentTarget.style.borderColor = "#484f58"
-								event.currentTarget.style.color = "#e6edf3"
+								event.currentTarget.style.borderColor = "var(--cc-border-strong)"
+								event.currentTarget.style.color = "var(--cc-text-strong)"
 							}}
 							onMouseLeave={(event) => {
-								event.currentTarget.style.borderColor = "#30363d"
-								event.currentTarget.style.color = "#8b949e"
+								event.currentTarget.style.borderColor = "var(--cc-border)"
+								event.currentTarget.style.color = "var(--cc-text-muted)"
 							}}
 						>
 							Adjust Profile
@@ -79,20 +79,20 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 						type="button"
 						onClick={onNewSearch}
 						style={{
-							border: "1px solid #30363d",
+							border: "1px solid var(--cc-border)",
 							background: "transparent",
 							borderRadius: 6,
 							padding: "6px 14px",
 							fontSize: 13,
-							color: "#8b949e",
+							color: "var(--cc-text-muted)",
 						}}
 						onMouseEnter={(event) => {
-							event.currentTarget.style.borderColor = "#484f58"
-							event.currentTarget.style.color = "#e6edf3"
+							event.currentTarget.style.borderColor = "var(--cc-border-strong)"
+							event.currentTarget.style.color = "var(--cc-text-strong)"
 						}}
 						onMouseLeave={(event) => {
-							event.currentTarget.style.borderColor = "#30363d"
-							event.currentTarget.style.color = "#8b949e"
+							event.currentTarget.style.borderColor = "var(--cc-border)"
+							event.currentTarget.style.color = "var(--cc-text-muted)"
 						}}
 					>
 						New Search
@@ -110,15 +110,15 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 
 			{profile && topPicks.length > 0 && (
 				<section>
-					<div style={{ borderBottom: "1px solid #21262d", paddingBottom: 10, marginBottom: 20 }}>
+					<div style={{ borderBottom: "1px solid var(--cc-border)", paddingBottom: 10, marginBottom: 20 }}>
 						<p
 							className="m-0"
 							style={{
 								fontSize: 12,
 								letterSpacing: "2px",
 								textTransform: "uppercase",
-								color: "#c9d1d9",
-								textShadow: "0 0 10px rgba(121,192,255,0.16)",
+								color: "var(--cc-text)",
+								textShadow: "var(--cc-heading-shadow)",
 							}}
 						>
 							Top Matches For You
@@ -129,7 +129,7 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 							<CreditCardCard
 								key={card.id}
 								card={card}
-								accentColor={accentMap[card.institutionId] ?? "#30363d"}
+								accentColor={accentMap[card.institutionId] ?? "var(--cc-border)"}
 								showTopPick
 								compact
 								employment={profile.employment}
@@ -148,13 +148,13 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 							fontSize: 11,
 							letterSpacing: "2px",
 							textTransform: "uppercase",
-							color: "#6e7681",
+							color: "var(--cc-text-subtle)",
 						}}
 					>
 						All Cards By Institution
 					</p>
 					<div className="flex items-center gap-2">
-						<label htmlFor="credit-sort" style={{ fontSize: 12, color: "#6e7681" }}>
+						<label htmlFor="credit-sort" style={{ fontSize: 12, color: "var(--cc-text-subtle)" }}>
 							Sort
 						</label>
 						<select
@@ -162,9 +162,9 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 							value={sortBy}
 							onChange={(event) => setSortBy(event.target.value as SortBy)}
 							style={{
-								background: "#161b22",
-								border: "1px solid #30363d",
-								color: "#e6edf3",
+								background: "var(--cc-select-bg)",
+								border: "1px solid var(--cc-border)",
+								color: "var(--cc-select-text)",
 								borderRadius: 6,
 								padding: "6px 12px",
 								fontSize: 13,
@@ -173,7 +173,7 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 								event.currentTarget.style.borderColor = "#58a6ff"
 							}}
 							onBlur={(event) => {
-								event.currentTarget.style.borderColor = "#30363d"
+								event.currentTarget.style.borderColor = "var(--cc-border)"
 							}}
 						>
 							<option value="relevance">Relevance</option>
@@ -186,7 +186,7 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 				<div className="space-y-4">
 					{rows.map((institution) => (
 						<div key={institution.id} className="creditcard-institution-section">
-							<div className="mb-4 flex items-center gap-2 border-b border-[#30363d] pb-3">
+							<div className="mb-4 flex items-center gap-2 border-b pb-3" style={{ borderColor: "var(--cc-border)" }}>
 								<span
 									aria-hidden="true"
 									style={{
@@ -197,17 +197,17 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 										display: "inline-block",
 									}}
 								/>
-								<h3 className="m-0" style={{ fontSize: 18, fontWeight: 600, color: "#e6edf3" }}>
+								<h3 className="m-0" style={{ fontSize: 18, fontWeight: 600, color: "var(--cc-text-strong)" }}>
 									{institution.name}
 								</h3>
-								<span style={{ fontSize: 12, color: "#8b949e" }}>{institution.cards.length} cards</span>
+								<span style={{ fontSize: 12, color: "var(--cc-text-muted)" }}>{institution.cards.length} cards</span>
 							</div>
-							<div className="mb-2 hidden border-b border-[#2a2f37] pb-2 md:grid md:grid-cols-[2.2fr_0.9fr_1.3fr_1fr_0.9fr] md:gap-3">
-								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Card</p>
-								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Fee</p>
-								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Top Earn</p>
-								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Bonus</p>
-								<p className="m-0 text-[10px] uppercase tracking-[1.5px] text-[#6e7681]">Rating</p>
+							<div className="mb-2 hidden border-b pb-2 md:grid md:grid-cols-[2.2fr_0.9fr_1.3fr_1fr_0.9fr] md:gap-3" style={{ borderColor: "var(--cc-border)" }}>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px]" style={{ color: "var(--cc-text-subtle)" }}>Card</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px]" style={{ color: "var(--cc-text-subtle)" }}>Fee</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px]" style={{ color: "var(--cc-text-subtle)" }}>Top Earn</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px]" style={{ color: "var(--cc-text-subtle)" }}>Bonus</p>
+								<p className="m-0 text-[10px] uppercase tracking-[1.5px]" style={{ color: "var(--cc-text-subtle)" }}>Rating</p>
 							</div>
 							<div className="grid grid-cols-1 gap-2">
 								{institution.cards.map((card, index) => (
@@ -222,10 +222,10 @@ export default function CreditCardResults({ profile, onAdjustProfile, onNewSearc
 			</section>
 
 			<footer className="pt-2">
-				<p className="m-0" style={{ fontSize: 12, color: "#8b949e" }}>
+				<p className="m-0" style={{ fontSize: 12, color: "var(--cc-text-muted)" }}>
 					Information accurate as of March 2026. Verify terms directly with each issuer before applying.
 				</p>
-				<p className="m-0 mt-1" style={{ fontSize: 12, color: "#6e7681" }}>
+				<p className="m-0 mt-1" style={{ fontSize: 12, color: "var(--cc-text-subtle)" }}>
 					This is not financial advice.
 				</p>
 			</footer>

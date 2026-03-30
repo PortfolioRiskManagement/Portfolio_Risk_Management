@@ -13,7 +13,7 @@ export default function PageShell({ title, children }: Props) {
 const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
 return (
-<div className="min-h-screen bg-black">
+<div className="min-h-screen bg-zinc-50 transition-colors dark:bg-black">
 <Sidebar
 isCollapsed={isSidebarCollapsed}
 onToggle={() => setIsSidebarCollapsed((prev) => !prev)}
@@ -24,7 +24,7 @@ isSidebarCollapsed ? "pl-16" : "pl-64"
 }`}
 >
 <Header title={title} />
-<main className="p-6 text-white flex-1">{children}</main>
+<main className="flex-1 p-6 text-zinc-900 transition-colors dark:text-white">{children}</main>
 </div>
 </div>
 )

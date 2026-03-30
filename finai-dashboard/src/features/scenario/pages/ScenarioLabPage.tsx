@@ -87,7 +87,7 @@ export default function ScenarioLabPage() {
 					<div className="flex justify-center">
 						<button
 							onClick={handleReturnToInfo}
-							className="group relative flex items-center justify-center w-10 hover:w-28 h-10 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 transition-all duration-300 ease-out overflow-hidden"
+							className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-white text-zinc-700 transition-all duration-300 ease-out hover:w-28 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
 							title="Go back to info"
 						>
 							<span className="shrink-0 text-lg">💡</span>
@@ -99,20 +99,20 @@ export default function ScenarioLabPage() {
 				)}
 
 				{(!hasProceeded || showInfoPanel) && (
-					<div className="max-w-5xl mx-auto w-full bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 md:p-8 shadow-lg">
+					<div className="mx-auto w-full max-w-5xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-lg shadow-black/5 dark:border-zinc-800 dark:bg-zinc-900/60 dark:shadow-black/20 md:p-8">
 						<div className="text-center mb-6">
 							<div className="text-4xl mb-2">💡</div>
-							<h3 className="text-2xl font-bold text-white mb-2">How Scenario Lab Works</h3>
-							<p className="text-sm text-zinc-400">
+							<h3 className="mb-2 text-2xl font-bold text-zinc-950 dark:text-white">How Scenario Lab Works</h3>
+							<p className="text-sm text-zinc-600 dark:text-zinc-400">
 								Test your portfolio against historical market events using real backend data.
 							</p>
 						</div>
 
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							{infoItems.map((item) => (
-								<div key={item.title} className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-4 text-center">
-									<div className="text-sm font-semibold text-white mb-1">{item.title}</div>
-									<div className="text-xs leading-relaxed text-zinc-400">{item.description}</div>
+								<div key={item.title} className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-center dark:border-zinc-800 dark:bg-zinc-950/70">
+									<div className="mb-1 text-sm font-semibold text-zinc-950 dark:text-white">{item.title}</div>
+									<div className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">{item.description}</div>
 								</div>
 							))}
 						</div>
@@ -124,7 +124,7 @@ export default function ScenarioLabPage() {
 										setHasProceeded(true)
 										setShowInfoPanel(false)
 									}}
-									className="px-7 py-3 rounded-lg font-semibold text-white bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+									className="rounded-lg border border-zinc-200 bg-zinc-100 px-7 py-3 font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
 								>
 									Proceed
 								</button>
@@ -166,7 +166,7 @@ export default function ScenarioLabPage() {
 							<button
 								onClick={handleBackToScenarios}
 								disabled={isAnimating}
-								className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								className="flex items-center gap-2 text-zinc-500 transition-colors hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-zinc-400 dark:hover:text-white"
 							>
 								<svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -175,7 +175,7 @@ export default function ScenarioLabPage() {
 							</button>
 							{selectedScenario && (
 								<div className="text-right">
-									<div className="text-white font-semibold">{selectedScenario.icon} {selectedScenario.name}</div>
+									<div className="font-semibold text-zinc-950 dark:text-white">{selectedScenario.icon} {selectedScenario.name}</div>
 									{isAnimating && <div className="text-sm text-purple-400">Simulating...</div>}
 								</div>
 							)}
@@ -194,7 +194,7 @@ export default function ScenarioLabPage() {
 						)}
 
 						{selectedScenario && isLoading && !scenarioImpact && (
-							<div className="w-full h-[500px] bg-zinc-900/50 rounded-xl border border-zinc-800 flex items-center justify-center">
+							<div className="flex h-[500px] w-full items-center justify-center rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/50">
 								<SpinnerLoader size={160} />
 							</div>
 						)}
@@ -203,7 +203,7 @@ export default function ScenarioLabPage() {
 							<div className="flex justify-center">
 								<button
 									onClick={() => setShowResults(true)}
-									className="px-6 py-3 rounded-lg font-semibold text-white bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+									className="rounded-lg border border-zinc-200 bg-zinc-100 px-6 py-3 font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
 								>
 									See Key Insights & Report
 								</button>
@@ -213,20 +213,20 @@ export default function ScenarioLabPage() {
 						{/* Quick Stats During Animation */}
 						{isAnimating && scenarioImpact && (
 							<div className="grid grid-cols-3 gap-4">
-								<div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-center">
-									<div className="text-zinc-500 text-sm mb-1">Max Drawdown</div>
+								<div className="rounded-lg border border-zinc-200 bg-white p-4 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none">
+									<div className="mb-1 text-sm text-zinc-500 dark:text-zinc-500">Max Drawdown</div>
 									<div className="text-xl font-bold text-orange-400">
 										{scenarioImpact.maxDrawdown.toFixed(1)}%
 									</div>
 								</div>
-								<div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-center">
-									<div className="text-zinc-500 text-sm mb-1">Volatility</div>
+								<div className="rounded-lg border border-zinc-200 bg-white p-4 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none">
+									<div className="mb-1 text-sm text-zinc-500 dark:text-zinc-500">Volatility</div>
 									<div className="text-xl font-bold text-yellow-400">
 										{scenarioImpact.volatility.toFixed(1)}%
 									</div>
 								</div>
-								<div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 text-center">
-									<div className="text-zinc-500 text-sm mb-1">Assets Affected</div>
+								<div className="rounded-lg border border-zinc-200 bg-white p-4 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 dark:shadow-none">
+									<div className="mb-1 text-sm text-zinc-500 dark:text-zinc-500">Assets Affected</div>
 									<div className="text-xl font-bold text-blue-400">
 										{scenarioImpact.affectedAssets.length}
 									</div>

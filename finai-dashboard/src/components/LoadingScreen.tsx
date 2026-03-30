@@ -41,8 +41,21 @@ export default function LoadingScreen({ isVisible }: LoadingScreenProps) {
 	if (!isVisible) return null
 
 	return (
-		<div className="fixed inset-0 bg-black flex items-center justify-center z-[200]">
+		<div className="fixed inset-0 z-[200] flex items-center justify-center bg-white dark:bg-black">
 			<style>{`
+				html:not(.dark) .loading-screen {
+					color: #0f172a;
+				}
+
+				html:not(.dark) .progress-bar {
+					background: rgba(15, 23, 42, 0.08);
+					border-color: rgba(234, 179, 8, 0.32);
+				}
+
+				html:not(.dark) .progress-number {
+					color: #64748b;
+				}
+
 				@keyframes spinCoin {
 					from {
 						transform: rotateY(0deg);
@@ -171,7 +184,7 @@ export default function LoadingScreen({ isVisible }: LoadingScreenProps) {
 				}
 			`}</style>
 
-			<div className="text-center">
+			<div className="loading-screen text-center">
 				<div className="coin mb-8">
 					<div className="glow-ring"></div>
 					<div className="coin-inner">
@@ -184,8 +197,8 @@ export default function LoadingScreen({ isVisible }: LoadingScreenProps) {
 					</div>
 				</div>
 
-				<h2 className="text-2xl font-bold text-white mb-2">FIN/AI</h2>
-				<p className="text-xs text-zinc-500 mb-8">Intelligence Overlay</p>
+				<h2 className="mb-2 text-2xl font-bold text-zinc-950 dark:text-white">FIN/AI</h2>
+				<p className="mb-8 text-xs text-zinc-500 dark:text-zinc-500">Intelligence Overlay</p>
 
 				<div className="progress-container">
 					<div className="progress-bar">

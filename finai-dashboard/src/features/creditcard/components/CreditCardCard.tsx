@@ -49,10 +49,10 @@ function accessBadge(accessTier: AccessTier): { label: string; style: React.CSSP
 }
 
 function fitRating(score?: number): { label: string; stars: number; color: string } {
-	if (score === undefined) return { label: "General", stars: 3, color: "#8b949e" }
+	if (score === undefined) return { label: "General", stars: 3, color: "var(--cc-text-muted)" }
 	if (score >= 105) return { label: "Excellent", stars: 5, color: "#f0c96e" }
 	if (score >= 90) return { label: "Strong", stars: 4, color: "#79c0ff" }
-	if (score >= 75) return { label: "Good", stars: 3, color: "#8b949e" }
+	if (score >= 75) return { label: "Good", stars: 3, color: "var(--cc-text-muted)" }
 	if (score >= 60) return { label: "Fair", stars: 2, color: "#d29922" }
 	return { label: "Weak", stars: 1, color: "#f85149" }
 }
@@ -81,9 +81,9 @@ export default function CreditCardCard({
 				border: "1px solid rgba(63,185,80,0.25)",
 			}
 			: {
-				background: "rgba(255,255,255,0.05)",
+				background: "var(--cc-chip-bg)",
 				color: "#d4a843",
-				border: "1px solid #30363d",
+				border: "1px solid var(--cc-border)",
 			}
 
 	return (
@@ -98,7 +98,7 @@ export default function CreditCardCard({
 			<div className="grid grid-cols-1 gap-3 md:grid-cols-[2.2fr_0.9fr_1.3fr_1fr_0.9fr] md:items-center">
 				<div className="min-w-0">
 					<div className="flex flex-wrap items-center gap-2">
-						<p className="m-0" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "1.6px", color: "#8b949e" }}>
+						<p className="m-0" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "1.6px", color: "var(--cc-text-muted)" }}>
 							{card.institution}
 						</p>
 						{tier && <span style={{ ...tier.style, fontSize: 10, borderRadius: 4, padding: "2px 7px" }}>{tier.label}</span>}
@@ -132,16 +132,16 @@ export default function CreditCardCard({
 						)}
 					</div>
 					<div className="mt-1 flex items-center gap-2">
-						<h3 className="m-0 truncate" style={{ fontSize: 17, fontWeight: 650, color: "#e6edf3" }}>
+						<h3 className="m-0 truncate" style={{ fontSize: 17, fontWeight: 650, color: "var(--cc-text-strong)" }}>
 							{card.name}
 						</h3>
 					</div>
 					<div className="mt-1 flex flex-wrap items-center gap-2">
 						<span
 							style={{
-								background: "rgba(255,255,255,0.05)",
-								border: "1px solid #30363d",
-								color: "#8b949e",
+								background: "var(--cc-chip-bg)",
+								border: "1px solid var(--cc-chip-border)",
+								color: "var(--cc-chip-text)",
 								fontSize: 10,
 								borderRadius: 4,
 								padding: "2px 7px",
@@ -149,14 +149,14 @@ export default function CreditCardCard({
 						>
 							{card.rewardProgram}
 						</span>
-						<p className="m-0 truncate" style={{ fontSize: 11, color: "#8b949e" }}>
+						<p className="m-0 truncate" style={{ fontSize: 11, color: "var(--cc-text-muted)" }}>
 							{keyPerks.join(" • ")}
 						</p>
 					</div>
 				</div>
 
 				<div className="md:text-center">
-					<p className="m-0 mb-1" style={{ fontSize: 10, color: "#6e7681", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+					<p className="m-0 mb-1" style={{ fontSize: 10, color: "var(--cc-text-subtle)", letterSpacing: "1.5px", textTransform: "uppercase" }}>
 						Annual Fee
 					</p>
 					<div
@@ -171,11 +171,11 @@ export default function CreditCardCard({
 					>
 						{formatAnnualFee(card.annualFee)}
 					</div>
-					{card.feeWaivable && <p className="m-0 mt-1" style={{ fontSize: 10, color: "#6e7681" }}>waivable</p>}
+					{card.feeWaivable && <p className="m-0 mt-1" style={{ fontSize: 10, color: "var(--cc-text-subtle)" }}>waivable</p>}
 				</div>
 
 				<div>
-					<p className="m-0 mb-1" style={{ fontSize: 10, color: "#6e7681", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+					<p className="m-0 mb-1" style={{ fontSize: 10, color: "var(--cc-text-subtle)", letterSpacing: "1.5px", textTransform: "uppercase" }}>
 						Top Earn Rates
 					</p>
 					<div className="space-y-1">
@@ -192,7 +192,7 @@ export default function CreditCardCard({
 							>
 								{rate.rate}
 							</span>
-							<span className="line-clamp-1" style={{ fontSize: 11, color: "#8b949e", lineHeight: 1.3 }}>
+							<span className="line-clamp-1" style={{ fontSize: 11, color: "var(--cc-text-muted)", lineHeight: 1.3 }}>
 								{rate.category}
 							</span>
 						</div>
@@ -201,19 +201,19 @@ export default function CreditCardCard({
 				</div>
 
 				<div>
-					<p className="m-0 mb-1" style={{ fontSize: 10, color: "#6e7681", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+					<p className="m-0 mb-1" style={{ fontSize: 10, color: "var(--cc-text-subtle)", letterSpacing: "1.5px", textTransform: "uppercase" }}>
 						Welcome Bonus
 					</p>
 					<p className="m-0" style={{ fontSize: 14, fontWeight: 700, color: "#d4a843" }}>
 						{card.welcomeBonusValue ?? card.welcomeBonus ?? "None"}
 					</p>
-					<p className="m-0 mt-1" style={{ fontSize: 11, color: "#8b949e" }}>
+					<p className="m-0 mt-1" style={{ fontSize: 11, color: "var(--cc-text-muted)" }}>
 						{card.baseRate}
 					</p>
 				</div>
 
 				<div>
-					<p className="m-0 mb-1" style={{ fontSize: 10, color: "#6e7681", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+					<p className="m-0 mb-1" style={{ fontSize: 10, color: "var(--cc-text-subtle)", letterSpacing: "1.5px", textTransform: "uppercase" }}>
 						Fit Rating
 					</p>
 					<p
@@ -224,10 +224,10 @@ export default function CreditCardCard({
 							color: rating.color,
 							textShadow: "0 0 10px rgba(255,255,255,0.06)",
 						}}
-					>
-						{stars}
-					</p>
-					<p className="m-0 mt-1" style={{ fontSize: 11, color: "#8b949e" }}>
+						>
+							{stars}
+						</p>
+					<p className="m-0 mt-1" style={{ fontSize: 11, color: "var(--cc-text-muted)" }}>
 						{rating.label}
 					</p>
 				</div>
@@ -261,12 +261,12 @@ export default function CreditCardCard({
 						<div
 							className="mt-3"
 							style={{
-								background: "rgba(88,166,255,0.04)",
-								border: "1px solid rgba(88,166,255,0.15)",
+								background: "var(--cc-student-bg)",
+								border: "1px solid var(--cc-student-border)",
 								borderRadius: 8,
 								padding: "12px 14px",
 								fontSize: 12,
-								color: "#8b949e",
+								color: "var(--cc-student-text)",
 								lineHeight: 1.6,
 							}}
 						>

@@ -1,19 +1,39 @@
 @import "tailwindcss";
 
 html {
+  background-color: #f8fafc;
+}
+
+html.dark {
   background-color: #0b0b0c;
 }
 
 body {
-  background-color: #0b0b0c;
-  color: #e6eef8;
+  background-color: #f8fafc;
+  color: #1f2937;
   margin: 0;
   padding: 0;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+html.dark body {
+  background-color: #0b0b0c;
+  color: #e6eef8;
 }
 
 :root {
   --card-border: rgba(255,255,255,0.04);
+  --light-bg: #f8fafc;
+  --light-surface: #ffffff;
+  --light-surface-soft: #f8fafc;
+  --light-surface-muted: #f1f5f9;
+  --light-surface-strong: #e2e8f0;
+  --light-border: rgba(148, 163, 184, 0.28);
+  --light-border-strong: rgba(100, 116, 139, 0.34);
+  --light-text: #0f172a;
+  --light-text-soft: #334155;
+  --light-text-muted: #64748b;
 }
 
 .app-container {
@@ -36,29 +56,47 @@ body {
 
 /* Polished card and UI helpers */
 .card {
-  background: linear-gradient(180deg, rgba(20,20,22,0.72), rgba(12,12,14,0.7));
-  border: 1px solid rgba(255,255,255,0.04);
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(248,250,252,0.98));
+  border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 14px;
   padding: 16px;
 }
 
-.metric-card {
-  background: linear-gradient(180deg, rgba(24,24,26,0.6), rgba(12,12,14,0.5));
+html.dark .card {
+  background: linear-gradient(180deg, rgba(20,20,22,0.72), rgba(12,12,14,0.7));
   border: 1px solid rgba(255,255,255,0.04);
+}
+
+.metric-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.98));
+  border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 12px;
   padding: 14px;
   transition: transform .18s cubic-bezier(.2,.9,.2,1), box-shadow .18s;
 }
-.metric-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(2,6,23,0.6); }
+.metric-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
+
+html.dark .metric-card {
+  background: linear-gradient(180deg, rgba(24,24,26,0.6), rgba(12,12,14,0.5));
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+html.dark .metric-card:hover { box-shadow: 0 8px 30px rgba(2,6,23,0.6); }
 
 .pill {
   display: inline-block;
   padding: 6px 10px;
   border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #475569;
+  font-size: 12px;
+}
+
+html.dark .pill {
   background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
   border: 1px solid rgba(255,255,255,0.03);
   color: #d7e7ef;
-  font-size: 12px;
 }
 
 .price-large { font-weight: 700; }
@@ -66,5 +104,189 @@ body {
 
 .fade-up { animation: fadeUp 320ms cubic-bezier(.2,.9,.2,1) both }
 
-.ai-panel .reason { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 10px; }
+.ai-panel .reason { background: rgba(15, 23, 42, 0.04); padding: 12px; border-radius: 10px; }
 
+html.dark .ai-panel .reason { background: rgba(255,255,255,0.02); }
+
+.pulse {
+  animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1 }
+  50% { transform: scale(1.12); opacity: .85 }
+  100% { transform: scale(1); opacity: 1 }
+}
+
+.connected-badge { border: 1px solid rgba(34,197,94,0.08); }
+
+html:not(.dark) main [class~="bg-zinc-950"],
+html:not(.dark) main [class~="bg-zinc-950/95"],
+html:not(.dark) main [class~="bg-zinc-950/80"],
+html:not(.dark) main [class~="bg-zinc-950/70"],
+html:not(.dark) main [class~="bg-zinc-950/60"],
+html:not(.dark) main [class~="bg-zinc-950/50"],
+html:not(.dark) main [class~="bg-zinc-950/40"] {
+  background-color: var(--light-surface) !important;
+}
+
+html:not(.dark) main [class~="bg-zinc-900"],
+html:not(.dark) main [class~="bg-zinc-900/95"],
+html:not(.dark) main [class~="bg-zinc-900/80"],
+html:not(.dark) main [class~="bg-zinc-900/70"],
+html:not(.dark) main [class~="bg-zinc-900/60"],
+html:not(.dark) main [class~="bg-zinc-900/50"],
+html:not(.dark) main [class~="bg-zinc-900/40"],
+html:not(.dark) main [class~="bg-zinc-900/30"] {
+  background-color: var(--light-surface-soft) !important;
+}
+
+html:not(.dark) main [class~="bg-zinc-800"],
+html:not(.dark) main [class~="bg-zinc-800/50"],
+html:not(.dark) main [class~="bg-zinc-800/40"],
+html:not(.dark) main [class~="bg-zinc-800/30"],
+html:not(.dark) main [class~="bg-zinc-800/20"] {
+  background-color: var(--light-surface-muted) !important;
+}
+
+html:not(.dark) main [class~="bg-zinc-700"],
+html:not(.dark) main [class~="bg-zinc-700/50"] {
+  background-color: var(--light-surface-strong) !important;
+}
+
+html:not(.dark) main [class~="bg-white/6"],
+html:not(.dark) main [class~="bg-white/8"],
+html:not(.dark) main [class~="bg-white/10"] {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+html:not(.dark) main [class~="border-zinc-900"],
+html:not(.dark) main [class~="border-zinc-800"],
+html:not(.dark) main [class~="border-zinc-800/50"],
+html:not(.dark) main [class~="border-zinc-800/40"],
+html:not(.dark) main [class~="border-zinc-800/30"],
+html:not(.dark) main [class~="border-zinc-700"],
+html:not(.dark) main [class~="border-zinc-600"],
+html:not(.dark) main [class~="border-white/8"],
+html:not(.dark) main [class~="border-white/10"] {
+  border-color: var(--light-border) !important;
+}
+
+html:not(.dark) main [class*="hover:bg-zinc-900"]:hover,
+html:not(.dark) main [class*="hover:bg-zinc-800"]:hover,
+html:not(.dark) main [class*="hover:bg-zinc-700"]:hover,
+html:not(.dark) main [class*="hover:bg-zinc-600"]:hover {
+  background-color: var(--light-surface-strong) !important;
+}
+
+html:not(.dark) main [class*="hover:bg-zinc-200"]:hover,
+html:not(.dark) main [class*="hover:bg-zinc-100"]:hover,
+html:not(.dark) main [class*="hover:bg-white/10"]:hover {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+html:not(.dark) main [class*="hover:text-white"]:hover,
+html:not(.dark) main [class*="hover:text-zinc-400"]:hover,
+html:not(.dark) main [class*="hover:text-zinc-300"]:hover {
+  color: var(--light-text) !important;
+}
+
+html:not(.dark) main [class*="focus:border-zinc-500"]:focus,
+html:not(.dark) main [class*="focus:border-zinc-600"]:focus,
+html:not(.dark) main [class*="focus:border-zinc-700"]:focus {
+  border-color: var(--light-border-strong) !important;
+}
+
+html:not(.dark) main [class*="focus:ring-zinc-500"]:focus,
+html:not(.dark) main [class*="focus:ring-zinc-600"]:focus,
+html:not(.dark) main [class*="focus:ring-zinc-700"]:focus {
+  --tw-ring-color: rgba(100, 116, 139, 0.22) !important;
+}
+
+html:not(.dark) main [class~="text-white"],
+html:not(.dark) main [class~="text-zinc-100"],
+html:not(.dark) main [class~="text-zinc-200"],
+html:not(.dark) main [class~="text-zinc-300"] {
+  color: var(--light-text) !important;
+}
+
+html:not(.dark) main [class~="text-zinc-400"],
+html:not(.dark) main [class~="text-zinc-500"],
+html:not(.dark) main [class~="text-zinc-600"] {
+  color: var(--light-text-muted) !important;
+}
+
+html:not(.dark) main [class~="placeholder-zinc-500"]::placeholder,
+html:not(.dark) main [class~="placeholder-zinc-600"]::placeholder {
+  color: rgba(100, 116, 139, 0.78) !important;
+}
+
+html:not(.dark) main [class~="from-zinc-950"] {
+  --tw-gradient-from: #ffffff var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html:not(.dark) main [class~="from-zinc-900"] {
+  --tw-gradient-from: #ffffff var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html:not(.dark) main [class~="from-zinc-800"] {
+  --tw-gradient-from: #f8fafc var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(248, 250, 252, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html:not(.dark) main [class~="from-zinc-700"] {
+  --tw-gradient-from: #f1f5f9 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(241, 245, 249, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html:not(.dark) main [class~="from-black"] {
+  --tw-gradient-from: #ffffff var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html:not(.dark) main [class~="to-zinc-950"],
+html:not(.dark) main [class~="to-zinc-900"] {
+  --tw-gradient-to: #f1f5f9 var(--tw-gradient-to-position) !important;
+}
+
+html:not(.dark) main [class~="to-zinc-800"] {
+  --tw-gradient-to: #e2e8f0 var(--tw-gradient-to-position) !important;
+}
+
+html:not(.dark) main [class~="to-zinc-700"] {
+  --tw-gradient-to: #cbd5e1 var(--tw-gradient-to-position) !important;
+}
+
+html:not(.dark) main [class~="to-zinc-600"] {
+  --tw-gradient-to: #cbd5e1 var(--tw-gradient-to-position) !important;
+}
+
+html:not(.dark) main [class~="ring-zinc-700"],
+html:not(.dark) main [class~="ring-zinc-800"] {
+  --tw-ring-color: rgba(148, 163, 184, 0.28) !important;
+}
+
+html:not(.dark) main [class~="text-white"][class~="bg-blue-600"],
+html:not(.dark) main [class~="text-white"][class~="bg-blue-700"],
+html:not(.dark) main [class~="text-white"][class~="bg-emerald-600"],
+html:not(.dark) main [class~="text-white"][class~="bg-red-600"],
+html:not(.dark) main [class~="text-white"][class~="bg-amber-500"],
+html:not(.dark) main [class~="text-white"][class~="bg-yellow-600"],
+html:not(.dark) main [class~="text-white"][class~="bg-indigo-600"],
+html:not(.dark) main [class~="text-white"][class~="bg-purple-600"],
+html:not(.dark) main [class~="text-white"][class*="from-blue-"],
+html:not(.dark) main [class~="text-white"][class*="from-emerald-"],
+html:not(.dark) main [class~="text-white"][class*="from-red-"],
+html:not(.dark) main [class~="text-white"][class*="from-amber-"],
+html:not(.dark) main [class~="text-white"][class*="from-yellow-"],
+html:not(.dark) main [class~="text-white"][class*="from-indigo-"],
+html:not(.dark) main [class~="text-white"][class*="from-purple-"] {
+  color: #ffffff !important;
+}

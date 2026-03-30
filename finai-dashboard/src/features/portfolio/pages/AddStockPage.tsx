@@ -31,19 +31,19 @@ export default function AddStockPage() {
 
   return (
     <PageShell title="Add Stock">
-      <form onSubmit={submit} className="max-w-lg mx-auto bg-zinc-900 p-6 rounded">
-        <label className="block mb-2 text-zinc-200">Stock</label>
-        <select className="w-full p-2 rounded bg-zinc-800 mb-4" value={symbol} onChange={e => setSymbol(e.target.value)}>
+      <form onSubmit={submit} className="mx-auto max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <label className="mb-2 block text-zinc-700 dark:text-zinc-200">Stock</label>
+        <select className="mb-4 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" value={symbol} onChange={e => setSymbol(e.target.value)}>
           {STOCKS.map(s => (
             <option key={s.symbol} value={s.symbol}>{s.symbol} - {s.name}</option>
           ))}
         </select>
 
-        <label className="block mb-2 text-zinc-200">Entry Price</label>
-        <input className="w-full p-2 rounded bg-zinc-800 mb-4" type="number" value={entry} onChange={e => setEntry(Number(e.target.value))} />
+        <label className="mb-2 block text-zinc-700 dark:text-zinc-200">Entry Price</label>
+        <input className="mb-4 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" type="number" value={entry} onChange={e => setEntry(Number(e.target.value))} />
 
-        <label className="block mb-2 text-zinc-200">Platform</label>
-        <select className="w-full p-2 rounded bg-zinc-800 mb-4" value={platform} onChange={e => setPlatform(e.target.value)}>
+        <label className="mb-2 block text-zinc-700 dark:text-zinc-200">Platform</label>
+        <select className="mb-4 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" value={platform} onChange={e => setPlatform(e.target.value)}>
           <option>Manual</option>
           <option>Wealthsimple</option>
           <option>Robinhood</option>
@@ -51,11 +51,11 @@ export default function AddStockPage() {
           <option>Fidelity</option>
         </select>
 
-        <label className="block mb-2 text-zinc-200">Quantity</label>
-        <input className="w-full p-2 rounded bg-zinc-800 mb-4" type="number" value={qty} onChange={e => setQty(Number(e.target.value))} />
+        <label className="mb-2 block text-zinc-700 dark:text-zinc-200">Quantity</label>
+        <input className="mb-4 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" type="number" value={qty} onChange={e => setQty(Number(e.target.value))} />
 
-        <label className="block mb-2 text-zinc-200">Type</label>
-        <select className="w-full p-2 rounded bg-zinc-800 mb-4" value={type} onChange={e => setType(e.target.value)}>
+        <label className="mb-2 block text-zinc-700 dark:text-zinc-200">Type</label>
+        <select className="mb-4 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-2 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" value={type} onChange={e => setType(e.target.value)}>
           <option>Stock</option>
           <option>Crypto</option>
           <option>ETF</option>

@@ -26,28 +26,28 @@ export default function ComparisonView({ original, modified, onClose }: Props) {
     }
 
     return (
-        <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700 space-y-4">
+        <div className="space-y-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/50 dark:shadow-none">
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-semibold text-white">Portfolio Comparison</h3>
-                <button onClick={onClose} className="text-zinc-400 hover:text-white text-lg transition">×</button>
+                <h3 className="text-sm font-semibold text-zinc-950 dark:text-white">Portfolio Comparison</h3>
+                <button onClick={onClose} className="text-lg text-zinc-500 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">×</button>
             </div>
             <div className="space-y-2">
                 {metrics.map((m, idx) => {
                     const { diff, improved } = getDifference(original, modified, m.key)
                     return (
-                        <div key={idx} className="bg-zinc-700/50 rounded p-3 flex items-center justify-between">
-                            <span className="text-sm text-zinc-300">{m.label}</span>
+                        <div key={idx} className="flex items-center justify-between rounded border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-700/50">
+                            <span className="text-sm text-zinc-700 dark:text-zinc-300">{m.label}</span>
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                    <p className="text-xs text-zinc-400">Original</p>
-                                    <p className="text-sm font-medium text-white">{m.format(original[m.key])}</p>
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Original</p>
+                                    <p className="text-sm font-medium text-zinc-950 dark:text-white">{m.format(original[m.key])}</p>
                                 </div>
                                 <div className="text-center">
                                     <p className={`text-lg font-bold ${diff < 0 ? "text-green-400" : diff > 0 ? "text-red-400" : "text-zinc-400"}`}>{improved}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs text-zinc-400">New</p>
-                                    <p className="text-sm font-medium text-white">{m.format(modified[m.key])}</p>
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">New</p>
+                                    <p className="text-sm font-medium text-zinc-950 dark:text-white">{m.format(modified[m.key])}</p>
                                 </div>
                             </div>
                         </div>

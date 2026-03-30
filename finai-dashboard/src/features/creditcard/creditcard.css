@@ -1,4 +1,24 @@
 .creditcard-bg {
+  --cc-text-strong: #e6edf3;
+  --cc-text: #c9d1d9;
+  --cc-text-muted: #8b949e;
+  --cc-text-subtle: #6e7681;
+  --cc-border: #30363d;
+  --cc-border-strong: #484f58;
+  --cc-surface: #161b22;
+  --cc-surface-alt: #0f1318;
+  --cc-surface-soft: #1c2128;
+  --cc-surface-hover: #21262d;
+  --cc-select-bg: #161b22;
+  --cc-select-text: #e6edf3;
+  --cc-chip-bg: rgba(255, 255, 255, 0.05);
+  --cc-chip-border: #30363d;
+  --cc-chip-text: #8b949e;
+  --cc-student-bg: rgba(88, 166, 255, 0.04);
+  --cc-student-border: rgba(88, 166, 255, 0.15);
+  --cc-student-text: #8b949e;
+  --cc-track: rgba(48, 54, 61, 0.8);
+  --cc-heading-shadow: 0 0 18px rgba(121, 192, 255, 0.14);
   background-color: #0d1117;
   background-image:
     radial-gradient(ellipse at 70% 20%, rgba(88, 166, 255, 0.04) 0%, transparent 60%),
@@ -257,6 +277,65 @@
   border-radius: 0 0 10px 10px;
   overflow: hidden;
   transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
+}
+
+html:not(.dark) .creditcard-bg {
+  --cc-text-strong: #0f172a;
+  --cc-text: #334155;
+  --cc-text-muted: #64748b;
+  --cc-text-subtle: #94a3b8;
+  --cc-border: rgba(148, 163, 184, 0.24);
+  --cc-border-strong: rgba(100, 116, 139, 0.36);
+  --cc-surface: #ffffff;
+  --cc-surface-alt: #f8fafc;
+  --cc-surface-soft: #f1f5f9;
+  --cc-surface-hover: #e2e8f0;
+  --cc-select-bg: #ffffff;
+  --cc-select-text: #0f172a;
+  --cc-chip-bg: rgba(15, 23, 42, 0.04);
+  --cc-chip-border: rgba(148, 163, 184, 0.24);
+  --cc-chip-text: #64748b;
+  --cc-student-bg: rgba(59, 130, 246, 0.07);
+  --cc-student-border: rgba(59, 130, 246, 0.18);
+  --cc-student-text: #475569;
+  --cc-track: rgba(148, 163, 184, 0.32);
+  --cc-heading-shadow: 0 0 18px rgba(59, 130, 246, 0.1);
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse at 70% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+}
+
+html:not(.dark) .creditcard-panel,
+html:not(.dark) .creditcard-card,
+html:not(.dark) .creditcard-accordion-header,
+html:not(.dark) .creditcard-institution-section,
+html:not(.dark) .creditcard-row,
+html:not(.dark) .creditcard-legend,
+html:not(.dark) .creditcard-accordion-content,
+html:not(.dark) .creditcard-option {
+  background: #ffffff;
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+html:not(.dark) .creditcard-option:hover,
+html:not(.dark) .creditcard-card:hover,
+html:not(.dark) .creditcard-accordion-header:hover {
+  background: #f8fafc;
+  border-color: rgba(100, 116, 139, 0.32);
+}
+
+html:not(.dark) .creditcard-skip-this-btn,
+html:not(.dark) .creditcard-legend-chip {
+  color: #64748b;
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
+html:not(.dark) .creditcard-divider {
+  border-top-color: rgba(148, 163, 184, 0.2);
 }
 
 .creditcard-accordion-card-in {

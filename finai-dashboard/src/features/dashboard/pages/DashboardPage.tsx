@@ -2,6 +2,7 @@ import PageShell from "../../../components/layout/PageShell"
 import Card from "../../../components/ui/Card"
 import Metric from "../../../components/ui/Metric"
 import PortfolioChart from "../components/PortfolioChart"
+import ConnectionsPanel from "../../connections/components/ConnectionsPanel"
 import { useMemo } from "react"
 import { useHoldings } from "../../portfolio/hooks/useHoldings"
 
@@ -80,7 +81,7 @@ export default function DashboardPage() {
   return (
     <PageShell title="Unified Intelligence Dashboard">
       {/* Status bar */}
-      <div className="flex items-center gap-4 mb-6 text-sm text-zinc-400">
+      <div className="mb-6 flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-green-500 rounded-full"></span>
           <span>Last synced 2 minutes ago</span>
@@ -136,18 +137,18 @@ export default function DashboardPage() {
 
         <Card title="AI Daily Brief">
           <div className="space-y-3">
-            <div className="bg-blue-950/30 border border-blue-800/50 rounded-lg p-3 text-sm">
-              <p className="text-blue-200">
+            <div className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm dark:border-blue-800/50 dark:bg-blue-950/30">
+              <p className="text-blue-900 dark:text-blue-200">
                 Your portfolio is up 2.3% today driven by strong performance in tech sector. NVDA showing exceptional gains.
               </p>
             </div>
-            <div className="bg-yellow-950/30 border border-yellow-800/50 rounded-lg p-3 text-sm">
-              <p className="text-yellow-200">
+            <div className="rounded-lg border border-yellow-100 bg-yellow-50 p-3 text-sm dark:border-yellow-800/50 dark:bg-yellow-950/30">
+              <p className="text-yellow-900 dark:text-yellow-200">
                 High tech concentration detected (65%). Consider rebalancing to reduce sector risk.
               </p>
             </div>
-            <div className="bg-green-950/30 border border-green-800/50 rounded-lg p-3 text-sm">
-              <p className="text-green-200">
+            <div className="rounded-lg border border-green-100 bg-green-50 p-3 text-sm dark:border-green-800/50 dark:bg-green-950/30">
+              <p className="text-green-900 dark:text-green-200">
                 Federal Reserve rate hold signals positive outlook for equities. Good time to maintain positions.
               </p>
             </div>
@@ -155,13 +156,31 @@ export default function DashboardPage() {
         </Card>
   </div>
 
-  {/* Placeholder below chart and AI brief */}
+      {/* Connections / Integrations panel */}
       <div className="mt-4">
-        <Card>
-          <div className="h-40 flex items-center justify-center rounded-lg bg-zinc-900/40 border border-zinc-800/50 text-sm text-zinc-400">
-            Placeholder for future content
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <ConnectionsPanel />
           </div>
-        </Card>
+          <div>
+            <Card title="Recent Activity">
+              <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+                <div className="flex items-center justify-between">
+                  <div>Synced Coinbase</div>
+                  <div className="text-xs text-zinc-400 dark:text-zinc-500">2m ago</div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>Imported 3 holdings from Fidelity</div>
+                  <div className="text-xs text-zinc-400 dark:text-zinc-500">1h ago</div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>Connected Robinhood</div>
+                  <div className="text-xs text-zinc-400 dark:text-zinc-500">Yesterday</div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
 
     </PageShell>

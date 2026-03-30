@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom"
+import ConnectionsPage from "../features/connections/pages/ConnectionsPage"
 import DashboardPage from "../features/dashboard/pages/DashboardPage"
 import PortfolioPage from "../features/portfolio/pages/PortfolioPage"
 import AddStockPage from "../features/portfolio/pages/AddStockPage"
@@ -71,15 +72,7 @@ export default function AppRoutes() {
 					</PageShell>
 				}
 			/>
-			<Route
-				path="/connections"
-				element={
-					<StubPage
-						title="Connections"
-						subtitle="Connect your brokerages and accounts here."
-					/>
-				}
-			/>
+			<Route path="/connections" element={<ConnectionsPage />} />
 			<Route
 				path="/settings"
 				element={

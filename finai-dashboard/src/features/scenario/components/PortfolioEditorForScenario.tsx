@@ -107,11 +107,7 @@ export function PortfolioEditorForScenario({ holdings, onUpdateHoldings, totalVa
 		setEditedHoldings(editedHoldings.filter(h => h.symbol !== symbol))
 	}
 
-	const handleUpdateHolding = (symbol: string, field: keyof PortfolioHolding, value: any) => {
-		setEditedHoldings(editedHoldings.map(h => 
-			h.symbol === symbol ? { ...h, [field]: value } : h
-		))
-	}
+	// handleUpdateHolding removed; use handleValueChange and other helpers instead
 
 	const resolveAssetClass = async (symbol: string): Promise<PortfolioHolding['assetClass']> => {
 		const results = await scenarioService.searchAssets(symbol)

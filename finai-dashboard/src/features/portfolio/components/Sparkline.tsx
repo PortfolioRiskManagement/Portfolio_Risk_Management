@@ -80,9 +80,9 @@ export default function Sparkline({ data, width = 820, height = 140, color = '#1
             dateStr = new Date(times[highlightIndex]).toLocaleDateString()
           }
           return (
-            <div style={badgeStyle} className="text-xs bg-zinc-900 px-2 py-1 rounded-md border border-zinc-800 shadow">
+            <div style={badgeStyle} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-white">
               <div className="font-medium">{formatPrice(price)}</div>
-              {dateStr ? <div className="text-[10px] text-zinc-400">{dateStr}</div> : null}
+              {dateStr ? <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{dateStr}</div> : null}
             </div>
           )
         })()
@@ -99,7 +99,7 @@ export default function Sparkline({ data, width = 820, height = 140, color = '#1
           const top = (y / height) * 100
           let dateStr = ''
           if (times && times[hoverIdx]) dateStr = new Date(times[hoverIdx]).toLocaleDateString()
-          return <div style={{ position: 'absolute', left: `${left}%`, top: `${top}%`, transform: 'translate(-50%, -120%)', pointerEvents: 'none' }} className="text-xs bg-zinc-900 px-2 py-1 rounded-md border border-zinc-800 shadow"><div className="font-medium">{Number(data[hoverIdx]).toFixed(2)}</div>{dateStr ? <div className="text-[10px] text-zinc-400">{dateStr}</div> : null}</div>
+          return <div style={{ position: 'absolute', left: `${left}%`, top: `${top}%`, transform: 'translate(-50%, -120%)', pointerEvents: 'none' }} className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"><div className="font-medium">{Number(data[hoverIdx]).toFixed(2)}</div>{dateStr ? <div className="text-[10px] text-zinc-500 dark:text-zinc-400">{dateStr}</div> : null}</div>
         })()
       ) : null}
     </div>

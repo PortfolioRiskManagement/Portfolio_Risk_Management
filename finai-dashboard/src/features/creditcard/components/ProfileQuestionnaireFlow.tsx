@@ -135,14 +135,14 @@ export default function ProfileQuestionnaireFlow({ onComplete, onSkipAll }: Prof
 		<div className="mx-auto w-full max-w-[560px] px-4">
 			<div className="creditcard-panel creditcard-questionnaire-in p-10">
 				<div className="creditcard-panel-header mb-2">
-					<p className="m-0" style={{ fontSize: 11, color: "#6e7681", letterSpacing: "1px" }}>
+					<p className="m-0" style={{ fontSize: 11, color: "var(--cc-text-subtle)", letterSpacing: "1px" }}>
 						Step {step + 1} of {totalSteps}
 					</p>
 					<button type="button" onClick={onSkipAll} className="creditcard-skip-all-btn">
 						Skip All Questions
 					</button>
 				</div>
-				<div className="mb-7 h-[3px] rounded-[2px]" style={{ background: "rgba(48,54,61,0.8)" }}>
+				<div className="mb-7 h-[3px] rounded-[2px]" style={{ background: "var(--cc-track)" }}>
 					<div
 						className="h-[3px] rounded-[2px]"
 						style={{
@@ -154,11 +154,11 @@ export default function ProfileQuestionnaireFlow({ onComplete, onSkipAll }: Prof
 				</div>
 
 				<div className={stepClass(phase, direction)}>
-					<h2 className="m-0" style={{ fontSize: 20, fontWeight: 600, color: "#e6edf3" }}>
+					<h2 className="m-0" style={{ fontSize: 20, fontWeight: 600, color: "var(--cc-text-strong)" }}>
 						{question.title}
 					</h2>
 					{question.subtitle && (
-						<p className="m-0 mt-[6px]" style={{ fontSize: 13, color: "#8b949e" }}>
+						<p className="m-0 mt-[6px]" style={{ fontSize: 13, color: "var(--cc-text-muted)" }}>
 							{question.subtitle}
 						</p>
 					)}
@@ -186,7 +186,7 @@ export default function ProfileQuestionnaireFlow({ onComplete, onSkipAll }: Prof
 									style={{ animationDelay: `${80 + index * 60}ms` }}
 								>
 									<div className="flex items-center justify-between gap-3">
-										<span style={{ fontSize: 14, fontWeight: 500, color: isSelected ? "#79c0ff" : "#e6edf3" }}>{option.label}</span>
+										<span style={{ fontSize: 14, fontWeight: 500, color: isSelected ? "#79c0ff" : "var(--cc-text-strong)" }}>{option.label}</span>
 										{step < 2 ? (
 											isSelected ? (
 												<span style={{ color: "#79c0ff", fontSize: 14 }}>✓</span>
@@ -197,7 +197,7 @@ export default function ProfileQuestionnaireFlow({ onComplete, onSkipAll }: Prof
 													width: 18,
 													height: 18,
 													borderRadius: 4,
-													border: isSelected ? "1.5px solid #58a6ff" : "1.5px solid #30363d",
+													border: isSelected ? "1.5px solid #58a6ff" : "1.5px solid var(--cc-border)",
 													background: isSelected ? "#58a6ff" : "transparent",
 													color: "#ffffff",
 													fontSize: 12,
@@ -216,14 +216,14 @@ export default function ProfileQuestionnaireFlow({ onComplete, onSkipAll }: Prof
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between border-t pt-5" style={{ borderColor: "#30363d" }}>
+					<div className="flex items-center justify-between border-t pt-5" style={{ borderColor: "var(--cc-border)" }}>
 						<div className="w-28 text-left">
 							{step > 0 && (
 								<button
 									type="button"
 									onClick={handleBack}
 									className="bg-transparent p-0"
-									style={{ color: "#6e7681", border: "none", fontSize: 13 }}
+									style={{ color: "var(--cc-text-subtle)", border: "none", fontSize: 13 }}
 								>
 									Back
 								</button>
@@ -257,7 +257,7 @@ export default function ProfileQuestionnaireFlow({ onComplete, onSkipAll }: Prof
 					</div>
 				</div>
 			</div>
-			<p className="m-0 pt-4 text-center" style={{ fontSize: 12, color: "#8b949e" }}>
+			<p className="m-0 pt-4 text-center" style={{ fontSize: 12, color: "var(--cc-text-muted)" }}>
 				No pressure: answers are optional, and you can skip everything anytime.
 			</p>
 		</div>

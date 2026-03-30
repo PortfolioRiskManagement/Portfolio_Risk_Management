@@ -42,9 +42,9 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-2xl">📊</span>
-          <h2 className="text-2xl font-bold text-white">Portfolio Structure & Analytics</h2>
+          <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">Portfolio Structure & Analytics</h2>
         </div>
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
           Visual breakdown of your account distribution and contribution room usage
         </p>
       </div>
@@ -52,7 +52,7 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Account Distribution */}
         <Card className="border-blue-600/20 hover:border-blue-600/40 transition-all duration-300">
-          <h3 className="text-white font-bold mb-5 flex items-center gap-2">
+          <h3 className="mb-5 flex items-center gap-2 font-bold text-zinc-950 dark:text-white">
             <span className="text-lg">🏦</span>
             Account Distribution
           </h3>
@@ -60,13 +60,13 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
             {accountDistribution.map((acc) => (
               <div key={acc.type} className="group">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-zinc-300 group-hover:text-blue-300 transition-colors">
+                  <span className="text-sm font-semibold text-zinc-700 transition-colors group-hover:text-blue-700 dark:text-zinc-300 dark:group-hover:text-blue-300">
                     {acc.name}
                   </span>
-                  <span className="text-sm font-bold text-white">{formatCurrency(acc.value)}</span>
+                  <span className="text-sm font-bold text-zinc-950 dark:text-white">{formatCurrency(acc.value)}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-3 bg-gradient-to-r from-zinc-800 to-zinc-900 rounded-full overflow-hidden border border-zinc-800/50">
+                  <div className="flex-1 h-3 overflow-hidden rounded-full border border-zinc-200 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:border-zinc-800/50 dark:from-zinc-800 dark:to-zinc-900">
                     <div
                       className="h-full rounded-full transition-all duration-500 shadow-lg"
                       style={{
@@ -75,7 +75,7 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-semibold text-zinc-400 w-12 text-right group-hover:text-white transition-colors">
+                  <span className="w-12 text-right text-sm font-semibold text-zinc-500 transition-colors group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white">
                     {acc.percentage.toFixed(1)}%
                   </span>
                 </div>
@@ -86,7 +86,7 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
 
         {/* Registered vs Non-Registered */}
         <Card className="border-emerald-600/20 hover:border-emerald-600/40 transition-all duration-300">
-          <h3 className="text-white font-bold mb-5 flex items-center gap-2">
+          <h3 className="mb-5 flex items-center gap-2 font-bold text-zinc-950 dark:text-white">
             <span className="text-lg">🎯</span>
             Registered vs Non-Registered
           </h3>
@@ -119,32 +119,32 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-4xl font-bold text-emerald-400">{registeredPercent.toFixed(0)}%</div>
-                  <div className="text-xs text-zinc-400 font-semibold">Registered</div>
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Registered</div>
                 </div>
               </div>
             </div>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-600/10 to-emerald-500/5 border border-emerald-600/30 rounded-lg hover:border-emerald-600/50 transition-all">
+            <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 to-white p-4 transition-all hover:border-emerald-300 dark:border-emerald-600/30 dark:from-emerald-600/10 dark:to-emerald-500/5 dark:hover:border-emerald-600/50">
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full"></div>
-                <span className="text-sm font-semibold text-zinc-300">Registered Accounts</span>
+                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Registered Accounts</span>
               </div>
-              <span className="text-white font-bold text-lg">{formatCurrency(registeredValue)}</span>
+              <span className="text-lg font-bold text-zinc-950 dark:text-white">{formatCurrency(registeredValue)}</span>
             </div>
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-600/10 to-indigo-500/5 border border-indigo-600/30 rounded-lg hover:border-indigo-600/50 transition-all">
+            <div className="flex items-center justify-between rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white p-4 transition-all hover:border-indigo-300 dark:border-indigo-600/30 dark:from-indigo-600/10 dark:to-indigo-500/5 dark:hover:border-indigo-600/50">
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full"></div>
-                <span className="text-sm font-semibold text-zinc-300">Non-Registered</span>
+                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Non-Registered</span>
               </div>
-              <span className="text-white font-bold text-lg">{formatCurrency(nonRegisteredValue)}</span>
+              <span className="text-lg font-bold text-zinc-950 dark:text-white">{formatCurrency(nonRegisteredValue)}</span>
             </div>
           </div>
         </Card>
 
         {/* Contribution Room Usage */}
         <Card className="lg:col-span-2 border-amber-600/20 hover:border-amber-600/40 transition-all duration-300">
-          <h3 className="text-white font-bold mb-6 flex items-center gap-2">
+          <h3 className="mb-6 flex items-center gap-2 font-bold text-zinc-950 dark:text-white">
             <span className="text-lg">💰</span>
             Contribution Room Usage
           </h3>
@@ -153,17 +153,17 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
               contributionData.map((data) => (
                 <div
                   key={data.type}
-                  className="bg-gradient-to-br from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-amber-600/40 rounded-xl p-5 transition-all duration-300 group"
+                  className="group rounded-xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-5 transition-all duration-300 hover:border-amber-300 dark:border-zinc-800 dark:from-zinc-950 dark:to-zinc-900 dark:hover:border-amber-600/40"
                 >
                   <div className="text-center mb-4">
-                    <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-2 group-hover:text-amber-400 transition-colors">
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500 transition-colors group-hover:text-amber-500 dark:text-zinc-500 dark:group-hover:text-amber-400">
                       {data.type}
                     </div>
-                    <div className="text-4xl font-bold text-white group-hover:text-amber-300 transition-colors">
+                    <div className="text-4xl font-bold text-zinc-950 transition-colors group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-300">
                       {data.usedPercent.toFixed(0)}%
                     </div>
                   </div>
-                  <div className="h-3 bg-gradient-to-r from-zinc-800 to-zinc-700 rounded-full overflow-hidden mb-4 border border-zinc-800/50">
+                  <div className="mb-4 h-3 overflow-hidden rounded-full border border-zinc-200 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:border-zinc-800/50 dark:from-zinc-800 dark:to-zinc-700">
                     <div
                       className={`h-full rounded-full transition-all duration-500 shadow-lg ${
                         data.usedPercent >= 90
@@ -177,22 +177,22 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
                   </div>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-500 font-medium">Used</span>
-                      <span className="text-zinc-200 font-bold">{formatCurrency(data.used)}</span>
+                      <span className="font-medium text-zinc-500 dark:text-zinc-500">Used</span>
+                      <span className="font-bold text-zinc-700 dark:text-zinc-200">{formatCurrency(data.used)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-500 font-medium">Remaining</span>
+                      <span className="font-medium text-zinc-500 dark:text-zinc-500">Remaining</span>
                       <span className="text-emerald-400 font-bold">{formatCurrency(data.remaining)}</span>
                     </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-zinc-800">
-                      <span className="text-zinc-500 font-medium">Annual Limit</span>
-                      <span className="text-white font-bold">{formatCurrency(data.total)}</span>
+                    <div className="flex items-center justify-between border-t border-zinc-200 pt-2 dark:border-zinc-800">
+                      <span className="font-medium text-zinc-500 dark:text-zinc-500">Annual Limit</span>
+                      <span className="font-bold text-zinc-950 dark:text-white">{formatCurrency(data.total)}</span>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="lg:col-span-2 text-center py-8 text-zinc-400">
+              <div className="py-8 text-center text-zinc-500 dark:text-zinc-400 lg:col-span-2">
                 No contribution room data available
               </div>
             )}

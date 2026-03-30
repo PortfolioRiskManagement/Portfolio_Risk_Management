@@ -30,9 +30,9 @@ export default function AssetDetailsPage() {
   if (!h) {
     return (
       <PageShell title="Asset Not Found">
-        <div className="text-zinc-400">Holding not found.</div>
+        <div className="text-zinc-600 dark:text-zinc-400">Holding not found.</div>
         <div className="mt-4">
-          <button className="bg-blue-600 px-3 py-2 rounded text-white" onClick={() => navigate('/assets')}>Back to Assets</button>
+          <button className="rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600" onClick={() => navigate('/assets')}>Back to Assets</button>
         </div>
       </PageShell>
     )
@@ -55,10 +55,10 @@ export default function AssetDetailsPage() {
       <div className="space-y-6 fade-up">
         <div className="flex items-start justify-between">
           <div>
-            <button className="text-sm text-zinc-400 mb-2" onClick={() => navigate('/assets')}>← Back to Assets</button>
+            <button className="mb-2 text-sm text-zinc-600 dark:text-zinc-400" onClick={() => navigate('/assets')}>← Back to Assets</button>
             <div className="flex items-center gap-4">
               <div>
-                <div className="text-2xl font-bold text-zinc-100">{h.symbol} <span className="ml-2 text-base font-medium text-zinc-400">{h.name}</span></div>
+                <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{h.symbol} <span className="ml-2 text-base font-medium text-zinc-500 dark:text-zinc-400">{h.name}</span></div>
                 <div className="mt-2 flex items-center gap-2">
                   {tagList.map(t => (
                     <div key={t} className="pill">{t}</div>
@@ -69,44 +69,44 @@ export default function AssetDetailsPage() {
           </div>
 
           <div className="text-right">
-            <div className="text-sm text-zinc-400">Current Price</div>
-            <div className="text-3xl price-large">{formatCurrency(currentPrice)}</div>
-            <div className={`price-change mt-1 ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{gainLoss >= 0 ? '+' : '-'}{formatCurrency(Math.abs(gainLoss))} <span className="text-zinc-500">({pct.toFixed(2)}%)</span></div>
+            <div className="text-sm text-zinc-500 dark:text-zinc-400">Current Price</div>
+            <div className="price-large text-3xl text-zinc-900 dark:text-white">{formatCurrency(currentPrice)}</div>
+            <div className={`price-change mt-1 ${gainLoss >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>{gainLoss >= 0 ? '+' : '-'}{formatCurrency(Math.abs(gainLoss))} <span className="text-zinc-500 dark:text-zinc-500">({pct.toFixed(2)}%)</span></div>
           </div>
         </div>
 
         <div className="grid grid-cols-4 gap-4">
           <div className="metric-card">
-            <div className="text-xs text-zinc-400">Quantity</div>
-            <div className="text-xl font-semibold text-zinc-100">{h.quantity}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">Quantity</div>
+            <div className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{h.quantity}</div>
           </div>
           <div className="metric-card">
-            <div className="text-xs text-zinc-400">Entry Price</div>
-            <div className="text-xl font-semibold text-zinc-100">{formatCurrency(h.entry)}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">Entry Price</div>
+            <div className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{formatCurrency(h.entry)}</div>
           </div>
           <div className="metric-card">
-            <div className="text-xs text-zinc-400">Total Value</div>
-            <div className="text-xl font-semibold text-zinc-100">{formatCurrency(totalValue)}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">Total Value</div>
+            <div className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{formatCurrency(totalValue)}</div>
           </div>
           <div className="metric-card"> 
-            <div className="text-xs text-zinc-400">Gain / Loss</div>
-            <div className={`text-xl font-semibold ${gainLoss >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{gainLoss >= 0 ? '+' : '-'}{formatCurrency(Math.abs(gainLoss))}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">Gain / Loss</div>
+            <div className={`text-xl font-semibold ${gainLoss >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>{gainLoss >= 0 ? '+' : '-'}{formatCurrency(Math.abs(gainLoss))}</div>
           </div>
         </div>
 
         <div className="card"> 
-          <div className="text-sm text-zinc-300 font-medium mb-3">Price History</div>
+          <div className="mb-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">Price History</div>
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="text-xs text-zinc-400">Range</div>
+              <div className="text-xs text-zinc-500 dark:text-zinc-400">Range</div>
               {[7,30,90,365,365*5].map(d => (
-                <button key={d} onClick={() => { setTimeframe(d); setHighlightIndex(null) }} className={`px-3 py-1 rounded-full text-sm ${timeframe===d? 'bg-white/6' : 'bg-transparent'}`}>{d===7? '7D' : d===30? '30D' : d===90? '90D' : d===365? '1Y' : '5Y'}</button>
+                <button key={d} onClick={() => { setTimeframe(d); setHighlightIndex(null) }} className={`rounded-full px-3 py-1 text-sm ${timeframe===d ? 'bg-zinc-100 text-zinc-900 dark:bg-white/6 dark:text-white' : 'bg-transparent text-zinc-600 dark:text-zinc-400'}`}>{d===7? '7D' : d===30? '30D' : d===90? '90D' : d===365? '1Y' : '5Y'}</button>
               ))}
             </div>
 
             <div className="h-96 rounded-lg overflow-visible relative">
               {(!hist || hist.length === 0) ? (
-                <div className="h-96 flex items-center justify-center text-zinc-500">Loading chart…</div>
+                <div className="flex h-96 items-center justify-center text-zinc-500 dark:text-zinc-500">Loading chart…</div>
               ) : (
                 <>
                   <Sparkline data={hist} times={times ?? undefined} showLast highlightIndex={highlightIndex ?? undefined} height={220} />

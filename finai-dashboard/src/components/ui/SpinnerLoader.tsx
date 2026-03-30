@@ -16,7 +16,7 @@ export function SpinnerLoader({ label = 'LOADING', size = 160, className = '' }:
 	const R = size * 0.37
 
 	return (
-		<div className={`flex items-center justify-center ${className}`}>
+		<div className={`flex items-center justify-center text-zinc-900 dark:text-white ${className}`}>
 			<div className="relative" style={{ width: size, height: size }}>
 				{/* Spinning ring of dots — grows brighter/larger clockwise */}
 				<div
@@ -41,11 +41,11 @@ export function SpinnerLoader({ label = 'LOADING', size = 160, className = '' }:
 									width: dotSize,
 									height: dotSize,
 									borderRadius: '50%',
-									background: 'white',
+									background: 'currentColor',
 									opacity,
 									boxShadow:
 										progress > 0.6
-											? `0 0 ${Math.round(dotSize)}px rgba(255,255,255,0.6)`
+											? `0 0 ${Math.round(dotSize)}px currentColor`
 											: 'none',
 								}}
 							/>
@@ -55,7 +55,7 @@ export function SpinnerLoader({ label = 'LOADING', size = 160, className = '' }:
 
 				{/* Static label in the centre */}
 				<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-					<span className="text-white font-semibold text-sm tracking-[0.2em] select-none">
+					<span className="text-current font-semibold text-sm tracking-[0.2em] select-none">
 						{label}
 					</span>
 				</div>

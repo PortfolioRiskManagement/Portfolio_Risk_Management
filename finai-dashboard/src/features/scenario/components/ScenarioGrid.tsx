@@ -9,10 +9,10 @@ interface ScenarioCardProps {
 
 export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: ScenarioCardProps) {
 	const categoryColors = {
-		crash: 'from-zinc-900 to-zinc-900 border-zinc-800',
-		bull_run: 'from-zinc-900 to-zinc-900 border-zinc-800',
-		volatility: 'from-zinc-900 to-zinc-900 border-zinc-800',
-		recovery: 'from-zinc-900 to-zinc-900 border-zinc-800'
+		crash: 'from-white to-zinc-50 border-zinc-200 dark:from-zinc-900 dark:to-zinc-900 dark:border-zinc-800',
+		bull_run: 'from-white to-zinc-50 border-zinc-200 dark:from-zinc-900 dark:to-zinc-900 dark:border-zinc-800',
+		volatility: 'from-white to-zinc-50 border-zinc-200 dark:from-zinc-900 dark:to-zinc-900 dark:border-zinc-800',
+		recovery: 'from-white to-zinc-50 border-zinc-200 dark:from-zinc-900 dark:to-zinc-900 dark:border-zinc-800'
 	}
 
 	const categoryTextColors = {
@@ -36,9 +36,9 @@ export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: Scena
 			className={`
 				relative p-6 rounded-xl border-2 transition-all duration-300
 				bg-gradient-to-br ${categoryColors[scenario.category]}
-				hover:border-zinc-700 hover:-translate-y-0.5
+				hover:border-zinc-300 hover:-translate-y-0.5 dark:hover:border-zinc-700
 				disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-				${isSelected ? 'ring-2 ring-zinc-600 border-zinc-600' : ''}
+				${isSelected ? 'ring-2 ring-blue-200 border-blue-300 dark:ring-zinc-600 dark:border-zinc-600' : ''}
 				text-left w-full
 			`}
 		>
@@ -46,10 +46,10 @@ export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: Scena
 			<div className="text-5xl mb-3">{scenario.icon}</div>
 
 			{/* Title */}
-			<h3 className="text-xl font-bold text-white mb-2">{scenario.name}</h3>
+			<h3 className="mb-2 text-xl font-bold text-zinc-950 dark:text-white">{scenario.name}</h3>
 
 			{/* Description */}
-			<p className="text-sm text-zinc-400 mb-4 line-clamp-2">
+			<p className="mb-4 line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
 				{scenario.description}
 			</p>
 
@@ -58,7 +58,7 @@ export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: Scena
 				<div className="flex items-center gap-3">
 					{scenario.severity && (
 						<div className="flex items-center gap-1">
-							<span className="text-zinc-500">Severity:</span>
+							<span className="text-zinc-500 dark:text-zinc-500">Severity:</span>
 							<span className={`font-bold ${getSeverityColor(scenario.severity)}`}>
 								{scenario.severity}/10
 							</span>
@@ -76,7 +76,7 @@ export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: Scena
 			</div>
 
 			{/* Date Range */}
-			<div className="mt-3 text-xs text-zinc-500">
+			<div className="mt-3 text-xs text-zinc-500 dark:text-zinc-500">
 				{new Date(scenario.dateRange.start).toLocaleDateString('en-US', { 
 					month: 'short', 
 					year: 'numeric' 
@@ -91,7 +91,7 @@ export function ScenarioCard({ scenario, onSelect, isSelected, disabled }: Scena
 			{/* Selected Indicator */}
 			{isSelected && (
 				<div className="absolute top-3 right-3">
-					<div className="w-2.5 h-2.5 rounded-full bg-zinc-300" />
+					<div className="h-2.5 w-2.5 rounded-full bg-blue-500 dark:bg-zinc-300" />
 				</div>
 			)}
 		</button>
@@ -112,7 +112,7 @@ export function ScenarioGrid({ onSelectScenario, selectedScenarioId, disabled }:
 		<div className="space-y-8">
 			{/* Crashes Section */}
 			<div>
-				<h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+				<h2 className="mb-4 flex items-center gap-2 text-2xl font-bold text-zinc-950 dark:text-white">
 					<span>📉</span>
 					Market Crashes
 				</h2>
@@ -131,7 +131,7 @@ export function ScenarioGrid({ onSelectScenario, selectedScenarioId, disabled }:
 
 			{/* Bull Runs Section */}
 			<div>
-				<h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+				<h2 className="mb-4 flex items-center gap-2 text-2xl font-bold text-zinc-950 dark:text-white">
 					<span>📈</span>
 					Bull Runs
 				</h2>

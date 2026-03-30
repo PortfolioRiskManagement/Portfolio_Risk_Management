@@ -38,8 +38,8 @@ export default function BestNextMoves({ recommendations }: Props) {
   return (
     <div className="mb-8">
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-white mb-1">Best Next Moves</h2>
-        <p className="text-sm text-zinc-400">
+        <h2 className="mb-1 text-2xl font-bold text-zinc-950 dark:text-white">Best Next Moves</h2>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
           Strategic actions to optimize your portfolio structure and maximize tax efficiency
         </p>
       </div>
@@ -55,7 +55,7 @@ export default function BestNextMoves({ recommendations }: Props) {
               className="cursor-pointer"
               onClick={() => setExpandedId(isExpanded ? null : rec.id)}
             >
-              <Card className="hover:border-zinc-700 transition-all duration-200">
+              <Card className="transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{getImpactIcon(rec.impact)}</span>
@@ -65,18 +65,18 @@ export default function BestNextMoves({ recommendations }: Props) {
                 </div>
               </div>
 
-              <h3 className="text-white font-semibold mb-2 leading-tight">{rec.title}</h3>
+              <h3 className="mb-2 leading-tight font-semibold text-zinc-950 dark:text-white">{rec.title}</h3>
               
-              <p className="text-sm text-zinc-400 mb-3">{rec.description}</p>
+              <p className="mb-3 text-sm text-zinc-600 dark:text-zinc-400">{rec.description}</p>
 
               <div 
                 className={`overflow-hidden transition-all duration-300 ${
                   isExpanded ? 'max-h-40 opacity-100 mb-3' : 'max-h-0 opacity-0'
                 }`}
               >
-                <div className="bg-zinc-950/50 border border-zinc-800 rounded-lg p-3">
-                  <div className="text-xs text-zinc-500 mb-1 uppercase tracking-wide">Recommended Action</div>
-                  <div className="text-sm text-zinc-300">{rec.action}</div>
+                <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950/50">
+                  <div className="mb-1 text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-500">Recommended Action</div>
+                  <div className="text-sm text-zinc-700 dark:text-zinc-300">{rec.action}</div>
                 </div>
               </div>
 

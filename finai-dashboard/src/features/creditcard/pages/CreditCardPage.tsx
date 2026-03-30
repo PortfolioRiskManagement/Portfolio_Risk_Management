@@ -76,10 +76,10 @@ export default function CreditCardPage() {
 							transform: headerVisible ? "translateY(0)" : "translateY(8px)",
 						}}
 					>
-						<h1 className="m-0" style={{ fontSize: 22, fontWeight: 600, color: "#e6edf3" }}>
+						<h1 className="m-0" style={{ fontSize: 22, fontWeight: 600, color: "var(--cc-text-strong)" }}>
 							Credit Card Assistant
 						</h1>
-						<p className="m-0 mt-2" style={{ fontSize: 13, color: "#8b949e" }}>
+						<p className="m-0 mt-2" style={{ fontSize: 13, color: "var(--cc-text-muted)" }}>
 							Answer a few questions to get personalized recommendations
 						</p>
 					</div>

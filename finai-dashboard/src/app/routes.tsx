@@ -11,6 +11,7 @@ import AdvisorPage from "../features/advisor/pages/AdvisorPage"
 import AlertsPage from "../features/alerts/pages/AlertsPage"
 import ScenarioLabPage from "../features/scenario/pages/ScenarioLabPage"
 import CreditCardPage from "../features/creditcard/pages/CreditCardPage"
+import SettingsPage from "../features/settings/pages/SettingsPage"
 
 type StubProps = {
 	title: string
@@ -73,15 +74,7 @@ export default function AppRoutes() {
 				}
 			/>
 			<Route path="/connections" element={<ConnectionsPage />} />
-			<Route
-				path="/settings"
-				element={
-					<StubPage
-						title="Settings"
-						subtitle="Preferences and configuration will appear here."
-					/>
-				}
-			/>
+			<Route path="/settings" element={<SettingsPage />} />
 		</Routes>
 	)
 }

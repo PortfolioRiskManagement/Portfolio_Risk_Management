@@ -1,14 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import Card from "../../../components/ui/Card"
 import { useConnections } from "../hooks/useConnections"
-
-function ProviderLogo({ provider }: { provider: string }) {
-  return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-100 text-sm font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
-      {provider[0]}
-    </div>
-  )
-}
+import ProviderLogo from "./ProviderLogo"
 
 export default function ConnectionsPanel() {
   const { connections } = useConnections()

@@ -170,6 +170,46 @@ def search_stock():
         print(f"Search error: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 400
 
+@app.route('/api/quote', methods=['GET', 'OPTIONS'])
+def get_quote():
+    """
+    Fetch current market price for a ticker symbol from Yahoo Finance
+    Query param: symbol (ticker)
+    """
+    if request.method == "OPTIONS":
+        return "", 204
+
+    try:
+        symbol = request.args.get('symbol', '').strip().upper()
+        if not symbol:
+            return jsonify({"success": False, "error": "No symbol provided"}), 400
+
+        chart_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=1d"
+        req = Request(chart_url, headers={"User-Agent": "Mozilla/5.0"})
+
+        with urlopen(req, timeout=6) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+
+        result = payload.get('chart', {}).get('result', []) if isinstance(payload, dict) else []
+        if not result:
+            return jsonify({"success": False, "error": "Symbol not found"}), 404
+
+        entry = result[0]
+        meta = entry.get('meta', {}) if isinstance(entry, dict) else {}
+        price = meta.get('regularMarketPrice')
+        if price is None:
+            return jsonify({"success": False, "error": "Price unavailable"}), 404
+
+        return jsonify({
+            "success": True,
+            "symbol": symbol,
+            "price": float(price)
+        }), 200
+
+    except Exception as e:
+        print(f"Quote error: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 400
+
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "healthy"}), 200

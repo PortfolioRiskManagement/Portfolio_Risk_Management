@@ -6,10 +6,6 @@ import path from "path"
 
 export default defineConfig({
   plugins: [react()],
-  test: {
-    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-    environment: "node",
-  },
   resolve: {
     alias: {
       "@app": path.resolve(__dirname, "src/app"),

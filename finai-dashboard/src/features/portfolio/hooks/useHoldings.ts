@@ -45,7 +45,7 @@ export function useHoldings() {
       if (!raw) return SAMPLE
       const parsed = JSON.parse(raw) as Holding[]
       return dedupe(parsed)
-    } catch (e) {
+    } catch {
       return SAMPLE
     }
   })
@@ -53,7 +53,7 @@ export function useHoldings() {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(holdings))
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, [holdings])

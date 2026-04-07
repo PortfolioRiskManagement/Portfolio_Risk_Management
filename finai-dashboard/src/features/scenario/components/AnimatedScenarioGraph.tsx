@@ -14,9 +14,7 @@ export function AnimatedScenarioGraph({
 	timeline,
 	startValue,
 	isAnimating,
-	onAnimationComplete,
-	scenarioName: _scenarioName,
-	scenarioIcon: _scenarioIcon
+	onAnimationComplete
 }: AnimatedScenarioGraphProps) {
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null)

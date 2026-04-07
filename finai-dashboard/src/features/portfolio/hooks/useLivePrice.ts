@@ -30,7 +30,7 @@ export function useLivePrice(symbol: string) {
 
         // fallback: use mock
         if (MOCK_PRICES[symbol]) setPrice(MOCK_PRICES[symbol])
-      } catch (e) {
+      } catch {
         // ignore
       }
     }

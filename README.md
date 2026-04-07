@@ -117,8 +117,15 @@ Current automated pipeline on push/PR to `main`:
 This is the current CI baseline and can be extended later with deployment steps.
 
 ## Video Demo
-Demo placeholder (replace with your final video link):
-- `TODO: Add video demo URL here`
+Watch the complete 2-minute demonstration of the Portfolio Risk Management system:
+
+[View Demo](docs/demoVideo/demonstration_2026-04-07.gif)
+
+Features demonstrated:
+- Portfolio dashboard and analytics
+- Risk interpretation interface
+- Scenario simulation capabilities
+- Asset-level risk analysis
 
 ## Client And Team Communication Records
 Meeting notes and progression records are tracked in:

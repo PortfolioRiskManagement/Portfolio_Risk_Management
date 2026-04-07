@@ -27,6 +27,9 @@ function pathFromData(data: number[], w: number, h: number) {
 }
 
 export default function Sparkline({ data, width = 820, height = 140, color = '#10b981', showLast = true, highlightIndex, onHover, times }: Props) {
+  // hover state within the component - must be defined before early return
+  const [hoverIdx, setHoverIdx] = React.useState<number | null>(null)
+  
   if (!data || data.length === 0) return <div />
   const d = pathFromData(data, width, height)
   const points = d.split(' ')
@@ -42,9 +45,6 @@ export default function Sparkline({ data, width = 820, height = 140, color = '#1
     const top = (y / height) * 100
     badgeStyle = { position: 'absolute', left: `${left}%`, top: `${top}%`, transform: 'translate(-50%, -120%)', pointerEvents: 'none' }
   }
-
-  // hover state within the component
-  const [hoverIdx, setHoverIdx] = React.useState<number | null>(null)
 
   function handlePointerMove(e: React.PointerEvent<SVGSVGElement>) {
     const rect = (e.target as Element).getBoundingClientRect()

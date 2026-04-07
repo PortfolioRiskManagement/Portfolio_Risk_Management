@@ -25,7 +25,12 @@ export default function AssetDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { holdings } = useHoldings()
+  const [timeframe, setTimeframe] = useState<number>(30)
+  const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
+  
   const h = holdings.find(x => x.id === id)
+  const live = useLivePrice(h?.symbol ?? '')
+  const { data: hist, times } = useHistoricalPrices(h?.symbol ?? '', timeframe)
 
   if (!h) {
     return (
@@ -38,7 +43,6 @@ export default function AssetDetailsPage() {
     )
   }
 
-  const live = useLivePrice(h.symbol)
   const currentPrice = live ?? (MOCK_PRICES[h.symbol] ?? 0)
   const totalValue = currentPrice * h.quantity
   const entryTotal = h.entry * h.quantity
@@ -46,9 +50,6 @@ export default function AssetDetailsPage() {
   const pct = h.entry > 0 ? ((currentPrice - h.entry) / h.entry) * 100 : 0
 
   const tagList = [h.platform, h.type].filter(Boolean)
-  const [timeframe, setTimeframe] = useState<number>(30)
-  const { data: hist, times } = useHistoricalPrices(h.symbol, timeframe)
-  const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
 
   return (
     <PageShell title={`${h.symbol} Details`}>

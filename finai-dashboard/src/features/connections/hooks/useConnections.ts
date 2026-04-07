@@ -29,7 +29,7 @@ function readFromStorage(): Connection[] {
       if (!map.has(p)) map.set(p, { provider: p, connected: false })
     }
     return Array.from(map.values())
-  } catch (e) {
+  } catch {
     return DEFAULT_PROVIDERS.map((p) => ({ provider: p, connected: false }))
   }
 }
@@ -37,7 +37,7 @@ function readFromStorage(): Connection[] {
 function writeToStorage(next: Connection[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-  } catch (e) {
+  } catch {
     // ignore
   }
 }

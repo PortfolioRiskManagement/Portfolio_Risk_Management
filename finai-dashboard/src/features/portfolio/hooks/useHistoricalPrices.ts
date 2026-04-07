@@ -38,7 +38,7 @@ export function useHistoricalPrices(symbol: string, days = 30) {
         const prices = entries.map((d: string) => Number(series[d]['4. close']))
         const timesArr = entries.map((d: string) => new Date(d).getTime())
         return { prices, timesArr }
-      } catch (e) {
+      } catch {
         return null
       }
     }
@@ -96,7 +96,7 @@ export function useHistoricalPrices(symbol: string, days = 30) {
           setTimes(timesArr)
           CACHE.set(cacheKey, { ts: now, data: mock, times: timesArr })
         }
-      } catch (e) {
+      } catch {
         if (mounted) {
           const mock = generateMockSeries(100, days)
           const now = Date.now()

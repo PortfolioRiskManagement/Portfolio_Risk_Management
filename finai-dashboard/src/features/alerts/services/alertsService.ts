@@ -362,15 +362,53 @@ function sortAlerts(alerts: Alert[]): Alert[] {
 	})
 }
 
+function buildFallbackAlerts(tickers: string[]): Alert[] {
+	const now = Date.now()
+	const topTickers = tickers.slice(0, 4)
+
+	const seeded: Alert[] = [
+		{
+			id: "fallback-market-1",
+			title: "Market snapshot unavailable",
+			description:
+				"Live news is currently unavailable because the Finnhub API key is not configured. Add VITE_FINNHUB_API_KEY in your .env.local to enable real-time alerts.",
+			source: "FIN/AI Local",
+			timestamp: new Date(now - 5 * 60 * 1000).toISOString(),
+			impact: "low",
+			category: "market",
+			relatedTickers: [],
+		},
+	]
+
+	for (let i = 0; i < topTickers.length; i++) {
+		const ticker = topTickers[i]
+		seeded.push({
+			id: `fallback-stock-${ticker}`,
+			title: `${ticker} monitoring enabled`,
+			description:
+				"Live quote/news fetching is disabled until API credentials are configured. This placeholder confirms your holding is being tracked.",
+			source: "FIN/AI Local",
+			timestamp: new Date(now - (i + 1) * 10 * 60 * 1000).toISOString(),
+			impact: "low",
+			category: "stock",
+			relatedTickers: [ticker],
+			link: `https://finance.yahoo.com/quote/${ticker}`,
+		})
+	}
+
+	return sortAlerts(seeded)
+}
+
 export async function fetchPortfolioAlerts(
 	portfolioTickers: string[],
 	portfolioHoldings: PortfolioHolding[] = []
 ): Promise<Alert[]> {
+	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
+
 	if (!FINNHUB_API_KEY) {
-		throw new Error("Missing VITE_FINNHUB_API_KEY")
+		return buildFallbackAlerts(tickers)
 	}
 
-	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
 	const limitedTickers = tickers.slice(0, MAX_TICKERS)
 	const quoteTickers = pickQuoteTickers(limitedTickers)
 
@@ -405,11 +443,12 @@ export async function fetchPortfolioOnlyAlerts(
 	portfolioTickers: string[],
 	portfolioHoldings: PortfolioHolding[] = []
 ): Promise<Alert[]> {
+	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
+
 	if (!FINNHUB_API_KEY) {
-		throw new Error("Missing VITE_FINNHUB_API_KEY")
+		return buildFallbackAlerts(tickers).filter((alert) => alert.relatedTickers.length > 0)
 	}
 
-	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
 	const limitedTickers = tickers.slice(0, MAX_TICKERS)
 	const quoteTickers = pickQuoteTickers(limitedTickers)
 

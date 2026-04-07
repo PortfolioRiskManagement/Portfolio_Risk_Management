@@ -39,8 +39,8 @@ export default function PortfolioChart() {
   const yLabels = [35000, 70000, 105000, 140000]
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-      <div className="text-sm text-zinc-400 mb-4 uppercase tracking-wide">
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="mb-4 text-sm uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         Portfolio Performance (6M)
       </div>
       <svg
@@ -60,7 +60,7 @@ export default function PortfolioChart() {
               x={padding.left - 10}
               y={y}
               textAnchor="end"
-              className="fill-zinc-600 text-xs"
+              className="fill-zinc-500 text-xs dark:fill-zinc-600"
               dominantBaseline="middle"
             >
               {label.toLocaleString()}
@@ -108,7 +108,7 @@ export default function PortfolioChart() {
             x={point.x}
             y={padding.top + chartHeight + 20}
             textAnchor="middle"
-            className="fill-zinc-600 text-xs"
+            className="fill-zinc-500 text-xs dark:fill-zinc-600"
           >
             {point.month}
           </text>

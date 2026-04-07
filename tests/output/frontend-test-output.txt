@@ -1,0 +1,15 @@
+# Frontend Test Results
+
+| Test ID | Test Name | Duration | Status |
+|---------|-----------|----------|--------|
+| 1 | formatCurrency > formats CAD currency without decimals | 18ms | ✅ PASSED |
+| 2 | formatCurrency > formats CAD currency with two decimals | 0ms | ✅ PASSED |
+| 3 | formatPercent > adds + for positive values | 0ms | ✅ PASSED |
+| 4 | formatPercent > does not add + for negative values | 0ms | ✅ PASSED |
+| 5 | formatCompactNumber > formats values to K/M suffixes | 0ms | ✅ PASSED |
+| 6 | formatCompactNumber > formats small values as whole numbers | 0ms | ✅ PASSED |
+
+**Summary:** 6/6 tests passed in 1.16s
+**Framework:** Vitest v3.2.4
+**Test Suite:** src/utils/formatCurrency.test.ts
+

@@ -1,0 +1,10 @@
+# Backend Test Results
+
+| Test ID | Test Name | Status |
+|---------|-----------|--------|
+| 1 | test_health_endpoint_returns_healthy_status | ✅ PASSED |
+| 2 | test_analyze_portfolio_returns_success_with_mocked_analyzer | ✅ PASSED |
+| 3 | test_search_endpoint_classifies_crypto_symbol | ✅ PASSED |
+
+**Summary:** 3/3 tests passed in 2.74s
+**Environment:** Python 3.13.7, pytest-9.0.3

@@ -1,19 +1,15 @@
+# Frontend Test Results
 
-> finai-dashboard@0.0.0 test:ci
-> vitest run --reporter=verbose
+| Test ID | Test Name | Duration | Status |
+|---------|-----------|----------|--------|
+| 1 | formatCurrency > formats CAD currency without decimals | 18ms | ✅ PASSED |
+| 2 | formatCurrency > formats CAD currency with two decimals | 0ms | ✅ PASSED |
+| 3 | formatPercent > adds + for positive values | 0ms | ✅ PASSED |
+| 4 | formatPercent > does not add + for negative values | 0ms | ✅ PASSED |
+| 5 | formatCompactNumber > formats values to K/M suffixes | 0ms | ✅ PASSED |
+| 6 | formatCompactNumber > formats small values as whole numbers | 0ms | ✅ PASSED |
 
-
-[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mC:/Users/16137/Desktop/uOttawa/4 Fourth Year/Second Semester/SEG 4910 (Capstone)/Portfolio_Risk_Management/finai-dashboard[39m
-
- [32mâœ“[39m src/utils/formatCurrency.test.ts[2m > [22mformatCurrency[2m > [22mformats CAD currency without decimals[32m 18[2mms[22m[39m
- [32mâœ“[39m src/utils/formatCurrency.test.ts[2m > [22mformatCurrency[2m > [22mformats CAD currency with two decimals[32m 0[2mms[22m[39m
- [32mâœ“[39m src/utils/formatCurrency.test.ts[2m > [22mformatPercent[2m > [22madds + for positive values[32m 0[2mms[22m[39m
- [32mâœ“[39m src/utils/formatCurrency.test.ts[2m > [22mformatPercent[2m > [22mdoes not add + for negative values[32m 0[2mms[22m[39m
- [32mâœ“[39m src/utils/formatCurrency.test.ts[2m > [22mformatCompactNumber[2m > [22mformats values to K/M suffixes[32m 0[2mms[22m[39m
- [32mâœ“[39m src/utils/formatCurrency.test.ts[2m > [22mformatCompactNumber[2m > [22mformats small values as whole numbers[32m 0[2mms[22m[39m
-
-[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-[2m      Tests [22m [1m[32m6 passed[39m[22m[90m (6)[39m
-[2m   Start at [22m 15:43:12
-[2m   Duration [22m 1.16s[2m (transform 66ms, setup 0ms, collect 50ms, tests 21ms, environment 0ms, prepare 243ms)[22m
+**Summary:** 6/6 tests passed in 1.16s
+**Framework:** Vitest v3.2.4
+**Test Suite:** src/utils/formatCurrency.test.ts
 

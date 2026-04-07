@@ -1,0 +1,7 @@
+# Purpose: Ignore generated local artifacts that should not be committed.
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/

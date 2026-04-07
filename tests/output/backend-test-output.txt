@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\16137\Desktop\uOttawa\4 Fourth Year\Second Semester\SEG 4910 (Capstone)\Portfolio_Risk_Management\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\16137\Desktop\uOttawa\4 Fourth Year\Second Semester\SEG 4910 (Capstone)\Portfolio_Risk_Management
+configfile: pytest.ini
+collecting ... collected 3 items
+
+tests/backend/test_api.py::test_health_endpoint_returns_healthy_status PASSED [ 33%]
+tests/backend/test_api.py::test_analyze_portfolio_returns_success_with_mocked_analyzer PASSED [ 66%]
+tests/backend/test_api.py::test_search_endpoint_classifies_crypto_symbol PASSED [100%]
+
+============================== 3 passed in 2.74s ==============================

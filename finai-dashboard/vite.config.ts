@@ -1,3 +1,4 @@
+// Purpose: Configure Vite build aliases and Vitest execution for the React dashboard.
 import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import path from "path"
@@ -5,6 +6,10 @@ import path from "path"
 
 export default defineConfig({
   plugins: [react()],
+  test: {
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    environment: "node",
+  },
   resolve: {
     alias: {
       "@app": path.resolve(__dirname, "src/app"),

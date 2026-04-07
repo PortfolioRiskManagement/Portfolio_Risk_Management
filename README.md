@@ -1,78 +1,140 @@
-# Portfolio_Risk_Management
+# Portfolio Risk Management
 
-#### Table of Contents 
-- [Description](#desc)
-- [Usage Guide](#inst)
-  * [Installation](#inst1)
-  * [Application Demonstration](#demo)
-- [Client Meet](#cli)
-- [Contributors](#cont)
-- [License](#lics)
+<!-- Purpose: Give new reviewers and instructors a complete navigation and execution guide for this repository. -->
 
-<a name="desc"></a>
-## Description
+## Table Of Contents
+- [Project Overview](#project-overview)
+- [Repository Quick Navigation](#repository-quick-navigation)
+- [Architecture Summary](#architecture-summary)
+- [Local Setup](#local-setup)
+- [Run The Application](#run-the-application)
+- [Automated Testing](#automated-testing)
+- [CI/CD (GitHub Actions)](#cicd-github-actions)
+- [Video Demo](#video-demo)
+- [Client And Team Communication Records](#client-and-team-communication-records)
+- [Contributors](#contributors)
+- [License](#license)
 
-Modern investing platforms provide users with numbers, charts, and percentages. However, they rarely explain what those numbers actually mean. Investors are left with a portfolio balance and a return percentage without understanding the risks they are exposed to, the consequences of their decisions, or how their portfolio might behave under adverse conditions.
+## Project Overview
+Modern investing platforms often show users values and percentages without enough explanation of what those metrics mean in practice. This project provides an AI-assisted portfolio risk interpretation platform that focuses on educational analysis, transparency, and scenario understanding.
 
-This project introduces an **AI-assisted portfolio risk interpretation platform designed to bridge that gap.**
+The system does not execute trades. Instead, it explains risk through portfolio analytics, scenario simulation, and visualization.
 
-Rather than executing trades or providing investment recommendations, the platform focuses on understanding how and why a portfolio behaves the way it does. By analyzing user-provided portfolio data alongside historical market information, the system reconstructs the story behind each investment decision by highlighting risk exposure, behavioral patterns, and potential vulnerabilities that are often invisible in traditional brokerage tools.
+Core capabilities:
+- Portfolio-level metrics (volatility, concentration, drawdown)
+- Asset-level risk interpretation
+- Historical scenario simulation and impact tracking
+- Dashboard-first UI for risk interpretation workflows
 
-The platform operates as an external intelligence layer. Users import their portfolio data through a secure, user-initiated process and explore their investments in a separate analytical environment. This separation ensures that the system remains focused on education, transparency, and decision analysis rather than execution.
+## Repository Quick Navigation
+- Frontend app: [finai-dashboard/](finai-dashboard/)
+- Frontend entry route setup: [finai-dashboard/src/app/main.tsx](finai-dashboard/src/app/main.tsx)
+- Frontend routing: [finai-dashboard/src/app/routes.tsx](finai-dashboard/src/app/routes.tsx)
+- Backend API entry: [app.py](app.py)
+- Scenario engine: [scenario_service.py](scenario_service.py)
+- Data loading and analytics layer: [dataload/README.md](dataload/README.md)
+- Testing guide and scripts: [tests/README.md](tests/README.md)
+- CI workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml)
+- Client meeting notes: [docs/meetings/](docs/meetings/)
 
-Key capabilities include:
-- Portfolio-level risk assessment (volatility, drawdowns, concentration risk)
-- Asset-level and transaction-level analysis
-- Interactive risk exploration and scenario analysis
-- Natural-language explanations of complex financial metrics
+## Architecture Summary
+High-level flow:
+1. The React frontend collects portfolio/scenario inputs.
+2. The Flask backend exposes analysis/search/scenario APIs.
+3. Data and analytics modules process historical data and compute metrics.
+4. Results are returned to UI components for interpretation and display.
 
-<a name="inst"></a>
-## Usage Guide
+Main backend endpoints:
+- `POST /api/portfolio/analyze`
+- `POST /api/scenario/calculate`
+- `GET /api/search?q=...`
+- `GET /api/health`
 
-<a name="inst1"></a>
-### Installation
-
-1. Requirements:
-- Node.js (LTS recommended)
+## Local Setup
+Requirements:
+- Python 3.11+
+- Node.js 20+ (LTS recommended)
 - npm
 
-2. Run the following commands in your terminal:
-<br><code>npm install</code><br><br><code>npm run dev</code>
+Install backend dependencies from repository root:
+```bash
+pip install -r requirements.txt
+```
 
-The application will be available locally at:
-<br><code>http://localhost:5173</code>
+Install frontend dependencies:
+```bash
+cd finai-dashboard
+npm install
+```
 
-<a name="demo"></a>
-### Application Demonstration
+## Run The Application
+Run backend API (from repository root):
+```bash
+python app.py
+```
 
-Below are screenshots demonstrating the current state of the application UI and navigation.
-<br>_^TODO when app is more extensive^_
+Run frontend dashboard (in a second terminal):
+```bash
+cd finai-dashboard
+npm run dev
+```
 
-![][appDemo]
+Default local URLs:
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5001`
 
-<a name="cli"></a>
-## Client Meet
-- Requirements and feature requests are discussed during weekly client-style meetings
-- Each meeting documents:
-  - What was completed since the previous meeting
-  - What was demonstrated to the client
-  - What the client liked
-  - What the client requested next
+## Automated Testing
+Automated tests are split by stack and documented in [tests/README.md](tests/README.md).
 
-Weekly meeting notes can be found here:
-<br>https://github.com/PortfolioRiskManagement/Portfolio_Risk_Management/tree/main/docs/meetings
+Quick commands:
+- Backend tests:
+```bash
+pytest -q tests/backend
+```
+- Frontend tests:
+```bash
+cd finai-dashboard
+npm run test:ci
+```
+- Run all tests and generate output logs:
+```bash
+python tests/scripts/run_all_tests.py
+```
 
-<a name="cont"></a>
+Expected generated logs:
+- `tests/output/backend-test-output.txt`
+- `tests/output/frontend-test-output.txt`
+- `tests/output/summary.md`
+
+## CI/CD (GitHub Actions)
+CI workflow file: [.github/workflows/ci.yml](.github/workflows/ci.yml)
+
+Current automated pipeline on push/PR to `main`:
+1. Backend dependency install and pytest run
+2. Frontend dependency install, lint, build, and Vitest run
+3. Upload backend/frontend test output logs as artifacts
+
+This is the current CI baseline and can be extended later with deployment steps.
+
+## Video Demo
+Demo placeholder (replace with your final video link):
+- `TODO: Add video demo URL here`
+
+## Client And Team Communication Records
+Meeting notes and progression records are tracked in:
+- [docs/meetings/](docs/meetings/)
+
+Each meeting note captures:
+- Work completed
+- Features demonstrated
+- Client feedback
+- Requested changes and next actions
+
 ## Contributors
-
 - [Michael Haddad](https://github.com/MichaelHaddad47)
 - [Henry Saber](https://github.com/HenrySaber)
 - [Mathew Aoun](https://github.com/Mathewaoun)
 
-<a name="lics"></a>
 ## License
-
-This project is licensed under the GPL-3.0 License.  
-[License Details](../master/LICENSE.md)
-
-[appDemo]: ./docs/demo-placeholder.gif
+This project is licensed under the GPL-3.0 License.
+- [LICENSE](LICENSE)

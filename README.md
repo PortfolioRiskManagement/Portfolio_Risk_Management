@@ -28,10 +28,7 @@ Core capabilities:
 
 ## Repository Quick Navigation
 - Frontend app: [finai-dashboard/](finai-dashboard/)
-- Frontend entry route setup: [finai-dashboard/src/app/main.tsx](finai-dashboard/src/app/main.tsx)
-- Frontend routing: [finai-dashboard/src/app/routes.tsx](finai-dashboard/src/app/routes.tsx)
 - Backend API entry: [app.py](app.py)
-- Scenario engine: [scenario_service.py](scenario_service.py)
 - Data loading and analytics layer: [dataload/README.md](dataload/README.md)
 - Testing guide and scripts: [tests/README.md](tests/README.md)
 - CI workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml)

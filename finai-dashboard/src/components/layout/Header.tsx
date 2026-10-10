@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useThemeMode } from "../../hooks/useThemeMode"
 import { useAuth } from "../../contexts/AuthContext"
+import Icon from "../ui/Icon"
 
 interface Props {
   title: string
+  subtitle?: string
+  onMenuClick: () => void
 }
 
 function AccountMenu() {
@@ -48,7 +51,7 @@ function AccountMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white py-1 pr-3 pl-1 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white py-1 pr-3 pl-1 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-100 dark:hover:bg-white/10"
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 text-xs font-bold text-white">
           {initial}
@@ -90,21 +93,37 @@ function AccountMenu() {
   )
 }
 
-export default function Header({ title }: Props) {
+export default function Header({ title, subtitle, onMenuClick }: Props) {
   const { theme, toggleTheme } = useThemeMode()
 
   return (
-    <header className="border-b border-zinc-200 bg-white/90 p-6 backdrop-blur-sm transition-colors dark:border-zinc-800 dark:bg-black/85">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-zinc-950 dark:text-white">{title}</h1>
-        <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-20 border-b border-zinc-200/80 bg-white/75 backdrop-blur-xl transition-colors dark:border-white/[0.06] dark:bg-zinc-950/70">
+      <div className="mx-auto flex h-[76px] max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Open menu"
+            className="-ml-1 rounded-lg p-2 text-zinc-600 transition-colors hover:bg-zinc-100 lg:hidden dark:text-zinc-300 dark:hover:bg-white/5"
+          >
+            <Icon name="menu" className="h-5 w-5" />
+          </button>
+          {title && (
+            <div className="min-w-0">
+              <h1 className="truncate text-lg font-semibold tracking-tight text-zinc-950 sm:text-xl dark:text-white">{title}</h1>
+              {subtitle && <p className="hidden truncate text-sm text-zinc-500 sm:block dark:text-zinc-400">{subtitle}</p>}
+            </div>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={toggleTheme}
             type="button"
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            className="rounded-full p-2.5 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
           >
-            {theme === "dark" ? "Light mode" : "Dark mode"}
+            <Icon name={theme === "dark" ? "sun" : "moon"} className="h-[18px] w-[18px]" />
           </button>
           <AccountMenu />
         </div>

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js"
-import { supabase } from "../services/supabaseClient"
+import { isSupabaseConfigured, supabase } from "../services/supabaseClient"
 
 type AuthContextValue = {
 	user: User | null
@@ -22,6 +22,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		let isMounted = true
 
+		if (!isSupabaseConfigured) {
+			setIsLoading(false)
+			return () => {
+				isMounted = false
+			}
+		}
+
 		supabase.auth.getSession().then(({ data }) => {
 			if (!isMounted) return
 			setSession(data.session)
@@ -41,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, [])
 
 	async function signOut() {
+		if (!isSupabaseConfigured) return
 		await supabase.auth.signOut()
 	}
 

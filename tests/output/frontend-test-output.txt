@@ -1,15 +1,19 @@
-# Frontend Test Results
 
-| Test ID | Test Name | Duration | Status |
-|---------|-----------|----------|--------|
-| 1 | formatCurrency > formats CAD currency without decimals | 18ms | ✅ PASSED |
-| 2 | formatCurrency > formats CAD currency with two decimals | 0ms | ✅ PASSED |
-| 3 | formatPercent > adds + for positive values | 0ms | ✅ PASSED |
-| 4 | formatPercent > does not add + for negative values | 0ms | ✅ PASSED |
-| 5 | formatCompactNumber > formats values to K/M suffixes | 0ms | ✅ PASSED |
-| 6 | formatCompactNumber > formats small values as whole numbers | 0ms | ✅ PASSED |
+> finai-dashboard@0.0.0 test:ci
+> vitest run --reporter=verbose
 
-**Summary:** 6/6 tests passed in 1.16s
-**Framework:** Vitest v3.2.4
-**Test Suite:** src/utils/formatCurrency.test.ts
+
+ RUN  v3.2.4 /Users/henrysaber/Downloads/Capstone/Portfolio_Risk_Management/finai-dashboard
+
+ ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency without decimals 12ms
+ ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency with two decimals 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatPercent > adds + for positive values 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatPercent > does not add + for negative values 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats values to K/M suffixes 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats small values as whole numbers 0ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  16:35:47
+   Duration  526ms (transform 24ms, setup 0ms, collect 22ms, tests 14ms, environment 0ms, prepare 43ms)
 

@@ -9,7 +9,7 @@ function readThemeFromStorage(): Theme {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored === "light" || stored === "dark") return stored
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -23,7 +23,7 @@ function readThemeFromStorage(): Theme {
 function writeThemeToStorage(theme: Theme) {
   try {
     localStorage.setItem(STORAGE_KEY, theme)
-  } catch (e) {
+  } catch {
     // ignore
   }
 }

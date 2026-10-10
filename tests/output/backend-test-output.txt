@@ -1,10 +1,25 @@
-# Backend Test Results
+============================= test session starts ==============================
+platform darwin -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /Users/henrysaber/Downloads/Capstone/Portfolio_Risk_Management/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/henrysaber/Downloads/Capstone/Portfolio_Risk_Management
+configfile: pytest.ini
+collecting ... collected 16 items
 
-| Test ID | Test Name | Status |
-|---------|-----------|--------|
-| 1 | test_health_endpoint_returns_healthy_status | ✅ PASSED |
-| 2 | test_analyze_portfolio_returns_success_with_mocked_analyzer | ✅ PASSED |
-| 3 | test_search_endpoint_classifies_crypto_symbol | ✅ PASSED |
+tests/backend/test_api.py::test_health_endpoint_returns_healthy_status PASSED [  6%]
+tests/backend/test_api.py::test_analyze_portfolio_returns_success_with_mocked_analyzer PASSED [ 12%]
+tests/backend/test_api.py::test_search_endpoint_classifies_crypto_symbol PASSED [ 18%]
+tests/backend/test_api.py::test_search_endpoint_rejects_empty_query PASSED [ 25%]
+tests/backend/test_api.py::test_search_endpoint_falls_back_to_query_when_no_results PASSED [ 31%]
+tests/backend/test_api.py::test_search_endpoint_deduplicates_symbols PASSED [ 37%]
+tests/backend/test_api.py::test_quote_endpoint_requires_symbol PASSED    [ 43%]
+tests/backend/test_api.py::test_quote_endpoint_returns_price PASSED      [ 50%]
+tests/backend/test_api.py::test_quote_endpoint_unknown_symbol_returns_404 PASSED [ 56%]
+tests/backend/test_api.py::test_analyze_rejects_invalid_lookback_days PASSED [ 62%]
+tests/backend/test_api.py::test_analyze_rejects_invalid_risk_tolerance PASSED [ 68%]
+tests/backend/test_api.py::test_scenario_requires_holdings_and_scenario_id PASSED [ 75%]
+tests/backend/test_api.py::test_scenario_unknown_id_returns_400 PASSED   [ 81%]
+tests/backend/test_api.py::test_scenario_success_with_mocked_service PASSED [ 87%]
+tests/backend/test_api.py::test_cors_preflight_returns_204 PASSED        [ 93%]
+tests/backend/test_api.py::test_unknown_route_returns_404 PASSED         [100%]
 
-**Summary:** 3/3 tests passed in 2.74s
-**Environment:** Python 3.13.7, pytest-9.0.3
+============================== 16 passed in 0.95s ==============================

@@ -7,6 +7,7 @@ import pathlib
 import subprocess
 import sys
 
+NPM = "npm.cmd" if sys.platform == "win32" else "npm"
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUTPUT_DIR = ROOT / "tests" / "output"
 BACKEND_LOG = OUTPUT_DIR / "backend-test-output.txt"
@@ -33,7 +34,7 @@ def main() -> int:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     backend_exit = _run_and_capture([sys.executable, "-m", "pytest", "tests/backend", "-v"], ROOT, BACKEND_LOG)
-    frontend_exit = _run_and_capture(["npm.cmd", "run", "test:ci"], ROOT / "finai-dashboard", FRONTEND_LOG)
+    frontend_exit = _run_and_capture([NPM, "run", "test:ci"], ROOT / "finai-dashboard", FRONTEND_LOG)
 
     timestamp = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     summary_lines = [

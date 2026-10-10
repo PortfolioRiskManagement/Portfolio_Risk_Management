@@ -5,3 +5,13 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+.venv/
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/

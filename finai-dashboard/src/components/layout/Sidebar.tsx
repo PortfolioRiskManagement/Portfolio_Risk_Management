@@ -136,7 +136,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 				)}
 
 				<nav className="space-y-1">
-					<NavLink to="/" className={({ isActive }) => navItemClassName(isActive)} end title="Dashboard">
+					<NavLink to="/dashboard" className={({ isActive }) => navItemClassName(isActive)} end title="Dashboard">
 						<span className="flex items-center gap-2">
 							<span>📊</span>
 							{!isCollapsed && <span>Dashboard</span>}

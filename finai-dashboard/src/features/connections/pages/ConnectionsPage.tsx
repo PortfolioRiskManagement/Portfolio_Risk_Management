@@ -3,7 +3,6 @@ import Card from "../../../components/ui/Card"
 import { useConnections } from "../hooks/useConnections"
 import { useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
-import ProviderLogo from "../components/ProviderLogo"
 
 export default function ConnectionsPage() {
   const { connections, connect, disconnect } = useConnections()
@@ -29,13 +28,10 @@ export default function ConnectionsPage() {
                   key={c.provider}
                   className="flex items-center justify-between rounded-xl border border-zinc-200 p-4 transition-colors dark:border-zinc-800"
                 >
-                  <div className="flex items-center gap-3">
-                    <ProviderLogo provider={c.provider} />
-                    <div>
-                      <div className="font-medium text-zinc-950 dark:text-white">{c.provider}</div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {c.connected ? `Connected • ${c.accountName ?? "Account"}` : "Not connected"}
-                      </div>
+                  <div>
+                    <div className="font-medium text-zinc-950 dark:text-white">{c.provider}</div>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {c.connected ? `Connected • ${c.accountName ?? "Account"}` : "Not connected"}
                     </div>
                   </div>
                   <div className="space-x-2">

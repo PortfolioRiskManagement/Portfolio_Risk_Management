@@ -4,6 +4,7 @@ import { LoadingProvider } from "../contexts/LoadingContext"
 import LoadingScreen from "../components/LoadingScreen"
 import { useLoading } from "../contexts/LoadingContext"
 import { ThemeProvider } from "../hooks/useTheme"
+import { AuthProvider } from "../contexts/AuthContext"
 
 function AppContent() {
 	const { isLoading } = useLoading()
@@ -21,9 +22,11 @@ function AppContent() {
 export default function App() {
 	return (
 		<ThemeProvider>
-			<LoadingProvider>
-				<AppContent />
-			</LoadingProvider>
+			<AuthProvider>
+				<LoadingProvider>
+					<AppContent />
+				</LoadingProvider>
+			</AuthProvider>
 		</ThemeProvider>
 	)
 }

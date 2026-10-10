@@ -92,3 +92,131 @@ def test_search_endpoint_classifies_crypto_symbol(monkeypatch) -> None:
     assert payload["success"] is True
     assert payload["results"][0]["symbol"] == "BTC-USD"
     assert payload["results"][0]["type"] == "crypto"
+
+
+def test_search_endpoint_rejects_empty_query() -> None:
+    """Search without a query should fail fast with HTTP 400 and no outbound request."""
+    response = app_module.app.test_client().get("/api/search?q=")
+
+    assert response.status_code == 400
+    assert response.get_json()["success"] is False
+
+
+def test_search_endpoint_falls_back_to_query_when_no_results(monkeypatch) -> None:
+    """When Yahoo returns no quotes, the endpoint should echo the query back as a stock."""
+    monkeypatch.setattr(app_module, "urlopen", lambda req, timeout=6: _FakeResponse({"quotes": []}))
+
+    response = app_module.app.test_client().get("/api/search?q=zzzz")
+
+    assert response.status_code == 200
+    assert response.get_json()["results"] == [{"symbol": "ZZZZ", "name": "ZZZZ", "type": "stock"}]
+
+
+def test_search_endpoint_deduplicates_symbols(monkeypatch) -> None:
+    """Duplicate symbols in the Yahoo payload should only appear once in the response."""
+    quote = {"symbol": "AAPL", "shortname": "Apple Inc.", "quoteType": "EQUITY", "exchange": "NMS"}
+    monkeypatch.setattr(app_module, "urlopen", lambda req, timeout=6: _FakeResponse({"quotes": [quote, quote]}))
+
+    response = app_module.app.test_client().get("/api/search?q=aapl")
+
+    assert len(response.get_json()["results"]) == 1
+
+
+def test_quote_endpoint_requires_symbol() -> None:
+    """Quote endpoint should return 400 when no symbol is supplied."""
+    response = app_module.app.test_client().get("/api/quote")
+
+    assert response.status_code == 400
+
+
+def test_quote_endpoint_returns_price(monkeypatch) -> None:
+    """Quote endpoint should return the regular market price from the mocked chart payload."""
+    payload = {"chart": {"result": [{"meta": {"regularMarketPrice": 123.45}}]}}
+    monkeypatch.setattr(app_module, "urlopen", lambda req, timeout=6: _FakeResponse(payload))
+
+    response = app_module.app.test_client().get("/api/quote?symbol=aapl")
+
+    assert response.status_code == 200
+    assert response.get_json() == {"success": True, "symbol": "AAPL", "price": 123.45}
+
+
+def test_quote_endpoint_unknown_symbol_returns_404(monkeypatch) -> None:
+    """Quote endpoint should return 404 when Yahoo has no chart result for the symbol."""
+    monkeypatch.setattr(app_module, "urlopen", lambda req, timeout=6: _FakeResponse({"chart": {"result": []}}))
+
+    response = app_module.app.test_client().get("/api/quote?symbol=nope")
+
+    assert response.status_code == 404
+
+
+def test_analyze_rejects_invalid_lookback_days() -> None:
+    """Non-positive or non-integer lookback_days should be rejected with a clear 400 message."""
+    client = app_module.app.test_client()
+
+    for bad in (-5, 0, "ninety", 1.5, True):
+        response = client.post("/api/portfolio/analyze", json={"lookback_days": bad})
+        assert response.status_code == 400, bad
+        assert "lookback_days" in response.get_json()["error"]
+
+
+def test_analyze_rejects_invalid_risk_tolerance() -> None:
+    """risk_tolerance must be a non-empty string."""
+    client = app_module.app.test_client()
+
+    for bad in (123, "", "   ", None):
+        response = client.post("/api/portfolio/analyze", json={"risk_tolerance": bad})
+        assert response.status_code == 400, bad
+        assert "risk_tolerance" in response.get_json()["error"]
+
+
+def test_scenario_requires_holdings_and_scenario_id() -> None:
+    """Scenario endpoint should validate required fields before doing any work."""
+    client = app_module.app.test_client()
+
+    no_holdings = client.post("/api/scenario/calculate", json={"scenarioId": "2008-financial-crisis"})
+    no_scenario = client.post("/api/scenario/calculate", json={"holdings": [{"symbol": "AAPL", "currentValue": 100}]})
+
+    assert no_holdings.status_code == 400
+    assert "holdings" in no_holdings.get_json()["error"].lower()
+    assert no_scenario.status_code == 400
+    assert "scenarioId" in no_scenario.get_json()["error"]
+
+
+def test_scenario_unknown_id_returns_400() -> None:
+    """An unknown scenarioId should be reported as a client error."""
+    response = app_module.app.test_client().post(
+        "/api/scenario/calculate",
+        json={"holdings": [{"symbol": "AAPL", "currentValue": 100}], "scenarioId": "bogus"},
+    )
+
+    assert response.status_code == 400
+    assert "Unknown scenario" in response.get_json()["error"]
+
+
+def test_scenario_success_with_mocked_service(monkeypatch) -> None:
+    """Scenario endpoint should wrap the service result in a success payload."""
+    monkeypatch.setattr(
+        app_module.scenario_service, "calculate_scenario", lambda holdings, scenario_id: {"totalReturn": -12.5}
+    )
+
+    response = app_module.app.test_client().post(
+        "/api/scenario/calculate",
+        json={"holdings": [{"symbol": "AAPL", "currentValue": 100}], "scenarioId": "2008-financial-crisis"},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json() == {"success": True, "data": {"totalReturn": -12.5}}
+
+
+def test_cors_preflight_returns_204() -> None:
+    """OPTIONS preflight requests from the frontend origin should succeed without a body."""
+    response = app_module.app.test_client().open(
+        "/api/search", method="OPTIONS", headers={"Origin": "http://localhost:5173"}
+    )
+
+    assert response.status_code == 204
+
+
+def test_unknown_route_returns_404() -> None:
+    """Undefined routes should return 404."""
+    assert app_module.app.test_client().get("/api/nope").status_code == 404

@@ -23,9 +23,14 @@ def analyze_portfolio():
         return "", 204
     
     try:
-        data = request.json
+        data = request.get_json(silent=True) or {}
         risk_tolerance = data.get("risk_tolerance", "medium")
         lookback_days = data.get("lookback_days", 504)
+
+        if not isinstance(risk_tolerance, str) or not risk_tolerance.strip():
+            return jsonify({"success": False, "error": "risk_tolerance must be a non-empty string"}), 400
+        if isinstance(lookback_days, bool) or not isinstance(lookback_days, int) or lookback_days <= 0:
+            return jsonify({"success": False, "error": "lookback_days must be a positive integer"}), 400
         
         # Use provided portfolio or create mock
         portfolio_data = data.get("portfolio_data")

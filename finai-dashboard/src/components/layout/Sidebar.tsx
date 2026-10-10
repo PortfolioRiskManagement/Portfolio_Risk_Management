@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom"
-import { useLoading } from "../../contexts/LoadingContext"
 
 interface SidebarProps {
 	isCollapsed: boolean
@@ -15,12 +14,6 @@ function navItemClassName(isActive: boolean) {
 }
 
 export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
-	const { triggerLoading } = useLoading()
-
-	const handleLogoClick = () => {
-		triggerLoading()
-	}
-
 	return (
 		<aside
 			className={`fixed left-0 top-0 z-30 h-screen overflow-visible border-r border-zinc-200 bg-white text-zinc-900 transition-all duration-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white ${
@@ -111,9 +104,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 				{!isCollapsed ? (
 					<div className="mb-8">
 						<button
-							onClick={handleLogoClick}
 							className="logo-wrap"
-							title="Click to reload"
 							type="button"
 						>
 							<span className="logo-badge">
@@ -125,9 +116,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 				) : (
 					<div className="mb-6 flex justify-center">
 						<button
-							onClick={handleLogoClick}
 							className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 text-xs font-bold text-white"
-							title="Reload"
 							type="button"
 						>
 							FA

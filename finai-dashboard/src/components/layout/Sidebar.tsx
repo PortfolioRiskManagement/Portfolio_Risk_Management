@@ -1,5 +1,4 @@
-import { NavLink } from "react-router-dom"
-import { useLoading } from "../../contexts/LoadingContext"
+import { Link, NavLink } from "react-router-dom"
 import Icon, { type IconName } from "../ui/Icon"
 
 interface SidebarProps {
@@ -51,7 +50,6 @@ function navItemClassName(isActive: boolean, isCollapsed: boolean) {
 }
 
 export default function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: SidebarProps) {
-	const { triggerLoading } = useLoading()
 	// The drawer always shows labels; collapsing only applies on large screens.
 	const collapsed = isCollapsed && !isMobileOpen
 
@@ -78,7 +76,7 @@ export default function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileC
 
 				{/* Brand */}
 				<div className={`flex h-[76px] shrink-0 items-center ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
-					<button onClick={triggerLoading} className="group inline-flex items-center gap-3" title="FIN/AI" type="button">
+					<Link to="/dashboard" onClick={onMobileClose} className="group inline-flex items-center gap-3" aria-label="FIN/AI dashboard">
 						<span className="relative inline-flex items-center justify-center overflow-hidden rounded-lg border border-white/15 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 px-2.5 py-1.5 shadow-lg shadow-indigo-500/20 transition-transform duration-300 group-hover:-translate-y-0.5">
 							<span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
 							<span className="relative text-base font-black leading-none tracking-wide text-white">{collapsed ? "F/A" : "FIN/AI"}</span>
@@ -90,7 +88,7 @@ export default function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileC
 								Overlay
 							</span>
 						)}
-					</button>
+					</Link>
 					{isMobileOpen && (
 						<button
 							type="button"

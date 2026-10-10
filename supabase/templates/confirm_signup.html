@@ -1,0 +1,127 @@
+<!--
+  Purpose: "Confirm signup" email sent by Supabase Auth.
+  Paste into Supabase → Authentication → Emails → Confirm signup (Source tab).
+  Subject: Welcome to FIN/AI · confirm your email to get started
+  Uses table layout and inline styles so it renders in Gmail, Outlook and Apple Mail.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <title>Confirm your FIN/AI account</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f5fb; -webkit-font-smoothing:antialiased;">
+    <!-- Inbox preview text -->
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
+      One click and you're in. See your risk, diversification and total assets in plain language.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f5fb;">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px; font-family:Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+
+            <!-- Logo -->
+            <tr>
+              <td align="center" style="padding-bottom:24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td bgcolor="#4f46e5" style="background-color:#4f46e5; background-image:linear-gradient(135deg,#3b82f6 0%,#6366f1 50%,#a855f7 100%); border-radius:10px; padding:8px 14px;">
+                      <span style="font-size:18px; font-weight:900; letter-spacing:1px; color:#ffffff;">FIN/AI</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Card -->
+            <tr>
+              <td style="background-color:#ffffff; border-radius:20px; border:1px solid #e6e8f2; overflow:hidden;">
+
+                <!-- Hero band -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td bgcolor="#4f46e5" style="background-color:#4f46e5; background-image:linear-gradient(135deg,#3b82f6 0%,#6366f1 50%,#a855f7 100%); border-radius:20px 20px 0 0; padding:40px 40px 36px;">
+                      <p style="margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#e0e7ff;">You're almost in</p>
+                      <h1 style="margin:0; font-size:28px; line-height:1.25; font-weight:800; color:#ffffff;">Invest with clarity,<br />not guesswork.</h1>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Body -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:36px 40px 8px;">
+                      <p style="margin:0 0 16px; font-size:16px; line-height:1.6; color:#0f172a;">
+                        {{ if .Data.full_name }}Hi {{ .Data.full_name }},{{ else }}Hi there,{{ end }}
+                      </p>
+                      <p style="margin:0 0 28px; font-size:16px; line-height:1.6; color:#334155;">
+                        Welcome to FIN/AI. Confirm your email and you'll have one clear view of your portfolio: how much risk you're carrying, how diversified you really are, and where your money sits.
+                      </p>
+
+                      <!-- Button -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 32px;">
+                        <tr>
+                          <td bgcolor="#4f46e5" style="background-color:#4f46e5; background-image:linear-gradient(90deg,#2563eb 0%,#7c3aed 100%); border-radius:12px;">
+                            <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block; padding:15px 32px; font-size:16px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:12px;">Confirm my email &rarr;</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- What's waiting -->
+                  <tr>
+                    <td style="padding:0 40px 8px;">
+                      <p style="margin:0 0 14px; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#6366f1;">What's waiting for you</p>
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td width="32" valign="top" style="padding:0 0 14px;"><span style="display:inline-block; width:22px; height:22px; line-height:22px; text-align:center; border-radius:11px; background-color:#eef2ff; color:#4f46e5; font-size:13px; font-weight:700;">&#10003;</span></td>
+                          <td valign="top" style="padding:1px 0 14px; font-size:15px; line-height:1.5; color:#334155;"><strong style="color:#0f172a;">Your risk in plain language.</strong> Volatility, drawdown and concentration explained without the jargon.</td>
+                        </tr>
+                        <tr>
+                          <td width="32" valign="top" style="padding:0 0 14px;"><span style="display:inline-block; width:22px; height:22px; line-height:22px; text-align:center; border-radius:11px; background-color:#eef2ff; color:#4f46e5; font-size:13px; font-weight:700;">&#10003;</span></td>
+                          <td valign="top" style="padding:1px 0 14px; font-size:15px; line-height:1.5; color:#334155;"><strong style="color:#0f172a;">Stress-test your holdings.</strong> See how your portfolio would have handled real market crises.</td>
+                        </tr>
+                        <tr>
+                          <td width="32" valign="top" style="padding:0 0 14px;"><span style="display:inline-block; width:22px; height:22px; line-height:22px; text-align:center; border-radius:11px; background-color:#eef2ff; color:#4f46e5; font-size:13px; font-weight:700;">&#10003;</span></td>
+                          <td valign="top" style="padding:1px 0 14px; font-size:15px; line-height:1.5; color:#334155;"><strong style="color:#0f172a;">Read-only and secure.</strong> We never move money or place trades.</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Fallback link -->
+                  <tr>
+                    <td style="padding:16px 40px 36px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="border-top:1px solid #eceef5; padding-top:20px; font-size:13px; line-height:1.6; color:#64748b;">
+                            Button not working? Paste this link into your browser:<br />
+                            <a href="{{ .ConfirmationURL }}" target="_blank" style="color:#4f46e5; word-break:break-all;">{{ .ConfirmationURL }}</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td align="center" style="padding:24px 24px 0; font-size:12px; line-height:1.6; color:#94a3b8;">
+                You're receiving this because someone signed up for FIN/AI with {{ .Email }}.<br />
+                Didn't sign up? You can safely ignore this email.<br /><br />
+                FIN/AI provides educational analysis only and is not financial advice.
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

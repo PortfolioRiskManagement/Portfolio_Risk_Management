@@ -1,192 +1,159 @@
-import { NavLink } from "react-router-dom"
+import { Link, NavLink } from "react-router-dom"
+import Icon, { type IconName } from "../ui/Icon"
 
 interface SidebarProps {
 	isCollapsed: boolean
 	onToggle: () => void
+	/** Drawer state on small screens, where the sidebar slides over the page. */
+	isMobileOpen: boolean
+	onMobileClose: () => void
 }
 
-function navItemClassName(isActive: boolean) {
-	return `block rounded-lg px-3 py-2 transition-colors ${
+type NavItem = { to: string; label: string; icon: IconName; end?: boolean }
+
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+	{
+		label: "Overview",
+		items: [
+			{ to: "/dashboard", label: "Dashboard", icon: "dashboard", end: true },
+			{ to: "/portfolio", label: "Portfolio", icon: "portfolio" },
+			{ to: "/assets", label: "Assets", icon: "assets" },
+		],
+	},
+	{
+		label: "Insights",
+		items: [
+			{ to: "/advisor", label: "AI Advisor", icon: "advisor" },
+			{ to: "/scenario", label: "Scenario Lab", icon: "scenario" },
+			{ to: "/news", label: "News & Impact", icon: "news" },
+			{ to: "/alerts", label: "Alerts", icon: "bell" },
+		],
+	},
+	{
+		label: "Tools",
+		items: [
+			{ to: "/creditcard", label: "Credit Cards", icon: "card" },
+			{ to: "/connections", label: "Connections", icon: "link" },
+			{ to: "/settings", label: "Settings", icon: "settings" },
+		],
+	},
+]
+
+function navItemClassName(isActive: boolean, isCollapsed: boolean) {
+	return `group relative flex items-center gap-3 rounded-xl py-2 text-sm transition-colors ${
+		isCollapsed ? "justify-center px-0" : "px-3"
+	} ${
 		isActive
-			? "bg-zinc-900 text-white font-medium dark:bg-zinc-800 dark:text-white"
-			: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+			? "bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 font-semibold text-indigo-700 dark:from-blue-500/15 dark:via-indigo-500/15 dark:to-purple-500/15 dark:text-white"
+			: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
 	}`
 }
 
-export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: SidebarProps) {
+	// The drawer always shows labels; collapsing only applies on large screens.
+	const collapsed = isCollapsed && !isMobileOpen
+
 	return (
-		<aside
-			className={`fixed left-0 top-0 z-30 h-screen overflow-visible border-r border-zinc-200 bg-white text-zinc-900 transition-all duration-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white ${
-				isCollapsed ? "w-16" : "w-64"
-			}`}
-		>
-			<button
-				onClick={onToggle}
-				className="absolute right-0 top-1/2 z-[60] flex h-7 w-7 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 shadow-xl transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
-				title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-				type="button"
+		<>
+			{isMobileOpen && (
+				<div className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden" onClick={onMobileClose} aria-hidden="true" />
+			)}
+
+			<aside
+				className={`fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-zinc-200/80 bg-white/95 backdrop-blur-xl transition-all duration-300 dark:border-white/[0.06] dark:bg-zinc-950/95 ${
+					collapsed ? "w-[72px]" : "w-64"
+				} ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
 			>
-				<svg
-					className={`h-3.5 w-3.5 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
+				<button
+					onClick={onToggle}
+					className="absolute right-0 top-[30px] z-50 hidden h-6 w-6 translate-x-1/2 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-colors hover:text-zinc-900 lg:flex dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+					title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+					aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+					type="button"
 				>
-					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-				</svg>
-			</button>
+					<Icon name="chevronLeft" className={`h-3.5 w-3.5 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`} />
+				</button>
 
-			<div className={isCollapsed ? "px-2 pb-4 pt-14" : "p-6"}>
-				<style>{`
-					.logo-wrap {
-						display: inline-flex;
-						flex-direction: column;
-						align-items: center;
-						gap: 4px;
-						cursor: pointer;
-					}
-
-					.logo-badge {
-						background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #a855f7 100%);
-						border-radius: 8px;
-						padding: 5px 12px;
-						transition: all 0.3s ease;
-						position: relative;
-						overflow: hidden;
-						display: inline-flex;
-						align-items: center;
-						justify-content: center;
-						box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-						border: 1px solid rgba(255, 255, 255, 0.12);
-					}
-
-					.logo-badge::before {
-						content: '';
-						position: absolute;
-						top: 0;
-						left: 0;
-						right: 0;
-						height: 50%;
-						background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
-						border-radius: 12px 12px 0 0;
-					}
-
-					.logo-badge:hover {
-						box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-						transform: translateY(-1px) scale(1.01);
-					}
-
-					.logo-text {
-						font-size: 22px;
-						font-weight: 900;
-						color: white;
-						text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-						position: relative;
-						z-index: 1;
-						letter-spacing: 0.8px;
-						line-height: 1;
-					}
-
-					.logo-subtitle {
-						font-size: 9px;
-						text-transform: uppercase;
-						background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #a855f7 100%);
-						-webkit-background-clip: text;
-						background-clip: text;
-						-webkit-text-fill-color: transparent;
-						letter-spacing: 1px;
-						position: relative;
-						z-index: 1;
-						font-weight: 600;
-					}
-				`}</style>
-
-				{!isCollapsed ? (
-					<div className="mb-8">
-						<button
-							className="logo-wrap"
-							type="button"
-						>
-							<span className="logo-badge">
-								<span className="logo-text">FIN/AI</span>
+				{/* Brand */}
+				<div className={`flex h-[76px] shrink-0 items-center ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
+					<Link to="/dashboard" onClick={onMobileClose} className="group inline-flex items-center gap-3" aria-label="FIN/AI dashboard">
+						<span className="relative inline-flex items-center justify-center overflow-hidden rounded-lg border border-white/15 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 px-2.5 py-1.5 shadow-lg shadow-indigo-500/20 transition-transform duration-300 group-hover:-translate-y-0.5">
+							<span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
+							<span className="relative text-base font-black leading-none tracking-wide text-white">{collapsed ? "F/A" : "FIN/AI"}</span>
+						</span>
+						{!collapsed && (
+							<span className="text-[10px] font-semibold uppercase leading-tight tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+								Intelligence
+								<br />
+								Overlay
 							</span>
-							<span className="logo-subtitle">Intelligence Overlay</span>
-						</button>
-					</div>
-				) : (
-					<div className="mb-6 flex justify-center">
+						)}
+					</Link>
+					{isMobileOpen && (
 						<button
-							className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 text-xs font-bold text-white"
 							type="button"
+							onClick={onMobileClose}
+							className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 lg:hidden dark:text-zinc-400 dark:hover:bg-white/5"
+							aria-label="Close menu"
 						>
-							FA
+							<Icon name="close" className="h-5 w-5" />
 						</button>
+					)}
+				</div>
+
+				{/* Navigation */}
+				<nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6 pt-2">
+					{NAV_GROUPS.map((group) => (
+						<div key={group.label}>
+							{collapsed ? (
+								<div className="mx-auto mb-2 h-px w-6 bg-zinc-200 dark:bg-white/10" />
+							) : (
+								<div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">
+									{group.label}
+								</div>
+							)}
+							<div className="space-y-0.5">
+								{group.items.map((item) => (
+									<NavLink
+										key={item.to}
+										to={item.to}
+										end={item.end}
+										title={item.label}
+										onClick={onMobileClose}
+										className={({ isActive }) => navItemClassName(isActive, collapsed)}
+									>
+										{({ isActive }) => (
+											<>
+												{isActive && (
+													<span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-gradient-to-b from-blue-500 to-purple-500" />
+												)}
+												<Icon
+													name={item.icon}
+													className={`h-[18px] w-[18px] shrink-0 ${isActive ? "text-indigo-600 dark:text-indigo-300" : ""}`}
+												/>
+												{!collapsed && <span className="truncate">{item.label}</span>}
+											</>
+										)}
+									</NavLink>
+								))}
+							</div>
+						</div>
+					))}
+				</nav>
+
+				{/* Trust note */}
+				{!collapsed && (
+					<div className="m-3 rounded-2xl border border-zinc-200/80 bg-gradient-to-br from-blue-500/[0.06] via-indigo-500/[0.06] to-purple-500/[0.08] p-4 dark:border-white/[0.06]">
+						<div className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-white">
+							<Icon name="shield" className="h-4 w-4 text-indigo-500" />
+							Read-only access
+						</div>
+						<p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+							FIN/AI can never move money or place trades.
+						</p>
 					</div>
 				)}
-
-				<nav className="space-y-1">
-					<NavLink to="/dashboard" className={({ isActive }) => navItemClassName(isActive)} end title="Dashboard">
-						<span className="flex items-center gap-2">
-							<span>📊</span>
-							{!isCollapsed && <span>Dashboard</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/portfolio" className={({ isActive }) => navItemClassName(isActive)} title="Portfolio">
-						<span className="flex items-center gap-2">
-							<span>💼</span>
-							{!isCollapsed && <span>Portfolio</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/assets" className={({ isActive }) => navItemClassName(isActive)} title="Assets">
-						<span className="flex items-center gap-2">
-							<span>📈</span>
-							{!isCollapsed && <span>Assets</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/advisor" className={({ isActive }) => navItemClassName(isActive)} title="AI Advisor">
-						<span className="flex items-center gap-2">
-							<span>🤖</span>
-							{!isCollapsed && <span>AI Advisor</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/news" className={({ isActive }) => navItemClassName(isActive)} title="News & Impact">
-						<span className="flex items-center gap-2">
-							<span>📰</span>
-							{!isCollapsed && <span>News & Impact</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/scenario" className={({ isActive }) => navItemClassName(isActive)} title="Scenario Lab">
-						<span className="flex items-center gap-2">
-							<span>🧪</span>
-							{!isCollapsed && <span>Scenario Lab</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/creditcard" className={({ isActive }) => navItemClassName(isActive)} title="Credit Card Assistant">
-						<span className="flex items-center gap-2">
-							<span>💳</span>
-							{!isCollapsed && <span>Credit Cards</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/alerts" className={({ isActive }) => navItemClassName(isActive)} title="Alerts">
-						<span className="flex items-center gap-2">
-							<span>🔔</span>
-							{!isCollapsed && <span>Alerts</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/connections" className={({ isActive }) => navItemClassName(isActive)} title="Connections">
-						<span className="flex items-center gap-2">
-							<span>🔗</span>
-							{!isCollapsed && <span>Connections</span>}
-						</span>
-					</NavLink>
-					<NavLink to="/settings" className={({ isActive }) => navItemClassName(isActive)} title="Settings">
-						<span className="flex items-center gap-2">
-							<span>⚙️</span>
-							{!isCollapsed && <span>Settings</span>}
-						</span>
-					</NavLink>
-				</nav>
-			</div>
-		</aside>
+			</aside>
+		</>
 	)
 }

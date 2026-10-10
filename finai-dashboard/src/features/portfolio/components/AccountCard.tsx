@@ -2,168 +2,131 @@ import { useState } from 'react'
 import type { Account } from '../types/portfolio.types'
 import { formatCurrency, formatPercent } from '../../../utils/formatCurrency'
 import Card from '../../../components/ui/Card'
+import Icon, { type IconName } from '../../../components/ui/Icon'
 
 interface Props {
   account: Account
 }
 
+const STATUS_BADGES: Record<string, { text: string; className: string }> = {
+  optimized: { text: 'Optimized', className: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
+  underused: { text: 'Underused', className: 'bg-amber-500/10 text-amber-700 dark:text-amber-400' },
+  overused: { text: 'Over limit', className: 'bg-rose-500/10 text-rose-700 dark:text-rose-400' },
+  normal: { text: 'On track', className: 'bg-zinc-500/10 text-zinc-600 dark:text-zinc-300' },
+}
+
+const ACCOUNT_STYLES: Record<string, { icon: IconName; tile: string }> = {
+  RRSP: { icon: 'piggy', tile: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+  TFSA: { icon: 'trendUp', tile: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  FHSA: { icon: 'home', tile: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
+  PERSONAL: { icon: 'portfolio', tile: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' },
+}
+
 export default function AccountCard({ account }: Props) {
   const [showDetails, setShowDetails] = useState(false)
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'optimized':
-        return {
-          text: 'Optimized',
-          color: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
-          icon: '✓',
-        }
-      case 'underused':
-        return {
-          text: 'Underused',
-          color: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
-          icon: '⚠',
-        }
-      case 'overused':
-        return {
-          text: 'Over Limit',
-          color: 'bg-red-500/10 border-red-500/30 text-red-400',
-          icon: '!',
-        }
-      default:
-        return {
-          text: 'Normal',
-          color: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
-          icon: '•',
-        }
-    }
-  }
-
-  const getAccountIcon = (type: string) => {
-    switch (type) {
-      case 'TFSA':
-        return '🌱'
-      case 'RRSP':
-        return '🏦'
-      case 'FHSA':
-        return '🏡'
-      case 'PERSONAL':
-        return '💼'
-      default:
-        return '💰'
-    }
-  }
-
-  const statusBadge = getStatusBadge(account.status)
-  const contributionPercent = (account.contributionUsed / account.contributionLimit) * 100
+  const statusBadge = STATUS_BADGES[account.status] ?? STATUS_BADGES.normal
+  const style = ACCOUNT_STYLES[account.type] ?? ACCOUNT_STYLES.PERSONAL
+  // Non-registered accounts have no contribution limit, so there is no room to track.
+  const hasContributionLimit = account.contributionLimit > 0
+  const contributionPercent = hasContributionLimit ? (account.contributionUsed / account.contributionLimit) * 100 : 0
+  const isUp = account.gain >= 0
 
   return (
-    <Card className="group relative overflow-hidden transition-all duration-300 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 dark:hover:border-blue-600/50 dark:hover:shadow-blue-600/10">
-      {/* Gradient accent on hover */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-blue-600/5 dark:via-transparent" />
-
-      <div className="relative">
-        {/* Header with Icon and Status */}
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-center gap-4">
-            <div className="rounded-xl bg-gradient-to-br from-zinc-100 to-white p-3 text-4xl ring-1 ring-zinc-200 transition-all duration-300 group-hover:from-blue-100 group-hover:to-blue-50 dark:from-white/10 dark:to-white/5 dark:ring-0 dark:group-hover:from-blue-500/20 dark:group-hover:to-blue-400/10">
-              {getAccountIcon(account.type)}
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-zinc-950 transition-colors duration-300 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-300">
-                {account.name}
-              </h3>
-              <p className="text-xs text-zinc-500 transition-colors group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-400">{account.purpose}</p>
-            </div>
-          </div>
-          <div
-            className={`px-3 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 backdrop-blur-sm transition-all duration-300 ${statusBadge.color}`}
-          >
-            <span>{statusBadge.icon}</span>
-            {statusBadge.text}
+    <Card className="flex h-full flex-col transition-shadow duration-300 hover:shadow-lg hover:shadow-indigo-500/5">
+      {/* Header */}
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${style.tile}`}>
+            <Icon name={style.icon} className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="truncate font-semibold text-zinc-950 dark:text-white">{account.name}</h3>
+            <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{account.purpose}</p>
           </div>
         </div>
-
-        {/* Balance and Performance - Enhanced */}
-        <div className="mb-5 border-b border-zinc-200/80 pb-5 dark:border-zinc-800/50">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-500">Current Balance</div>
-          <div className="flex items-baseline gap-3">
-            <div className="text-3xl font-bold text-zinc-950 dark:text-white">{formatCurrency(account.balance)}</div>
-            <div
-              className={`text-sm font-semibold px-2.5 py-1 rounded-lg ${
-                account.gain >= 0
-                  ? 'text-green-400 bg-green-500/10 border border-green-500/30'
-                  : 'text-red-400 bg-red-500/10 border border-red-500/30'
-              }`}
-            >
-              {account.gain >= 0 ? '+' : ''}{formatCurrency(account.gain)} ({formatPercent(account.gainPercent)})
-            </div>
-          </div>
-        </div>
-
-        {/* Contribution Room - Enhanced */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">Contribution Room</span>
-            <span className="text-sm font-bold text-emerald-400">{formatCurrency(account.contributionRoom)} left</span>
-          </div>
-          <div className="h-2.5 overflow-hidden rounded-full border border-zinc-200 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:border-zinc-800/50 dark:from-zinc-800 dark:to-zinc-900">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                contributionPercent >= 90
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                  : contributionPercent >= 50
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-400'
-                  : 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-              }`}
-              style={{ width: `${Math.min(contributionPercent, 100)}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-xs text-zinc-500 dark:text-zinc-500">{formatCurrency(account.contributionUsed)} used</span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-500">{formatCurrency(account.contributionLimit)} limit</span>
-          </div>
-        </div>
-
-        {/* Tax Benefit - Enhanced */}
-        <div className="mb-5 rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-3.5 dark:border-blue-500/30 dark:from-blue-500/10 dark:to-blue-600/5">
-          <div className="text-xs font-bold text-blue-400 mb-1 uppercase tracking-widest">Tax Advantage</div>
-          <div className="text-sm text-blue-700 dark:text-blue-200">{account.taxBenefit}</div>
-        </div>
-
-        {/* Expandable Details - Smooth Animation */}
-        <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            showDetails ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <div className="space-y-3 border-t border-zinc-200/80 pt-4 dark:border-zinc-800/50">
-            <div>
-              <div className="mb-2 text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Role in Portfolio</div>
-              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700 backdrop-blur-sm dark:border-zinc-800/30 dark:bg-zinc-900/50 dark:text-zinc-300">
-                Priority #{account.priority} in your overall portfolio strategy
-              </div>
-            </div>
-
-            {account.recommendedAction && (
-              <div>
-                <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2">Recommended Action</div>
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 backdrop-blur-sm dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-200">
-                  {account.recommendedAction}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Toggle Button - Enhanced */}
-        <button
-          onClick={() => setShowDetails(!showDetails)}
-          className="mt-4 w-full rounded-lg border border-zinc-200 bg-gradient-to-r from-white to-zinc-50 px-4 py-2.5 text-sm font-semibold text-zinc-600 transition-all duration-300 hover:border-blue-300 hover:from-blue-50 hover:to-white hover:text-blue-700 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950 dark:text-zinc-400 dark:hover:border-blue-600/50 dark:hover:from-blue-950/40 dark:hover:to-blue-900/20 dark:hover:text-blue-300"
-        >
-          {showDetails ? '▲ Hide details' : '▼ Show details'}
-        </button>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadge.className}`}>{statusBadge.text}</span>
       </div>
+
+      {/* Balance */}
+      <div className="mb-5">
+        <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400">Balance</div>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="text-3xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">{formatCurrency(account.balance)}</span>
+          <span
+            className={`rounded-md px-1.5 py-0.5 text-sm font-semibold tabular-nums ${
+              isUp ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-700 dark:text-rose-400'
+            }`}
+          >
+            {isUp ? '+' : ''}
+            {formatCurrency(account.gain)} ({formatPercent(account.gainPercent)})
+          </span>
+        </div>
+      </div>
+
+      {/* Contribution room */}
+      <div className="mb-5 rounded-xl bg-zinc-50 p-4 dark:bg-white/[0.03]">
+        {hasContributionLimit ? (
+          <>
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-medium text-zinc-700 dark:text-zinc-300">Contribution room</span>
+              <span className="font-semibold tabular-nums text-zinc-950 dark:text-white">{formatCurrency(account.contributionRoom)} left</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-white/[0.08]">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-500"
+                style={{ width: `${Math.min(contributionPercent, 100)}%` }}
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
+              <span>{formatCurrency(account.contributionUsed)} used</span>
+              <span>{formatCurrency(account.contributionLimit)} limit</span>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300">Contribution room</span>
+            <span className="text-zinc-500 dark:text-zinc-400">No annual limit</span>
+          </div>
+        )}
+      </div>
+
+      {/* Tax advantage */}
+      <div className="mb-4 flex gap-3">
+        <Icon name="shield" className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
+        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+          <span className="font-semibold text-zinc-950 dark:text-white">Tax advantage. </span>
+          {account.taxBenefit}
+        </p>
+      </div>
+
+      {/* Expandable details */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${showDetails ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="space-y-3 border-t border-zinc-200/80 pt-4 text-sm dark:border-white/[0.06]">
+          <div className="flex items-center justify-between">
+            <span className="text-zinc-500 dark:text-zinc-400">Role in portfolio</span>
+            <span className="font-semibold text-zinc-950 dark:text-white">Priority #{account.priority}</span>
+          </div>
+          {account.recommendedAction && (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-3">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400">Recommended action</div>
+              <div className="text-zinc-700 dark:text-zinc-200">{account.recommendedAction}</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setShowDetails(!showDetails)}
+        aria-expanded={showDetails}
+        className="mt-auto inline-flex items-center gap-1 self-start pt-3 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+      >
+        {showDetails ? 'Hide details' : 'Show details'}
+        <Icon name="chevronDown" className={`h-4 w-4 transition-transform duration-300 ${showDetails ? 'rotate-180' : ''}`} />
+      </button>
     </Card>
   )
 }

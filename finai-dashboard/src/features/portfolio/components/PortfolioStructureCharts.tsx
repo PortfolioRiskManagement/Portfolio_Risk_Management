@@ -1,6 +1,18 @@
 import type { Account } from '../types/portfolio.types'
 import { formatCurrency } from '../../../utils/formatCurrency'
 import Card from '../../../components/ui/Card'
+import Icon, { type IconName } from '../../../components/ui/Icon'
+
+function CardHeading({ icon, children }: { icon: IconName; children: React.ReactNode }) {
+  return (
+    <h3 className="mb-5 flex items-center gap-2.5 font-semibold text-zinc-950 dark:text-white">
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-300">
+        <Icon name={icon} className="h-4 w-4" />
+      </span>
+      {children}
+    </h3>
+  )
+}
 
 interface Props {
   accounts: Account[]
@@ -38,24 +50,18 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
     }))
 
   return (
-    <div className="mb-8">
+    <section>
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-2xl">📊</span>
-          <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">Portfolio Structure & Analytics</h2>
-        </div>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <h2 className="mb-1 text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">Structure & analytics</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Visual breakdown of your account distribution and contribution room usage
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Account Distribution */}
-        <Card className="border-blue-600/20 hover:border-blue-600/40 transition-all duration-300">
-          <h3 className="mb-5 flex items-center gap-2 font-bold text-zinc-950 dark:text-white">
-            <span className="text-lg">🏦</span>
-            Account Distribution
-          </h3>
+        <Card>
+          <CardHeading icon="layers">Account distribution</CardHeading>
           <div className="space-y-4">
             {accountDistribution.map((acc) => (
               <div key={acc.type} className="group">
@@ -66,9 +72,9 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
                   <span className="text-sm font-bold text-zinc-950 dark:text-white">{formatCurrency(acc.value)}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-3 overflow-hidden rounded-full border border-zinc-200 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:border-zinc-800/50 dark:from-zinc-800 dark:to-zinc-900">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/[0.06]">
                     <div
-                      className="h-full rounded-full transition-all duration-500 shadow-lg"
+                      className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${acc.percentage}%`,
                         backgroundColor: acc.color,
@@ -85,24 +91,21 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
         </Card>
 
         {/* Registered vs Non-Registered */}
-        <Card className="border-emerald-600/20 hover:border-emerald-600/40 transition-all duration-300">
-          <h3 className="mb-5 flex items-center gap-2 font-bold text-zinc-950 dark:text-white">
-            <span className="text-lg">🎯</span>
-            Registered vs Non-Registered
-          </h3>
+        <Card>
+          <CardHeading icon="pie">Registered vs non-registered</CardHeading>
           <div className="flex items-center justify-center mb-6">
-            <div className="relative w-56 h-56">
+            <div className="relative h-48 w-48">
               {/* Circular chart simulation */}
-              <svg className="w-full h-full transform -rotate-90 drop-shadow-lg" viewBox="0 0 100 100">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
                 <circle
                   cx="50"
                   cy="50"
                   r="40"
                   fill="none"
                   stroke="#10b981"
-                  strokeWidth="20"
+                  strokeWidth="12"
                   strokeDasharray={`${registeredPercent * 2.513} 251.3`}
-                  opacity="0.9"
+                  
                 />
                 <circle
                   cx="50"
@@ -110,68 +113,59 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
                   r="40"
                   fill="none"
                   stroke="#6366f1"
-                  strokeWidth="20"
+                  strokeWidth="12"
                   strokeDasharray={`${(100 - registeredPercent) * 2.513} 251.3`}
                   strokeDashoffset={`-${registeredPercent * 2.513}`}
-                  opacity="0.9"
+                  
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-emerald-400">{registeredPercent.toFixed(0)}%</div>
+                  <div className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white">{registeredPercent.toFixed(0)}%</div>
                   <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Registered</div>
                 </div>
               </div>
             </div>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 to-white p-4 transition-all hover:border-emerald-300 dark:border-emerald-600/30 dark:from-emerald-600/10 dark:to-emerald-500/5 dark:hover:border-emerald-600/50">
+            <div className="flex items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 dark:bg-white/[0.03]">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full"></div>
+                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
                 <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Registered Accounts</span>
               </div>
-              <span className="text-lg font-bold text-zinc-950 dark:text-white">{formatCurrency(registeredValue)}</span>
+              <span className="font-bold tabular-nums text-zinc-950 dark:text-white">{formatCurrency(registeredValue)}</span>
             </div>
-            <div className="flex items-center justify-between rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white p-4 transition-all hover:border-indigo-300 dark:border-indigo-600/30 dark:from-indigo-600/10 dark:to-indigo-500/5 dark:hover:border-indigo-600/50">
+            <div className="flex items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 dark:bg-white/[0.03]">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full"></div>
+                <div className="h-2.5 w-2.5 rounded-full bg-indigo-500"></div>
                 <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Non-Registered</span>
               </div>
-              <span className="text-lg font-bold text-zinc-950 dark:text-white">{formatCurrency(nonRegisteredValue)}</span>
+              <span className="font-bold tabular-nums text-zinc-950 dark:text-white">{formatCurrency(nonRegisteredValue)}</span>
             </div>
           </div>
         </Card>
 
         {/* Contribution Room Usage */}
-        <Card className="lg:col-span-2 border-amber-600/20 hover:border-amber-600/40 transition-all duration-300">
-          <h3 className="mb-6 flex items-center gap-2 font-bold text-zinc-950 dark:text-white">
-            <span className="text-lg">💰</span>
-            Contribution Room Usage
-          </h3>
+        <Card className="lg:col-span-2">
+          <CardHeading icon="piggy">Contribution room usage</CardHeading>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {contributionData.length > 0 ? (
               contributionData.map((data) => (
                 <div
                   key={data.type}
-                  className="group rounded-xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-5 transition-all duration-300 hover:border-amber-300 dark:border-zinc-800 dark:from-zinc-950 dark:to-zinc-900 dark:hover:border-amber-600/40"
+                  className="rounded-xl bg-zinc-50 p-5 dark:bg-white/[0.03]"
                 >
                   <div className="text-center mb-4">
-                    <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500 transition-colors group-hover:text-amber-500 dark:text-zinc-500 dark:group-hover:text-amber-400">
+                    <div className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400">
                       {data.type}
                     </div>
-                    <div className="text-4xl font-bold text-zinc-950 transition-colors group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-300">
+                    <div className="text-4xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">
                       {data.usedPercent.toFixed(0)}%
                     </div>
                   </div>
-                  <div className="mb-4 h-3 overflow-hidden rounded-full border border-zinc-200 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:border-zinc-800/50 dark:from-zinc-800 dark:to-zinc-700">
+                  <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-white/[0.08]">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 shadow-lg ${
-                        data.usedPercent >= 90
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                          : data.usedPercent >= 50
-                          ? 'bg-gradient-to-r from-blue-500 to-blue-400'
-                          : 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                      }`}
+                      className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-500"
                       style={{ width: `${Math.min(data.usedPercent, 100)}%` }}
                     />
                   </div>
@@ -182,7 +176,7 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-medium text-zinc-500 dark:text-zinc-500">Remaining</span>
-                      <span className="text-emerald-400 font-bold">{formatCurrency(data.remaining)}</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(data.remaining)}</span>
                     </div>
                     <div className="flex items-center justify-between border-t border-zinc-200 pt-2 dark:border-zinc-800">
                       <span className="font-medium text-zinc-500 dark:text-zinc-500">Annual Limit</span>
@@ -199,7 +193,7 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
           </div>
         </Card>
       </div>
-    </div>
+    </section>
   )
 }
 

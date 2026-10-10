@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { UserProfile } from '../types/portfolio.types'
 import Card from '../../../components/ui/Card'
+import Icon from '../../../components/ui/Icon'
 
 interface Props {
   profile: UserProfile
@@ -27,55 +28,48 @@ export default function PortfolioProfile({ profile, onUpdate }: Props) {
   }, [isEditing])
 
   return (
-    <div className="mb-8">
+    <section>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">⚙️</span>
-            <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">Customize Your Profile</h2>
-          </div>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <h2 className="mb-1 text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">Your investor profile</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Tell us more about your goals and investment style for better personalized recommendations
           </p>
         </div>
         <button
           onClick={() => setIsEditing(true)}
-          className="ml-4 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg text-sm font-semibold transition-all duration-300 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50"
+          className="ml-4 shrink-0 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:-translate-y-0.5"
         >
           Edit Profile
         </button>
       </div>
 
       {/* Profile Completeness Card */}
-      <Card className="mb-6 transition-all duration-300">
+      <Card>
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold uppercase tracking-widest text-zinc-900 dark:text-white">Profile Completeness</span>
-              <span className={`text-2xl font-bold ${profileCompleteness === 100 ? 'text-emerald-400' : 'text-blue-400'}`}>
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400">Profile completeness</span>
+              <span className={`text-2xl font-bold tabular-nums ${profileCompleteness === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'}`}>
                 {profileCompleteness}%
               </span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full border border-zinc-200 bg-gradient-to-r from-zinc-200 to-zinc-100 dark:border-zinc-800/50 dark:from-zinc-800 dark:to-zinc-900">
+            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/[0.06]">
               <div
-                className={`h-full rounded-full transition-all duration-700 ${
-                  profileCompleteness === 100
-                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                    : 'bg-gradient-to-r from-blue-500 to-blue-400'
-                }`}
+                className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-700"
                 style={{ width: `${profileCompleteness}%` }}
               />
             </div>
             <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
               {profileCompleteness === 100
-                ? '✓ Complete! You\'re receiving the best possible recommendations.'
+                ? 'Complete. Your recommendations are fully personalized.'
                 : `${100 - profileCompleteness} fields remaining to unlock full personalization`}
             </p>
           </div>
-          <div className="text-4xl">
-            {profileCompleteness === 100 ? '🎉' : '📋'}
-          </div>
+          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${profileCompleteness === 100 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'}`}>
+            <Icon name={profileCompleteness === 100 ? 'check' : 'user'} className="h-5 w-5" />
+          </span>
         </div>
       </Card>
 
@@ -377,7 +371,7 @@ export default function PortfolioProfile({ profile, onUpdate }: Props) {
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }
 

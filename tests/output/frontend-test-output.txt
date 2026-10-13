@@ -5,6 +5,24 @@
 
  RUN  v3.2.4 /Users/henrysaber/Downloads/Capstone/Portfolio_Risk_Management/finai-dashboard
 
+ ✓ src/services/apiClient.test.ts > apiClient.get > returns the parsed body and status 2ms
+ ✓ src/services/apiClient.test.ts > apiClient.get > calls the local backend with credentials and a JSON header 1ms
+ ✓ src/services/apiClient.test.ts > apiClient.get > throws with the status code and text when the response is not ok 1ms
+ ✓ src/services/apiClient.test.ts > apiClient.get > passes through a 404 as an error 0ms
+ ✓ src/services/apiClient.test.ts > apiClient.post > sends the body as JSON 0ms
+ ✓ src/services/apiClient.test.ts > apiClient.post > returns the parsed body and status 0ms
+ ✓ src/services/apiClient.test.ts > apiClient.post > throws when the server rejects the request 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency without decimals 12ms
+ ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency with two decimals 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatPercent > adds + for positive values 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatPercent > does not add + for negative values 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats values to K/M suffixes 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats small values as whole numbers 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > formats zero and negative currency 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > rounds whole-dollar currency to the nearest dollar 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > treats zero as a non-negative percent 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > uses the requested number of decimals for percents 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > switches compact formatting exactly at the thresholds 0ms
  ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels price_above as Price Above 1ms
  ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels price_below as Price Below 0ms
  ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels day_change_up as Daily Gain >= X% 0ms
@@ -22,20 +40,118 @@
  ✓ src/features/creditcard/services/creditCardService.test.ts > getTopPicks > respects a custom count 0ms
  ✓ src/features/creditcard/services/creditCardService.test.ts > getCardsByInstitution > returns the unscored list when there is no profile 0ms
  ✓ src/features/creditcard/services/creditCardService.test.ts > getCardsByInstitution > keeps all institutions and scores their cards when a profile is given 0ms
- ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency without decimals 12ms
- ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency with two decimals 0ms
- ✓ src/utils/formatCurrency.test.ts > formatPercent > adds + for positive values 0ms
- ✓ src/utils/formatCurrency.test.ts > formatPercent > does not add + for negative values 0ms
- ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats values to K/M suffixes 0ms
- ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats small values as whole numbers 0ms
- ✓ src/utils/formatCurrency.test.ts > formatting edge cases > formats zero and negative currency 0ms
- ✓ src/utils/formatCurrency.test.ts > formatting edge cases > rounds whole-dollar currency to the nearest dollar 0ms
- ✓ src/utils/formatCurrency.test.ts > formatting edge cases > treats zero as a non-negative percent 0ms
- ✓ src/utils/formatCurrency.test.ts > formatting edge cases > uses the requested number of decimals for percents 0ms
- ✓ src/utils/formatCurrency.test.ts > formatting edge cases > switches compact formatting exactly at the thresholds 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > calculateScenario > returns the backend result when the call succeeds 2ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > calculateScenario > falls back to built-in estimates when the backend says it failed 1ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > calculateScenario > falls back to built-in estimates when the backend is unreachable 1ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > 2008-financial-crisis moves a stock by -57% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > covid-2020-crash moves a stock by -34% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > covid-recovery-2020 moves a stock by 120% 1ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > crypto-winter-2022 moves a stock by -18% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > post-2008-recovery moves a stock by 400% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > dot-com-bubble moves a stock by -49% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > black-monday-1987 moves a stock by -22.6% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > 2022-bear-market moves a stock by -25% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > applies a default 20% loss to an unknown scenario 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > treats each asset class separately 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > computes each asset's contribution to the total 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > derives recovery days and volatility from the total return 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > builds a 181-point timeline that starts near the starting value 1ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > ends the timeline near the final value 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > reports a drawdown that is not positive for a crash 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > keeps a 0% multiplier flat for dot-com-bubble crypto instead of falling back to -20% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > keeps a 0% multiplier flat for black-monday-1987 crypto instead of falling back to -20% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > keeps a 0% multiplier flat for made-up bond instead of falling back to -20% 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > fallback estimates > still applies the default 20% loss to an unrecognised asset class 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > searchAssets > returns nothing for a blank query without calling the backend 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > searchAssets > returns the backend results 2ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > searchAssets > trims and URL-encodes the query 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > searchAssets > returns nothing when the backend reports failure 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > searchAssets > returns nothing when the request throws 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > returns an empty list when there is no portfolio 1ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > flattens positions across accounts 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > accepts the alternative field names ticker, shares and value 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > skips accounts that have no positions 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies BTC as crypto 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies ETH as crypto 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies bitcoin as crypto 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies SPY as etf 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies vti as etf 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies TLT as bond 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies GLD as commodity 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies AAPL as stock 0ms
+ ✓ src/features/scenario/services/scenarioService.test.ts > convertPortfolioToHoldings > classifies UNKNOWN as stock 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > getPortfolioSummary > adds up balances and gains across accounts 1ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > getPortfolioSummary > computes gain percent against the starting value, not the current value 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > getPortfolioSummary > splits registered and non-registered balances 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > getPortfolioSummary > counts remaining room only on registered accounts 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > getPortfolioSummary > counts active accounts 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > getPortfolioSummary > scores the sample portfolio at 75 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > health score rules > reaches the maximum of 100 when every bonus applies 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > health score rules > stays at the base score of 50 when no bonus applies 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > health score rules > adds 10 when registered accounts are over half the portfolio 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > health score rules > adds 20 when registered accounts are over 70% of the portfolio 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > health score rules > adds 10 for contribution room utilisation between 40% and 60% 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > health score rules > adds 15 for contribution room utilisation above 60% 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > health score rules > does not return NaN when there are no registered limits 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > suggests TFSA and taxable-account actions for the sample portfolio 12ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > flags TFSA room only above 40,000 1ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > recommends the FHSA only with a home goal and room left 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > recommends the RRSP deduction only above 70,000 income 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > needs more than 10,000 of RRSP room for the RRSP recommendation 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > flags taxable exposure only with a large balance and registered room 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > suggests automation only above a 500 monthly budget 1ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > returns every recommendation in priority order when all rules apply 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > never returns more than six recommendations 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateRecommendations > returns nothing for an empty account list 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > returns no plan without a monthly budget 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > splits a 1,000 budget between TFSA and the personal account when income is unknown 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > adds an RRSP step with its tax saving for incomes above 60,000 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > skips the RRSP at exactly 60,000 income 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > puts the FHSA first for a home goal and caps it at 40% of the budget 1ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > skips the FHSA when the account has no room left 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > numbers priorities consecutively from 1 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > does not create a personal-account step when 50 or less is left 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateContributionPlan > never plans more than the monthly budget 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > reports unused room, a missing contribution plan, and strong performance for the sample portfolio 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > stops warning about a contribution plan once a budget is set 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > flags high taxable exposure above 40% when registered room is open 2ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > celebrates a fully used FHSA only with a home goal 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > marks a missing FHSA as critical for a home buyer 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > flags retirement pacing when under 20 years remain and the RRSP is small 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > does not flag retirement pacing once the RRSP is large 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > drops the strong-performance insight when any account lost money 0ms
+ ✓ src/features/portfolio/services/portfolioService.test.ts > generateInsights > reports the total unused room in the metric 0ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > normalises the symbol and starts enabled 30ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > stores the threshold as a number 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > saves rules so they can be read back 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > lists the newest rule first 2ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > gives every rule a unique id 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > can disable and re-enable a rule 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > deletes a rule and leaves the others 2ms
+ ✓ src/features/alerts/services/alertRules.test.ts > alert rule storage > returns an empty list when nothing is stored 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > market snapshots without an API key > uses built-in fallback prices for known symbols 3ms
+ ✓ src/features/alerts/services/alertRules.test.ts > market snapshots without an API key > uses neutral defaults for unknown symbols 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > price_above fires at or over the threshold only 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > price_below fires at or under the threshold only 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > day_change_up fires when the gain reaches the threshold 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > day_change_down fires when the drop reaches the threshold 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > day_change_down never fires for a stock that is up 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > near_52w_high fires when the price is close enough to its high 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > near_52w_low fires when the price is close enough to its low 2ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > never fires for an invalid threshold of 0 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > when an alert fires > never fires for an invalid threshold of -5 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > skips disabled rules 2ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > stores the triggered alert as unread with a readable message 2ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > records when a rule last fired 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > does not fire the same rule again while an unread alert exists 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > respects the 30 minute cooldown after a rule fires 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > fetches each symbol only once when several rules share it 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > marks an alert as read 2ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > clears all triggered alerts 1ms
+ ✓ src/features/alerts/services/alertRules.test.ts > evaluateAndTriggerAlerts > removes a rule's triggered alerts when the rule is deleted 1ms
 
- Test Files  3 passed (3)
-      Tests  28 passed (28)
-   Start at  16:42:42
-   Duration  430ms (transform 108ms, setup 0ms, collect 147ms, tests 21ms, environment 0ms, prepare 147ms)
+ Test Files  7 passed (7)
+      Tests  144 passed (144)
+   Start at  18:10:17
+   Duration  513ms (transform 325ms, setup 0ms, collect 503ms, tests 131ms, environment 1ms, prepare 586ms)
 

@@ -38,3 +38,29 @@ describe("formatCompactNumber", () => {
     expect(formatCompactNumber(999.4)).toBe("999")
   })
 })
+
+describe("formatting edge cases", () => {
+  it("formats zero and negative currency", () => {
+    expect(formatCurrency(0)).toBe("$0")
+    expect(formatCurrency(-1500)).toBe("-$1,500")
+  })
+
+  it("rounds whole-dollar currency to the nearest dollar", () => {
+    expect(formatCurrency(1999.6)).toBe("$2,000")
+  })
+
+  it("treats zero as a non-negative percent", () => {
+    expect(formatPercent(0, 1)).toBe("+0.0%")
+  })
+
+  it("uses the requested number of decimals for percents", () => {
+    expect(formatPercent(12.3456, 0)).toBe("+12%")
+    expect(formatPercent(12.3456, 3)).toBe("+12.346%")
+  })
+
+  it("switches compact formatting exactly at the thresholds", () => {
+    expect(formatCompactNumber(1000)).toBe("1.0K")
+    expect(formatCompactNumber(1000000)).toBe("1.0M")
+    expect(formatCompactNumber(0)).toBe("0")
+  })
+})

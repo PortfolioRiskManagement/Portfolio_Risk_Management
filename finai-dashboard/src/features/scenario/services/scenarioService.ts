@@ -253,7 +253,7 @@ class ScenarioService {
 					symbol: position.symbol || position.ticker,
 					quantity: position.quantity || position.shares,
 					currentValue: position.marketValue || position.value,
-					assetClass: this.determineAssetClass(position.symbol)
+					assetClass: this.determineAssetClass(position.symbol || position.ticker)
 				})
 			})
 		})

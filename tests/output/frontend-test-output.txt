@@ -5,15 +5,37 @@
 
  RUN  v3.2.4 /Users/henrysaber/Downloads/Capstone/Portfolio_Risk_Management/finai-dashboard
 
+ ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels price_above as Price Above 1ms
+ ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels price_below as Price Below 0ms
+ ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels day_change_up as Daily Gain >= X% 0ms
+ ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels day_change_down as Daily Drop >= X% 0ms
+ ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels near_52w_high as Near 52-Week High 0ms
+ ✓ src/features/alerts/services/userAlertsService.test.ts > getConditionLabel > labels near_52w_low as Near 52-Week Low 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > INSTITUTIONS > has unique ids and a card list per institution 1ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > INSTITUTIONS > only contains cards that point back to their institution 1ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > INSTITUTIONS > gives every card a unique id 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > scoreCards > returns every card with a numeric score, best first 1ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > scoreCards > does not mutate the input cards 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > scoreCards > favours no-fee cards for someone who wants no fee 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > scoreCards > scores differently for different profiles 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > getTopPicks > returns three picks by default 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > getTopPicks > respects a custom count 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > getCardsByInstitution > returns the unscored list when there is no profile 0ms
+ ✓ src/features/creditcard/services/creditCardService.test.ts > getCardsByInstitution > keeps all institutions and scores their cards when a profile is given 0ms
  ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency without decimals 12ms
  ✓ src/utils/formatCurrency.test.ts > formatCurrency > formats CAD currency with two decimals 0ms
  ✓ src/utils/formatCurrency.test.ts > formatPercent > adds + for positive values 0ms
  ✓ src/utils/formatCurrency.test.ts > formatPercent > does not add + for negative values 0ms
  ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats values to K/M suffixes 0ms
  ✓ src/utils/formatCurrency.test.ts > formatCompactNumber > formats small values as whole numbers 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > formats zero and negative currency 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > rounds whole-dollar currency to the nearest dollar 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > treats zero as a non-negative percent 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > uses the requested number of decimals for percents 0ms
+ ✓ src/utils/formatCurrency.test.ts > formatting edge cases > switches compact formatting exactly at the thresholds 0ms
 
- Test Files  1 passed (1)
-      Tests  6 passed (6)
-   Start at  16:35:47
-   Duration  526ms (transform 24ms, setup 0ms, collect 22ms, tests 14ms, environment 0ms, prepare 43ms)
+ Test Files  3 passed (3)
+      Tests  28 passed (28)
+   Start at  16:42:42
+   Duration  430ms (transform 108ms, setup 0ms, collect 147ms, tests 21ms, environment 0ms, prepare 147ms)
 

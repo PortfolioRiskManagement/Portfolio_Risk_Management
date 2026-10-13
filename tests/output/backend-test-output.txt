@@ -164,4 +164,4 @@ tests/backend/test_edge_cases.py::test_inception_boundaries[SOL-USD-2020-03-23-T
 tests/backend/test_edge_cases.py::test_inception_boundaries[TSLA-2010-01-01-True] PASSED [ 99%]
 tests/backend/test_edge_cases.py::test_inception_boundaries[SPY-2000-01-01-False] PASSED [100%]
 
-============================= 157 passed in 1.14s ==============================
+============================= 157 passed in 1.62s ==============================

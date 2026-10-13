@@ -157,7 +157,7 @@ class ScenarioService {
 
 		// Calculate impact per asset
 		const affectedAssets = holdings.map(holding => {
-			const multiplier = multipliers[holding.assetClass] || -0.20
+			const multiplier = multipliers[holding.assetClass] ?? -0.20
 			const finalValue = holding.currentValue * (1 + multiplier)
 			const percentChange = multiplier * 100
 

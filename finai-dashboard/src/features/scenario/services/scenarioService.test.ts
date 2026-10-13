@@ -117,7 +117,23 @@ describe("fallback estimates", () => {
     expect((await impactFor("2008-financial-crisis")).maxDrawdown).toBeLessThan(0)
   })
 
-  it.todo("treats a 0% multiplier (such as bonds in the dot-com crash) as flat instead of falling back to -20%")
+  it.each([
+    ["dot-com-bubble", "crypto"],
+    ["black-monday-1987", "crypto"],
+    ["made-up", "bond"],
+  ] as const)("keeps a 0%% multiplier flat for %s %s instead of falling back to -20%%", async (scenarioId, assetClass) => {
+    const holding: PortfolioHolding = { symbol: "X", quantity: 1, currentValue: 1000, assetClass }
+    const result = await impactFor(scenarioId, [holding])
+
+    expect(result.totalReturn).toBe(0)
+    expect(result.affectedAssets[0].finalValue).toBe(1000)
+  })
+
+  it("still applies the default 20% loss to an unrecognised asset class", async () => {
+    const holding = { symbol: "X", quantity: 1, currentValue: 1000, assetClass: "unknown" } as unknown as PortfolioHolding
+
+    expect((await impactFor("2008-financial-crisis", [holding])).totalReturn).toBeCloseTo(-20, 5)
+  })
 })
 
 describe("searchAssets", () => {

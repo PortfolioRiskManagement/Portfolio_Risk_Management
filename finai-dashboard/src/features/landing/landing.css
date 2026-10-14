@@ -1,0 +1,209 @@
+/* Purpose: Motion and decorative styles for the public landing and auth pages. */
+
+/* Soft gradient blobs drifting behind the hero */
+.lp-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: lp-drift 18s ease-in-out infinite alternate;
+}
+
+html.dark .lp-blob {
+  opacity: 0.35;
+}
+
+@keyframes lp-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(40px, -30px, 0) scale(1.08); }
+  100% { transform: translate3d(-30px, 20px, 0) scale(0.96); }
+}
+
+/* Faint grid that fades out toward the edges */
+.lp-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(100, 116, 139, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(100, 116, 139, 0.12) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+}
+
+/* Brand gradient text with a slow shimmer */
+.lp-gradient-text {
+  background: linear-gradient(110deg, #3b82f6 0%, #6366f1 35%, #a855f7 65%, #3b82f6 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: lp-shimmer 6s linear infinite;
+}
+
+@keyframes lp-shimmer {
+  to { background-position: 200% center; }
+}
+
+/* Scroll-triggered entrance, toggled by the Reveal component */
+.lp-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--lp-delay, 0ms);
+}
+
+.lp-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero entrance on first paint */
+.lp-enter {
+  opacity: 0;
+  animation: lp-enter 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--lp-delay, 0ms);
+}
+
+@keyframes lp-enter {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Chart line draws itself once visible */
+.lp-draw {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+}
+
+.is-visible .lp-draw {
+  animation: lp-draw 2.2s cubic-bezier(0.65, 0, 0.35, 1) 0.3s forwards;
+}
+
+@keyframes lp-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.lp-fade-area {
+  opacity: 0;
+}
+
+.is-visible .lp-fade-area {
+  animation: lp-fade 1.2s ease 1.4s forwards;
+}
+
+@keyframes lp-fade {
+  to { opacity: 1; }
+}
+
+/* Bars that grow to their width (set with --lp-w) once visible */
+.lp-bar {
+  width: 0;
+  transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--lp-delay, 0ms);
+}
+
+.is-visible .lp-bar {
+  width: var(--lp-w);
+}
+
+/* Floating callout chips around the product preview */
+.lp-float {
+  animation: lp-float 6s ease-in-out infinite;
+}
+
+.lp-float-delayed {
+  animation: lp-float 7s ease-in-out 1.2s infinite;
+}
+
+@keyframes lp-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Pulsing live dot */
+.lp-pulse {
+  position: relative;
+}
+
+.lp-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: lp-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes lp-ping {
+  75%, 100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Endless scrolling strip of account providers */
+.lp-marquee {
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+.lp-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: lp-marquee 32s linear infinite;
+}
+
+.lp-marquee:hover .lp-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes lp-marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* Card lift on hover */
+.lp-lift {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.lp-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -20px rgba(79, 70, 229, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-blob,
+  .lp-gradient-text,
+  .lp-float,
+  .lp-float-delayed,
+  .lp-pulse::after,
+  .lp-marquee-track {
+    animation: none;
+  }
+
+  .lp-reveal,
+  .lp-enter {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+
+  .lp-draw {
+    stroke-dashoffset: 0;
+  }
+
+  .is-visible .lp-draw,
+  .is-visible .lp-fade-area {
+    animation: none;
+  }
+
+  .lp-fade-area {
+    opacity: 1;
+  }
+
+  .lp-bar {
+    width: var(--lp-w);
+    transition: none;
+  }
+}

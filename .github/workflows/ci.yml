@@ -1,0 +1,78 @@
+# Purpose: Run backend/frontend lint/build/tests on every push and pull request.
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  backend:
+    name: Backend Tests (Python)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run backend tests
+        run: |
+          mkdir -p tests/output
+          pytest tests/backend -v | tee tests/output/backend-test-output.txt
+
+      - name: Upload backend test output
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-output
+          path: tests/output/backend-test-output.txt
+
+  frontend:
+    name: Frontend Build and Tests (React)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: finai-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: finai-dashboard
+        run: npm ci
+
+      - name: Lint
+        working-directory: finai-dashboard
+        run: npm run lint
+
+      - name: Build
+        working-directory: finai-dashboard
+        run: npm run build
+
+      - name: Run frontend tests
+        working-directory: finai-dashboard
+        run: |
+          mkdir -p ../tests/output
+          npm run test:ci | tee ../tests/output/frontend-test-output.txt
+
+      - name: Upload frontend test output
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-output
+          path: tests/output/frontend-test-output.txt

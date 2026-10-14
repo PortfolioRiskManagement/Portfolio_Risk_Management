@@ -13,12 +13,7 @@ type Props = {
 }
 
 export default function PortfolioEditorModal({ isOpen, onClose, onAnalyze, loading }: Props) {
-    const [portfolio, setPortfolio] = useState<PortfolioItem[]>([
-        { Ticker: "AAPL", Weight: 25 },
-        { Ticker: "MSFT", Weight: 25 },
-        { Ticker: "GOOGL", Weight: 25 },
-        { Ticker: "TSLA", Weight: 25 },
-    ])
+    const [portfolio, setPortfolio] = useState<PortfolioItem[]>([])
     const [newTicker, setNewTicker] = useState("")
     const [newWeight, setNewWeight] = useState(10)
 

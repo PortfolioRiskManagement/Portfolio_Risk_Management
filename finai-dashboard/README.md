@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# FINAI Dashboard (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<!-- Purpose: Help new contributors quickly navigate and run the React dashboard layer. -->
 
-Currently, two official plugins are available:
+## What this folder contains
+This directory hosts the React + TypeScript + Vite frontend for portfolio risk interpretation.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Primary responsibilities:
+- Render dashboard pages and feature views
+- Call backend API services
+- Present risk metrics, charts, and scenario outcomes
 
-## React Compiler
+## Quick navigation
+- App entry: [src/app/main.tsx](src/app/main.tsx)
+- App wrapper/providers: [src/app/App.tsx](src/app/App.tsx)
+- Route definitions: [src/app/routes.tsx](src/app/routes.tsx)
+- Shared UI components: [src/components/](src/components/)
+- Feature modules: [src/features/](src/features/)
+- API client: [src/services/apiClient.ts](src/services/apiClient.ts)
+- Utilities: [src/utils/](src/utils/)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Local development
+Install dependencies:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Start dev server:
+```bash
+npm run dev
 ```
+
+Build production bundle:
+```bash
+npm run build
+```
+
+## Frontend quality checks
+Lint:
+```bash
+npm run lint
+```
+
+Unit tests (Vitest):
+```bash
+npm run test
+```
+
+CI test run mode:
+```bash
+npm run test:ci
+```
+
+## Notes for reviewers
+- This folder is intentionally organized by feature to keep domain logic discoverable.
+- Tests currently focus on deterministic utility logic and can be expanded to component and page-level tests.

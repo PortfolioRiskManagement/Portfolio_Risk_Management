@@ -1,0 +1,17 @@
+# Purpose: Ignore generated local artifacts that should not be committed.
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+.venv/
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/

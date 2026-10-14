@@ -127,9 +127,9 @@ function detectImpact(headline: string, summary: string, relatedTickers: string[
 		"sector",
 	]
 
-	if (highWords.some((word) => text.includes(word))) return "high"
+	if (highWords.some((word) => containsWord(text, word))) return "high"
 	if (relatedTickers.length >= 2) return "high"
-	if (mediumWords.some((word) => text.includes(word))) return "medium"
+	if (mediumWords.some((word) => containsWord(text, word))) return "medium"
 
 	return "low"
 }
@@ -147,9 +147,6 @@ function pickQuoteTickers(tickers: string[]): string[] {
 	if (tickers.length <= MAX_QUOTE_TICKERS) return tickers
 
 	const chosen: string[] = []
-
-	// Keep META included when available because user requested META move visibility.
-	if (tickers.includes("META")) chosen.push("META")
 
 	// Rotate through remaining tickers so all holdings get quote coverage over time.
 	const start = quoteRotationCursor % tickers.length
@@ -213,6 +210,27 @@ function detectCategory(
 	return "market"
 }
 
+const COMPANY_SUFFIXES = /\b(inc|incorporated|corp|corporation|co|company|ltd|limited|plc|holdings|group|class [a-c]|common stock|etf|trust)\b\.?/g
+
+function cleanCompanyName(name: string) {
+	return name.toLowerCase().replace(COMPANY_SUFFIXES, "").replace(/[,.]/g, " ").replace(/\s+/g, " ").trim()
+}
+
+function escapeRegExp(text: string) {
+	return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+/** Whole-word match so "META" doesn't hit "metal" and "ETH" doesn't hit "whether". */
+function containsWord(text: string, phrase: string) {
+	return new RegExp(`(^|[^a-z0-9])${escapeRegExp(phrase.toLowerCase())}([^a-z0-9]|$)`).test(text)
+}
+
+/** Finnhub has no company news or quotes for crypto. */
+export function isCryptoTicker(ticker: string) {
+	const t = normalizeTicker(ticker)
+	return t.endsWith("-USD") || ["BTC", "ETH", "SOL", "ADA", "DOGE", "XRP", "LTC"].includes(t)
+}
+
 function buildAliasMap(tickers: string[], holdings?: PortfolioHolding[]) {
 	const aliasMap = new Map<string, string[]>()
 
@@ -222,15 +240,10 @@ function buildAliasMap(tickers: string[], holdings?: PortfolioHolding[]) {
 
 		const holding = holdings?.find((h) => normalizeTicker(h.ticker) === ticker)
 
-		if (holding?.companyName) {
-			aliases.add(holding.companyName.toLowerCase())
-
-			holding.companyName
-				.toLowerCase()
-				.split(/\s+/)
-				.filter((word) => word.length > 2)
-				.forEach((word) => aliases.add(word))
-		}
+		// Match on the distinctive part of the name ("Apple Inc." -> "apple"). Matching each
+		// word separately made "corporation", "etf", "500" etc. tag unrelated headlines.
+		const cleanedName = holding?.companyName ? cleanCompanyName(holding.companyName) : ""
+		if (cleanedName.length > 2) aliases.add(cleanedName)
 
 		if (ticker === "GOOGL" || ticker === "GOOG") {
 			aliases.add("google")
@@ -242,6 +255,9 @@ function buildAliasMap(tickers: string[], holdings?: PortfolioHolding[]) {
 		if (ticker === "MSFT") aliases.add("microsoft")
 		if (ticker === "TSLA") aliases.add("tesla")
 		if (ticker === "NVDA") aliases.add("nvidia")
+		if (ticker === "BTC" || ticker === "BTC-USD") aliases.add("bitcoin")
+		if (ticker === "ETH" || ticker === "ETH-USD") aliases.add("ethereum")
+		if (ticker === "SPY") aliases.add("s&p 500")
 		if (ticker === "GLD" || ticker === "XAUUSD") {
 			aliases.add("gold")
 			aliases.add("bullion")
@@ -265,7 +281,7 @@ function matchRelatedTickers(
 	const matches: string[] = []
 
 	for (const [ticker, aliases] of aliasMap.entries()) {
-		if (aliases.some((alias) => text.includes(alias.toLowerCase()))) {
+		if (aliases.some((alias) => containsWord(text, alias))) {
 			matches.push(ticker)
 		}
 	}
@@ -362,16 +378,54 @@ function sortAlerts(alerts: Alert[]): Alert[] {
 	})
 }
 
+function buildFallbackAlerts(tickers: string[]): Alert[] {
+	const now = Date.now()
+	const topTickers = tickers.slice(0, 4)
+
+	const seeded: Alert[] = [
+		{
+			id: "fallback-market-1",
+			title: "Market snapshot unavailable",
+			description:
+				"Live news is currently unavailable because the Finnhub API key is not configured. Add VITE_FINNHUB_API_KEY in your .env.local to enable real-time alerts.",
+			source: "FIN/AI Local",
+			timestamp: new Date(now - 5 * 60 * 1000).toISOString(),
+			impact: "low",
+			category: "market",
+			relatedTickers: [],
+		},
+	]
+
+	for (let i = 0; i < topTickers.length; i++) {
+		const ticker = topTickers[i]
+		seeded.push({
+			id: `fallback-stock-${ticker}`,
+			title: `${ticker} monitoring enabled`,
+			description:
+				"Live quote/news fetching is disabled until API credentials are configured. This placeholder confirms your holding is being tracked.",
+			source: "FIN/AI Local",
+			timestamp: new Date(now - (i + 1) * 10 * 60 * 1000).toISOString(),
+			impact: "low",
+			category: "stock",
+			relatedTickers: [ticker],
+			link: `https://finance.yahoo.com/quote/${ticker}`,
+		})
+	}
+
+	return sortAlerts(seeded)
+}
+
 export async function fetchPortfolioAlerts(
 	portfolioTickers: string[],
 	portfolioHoldings: PortfolioHolding[] = []
 ): Promise<Alert[]> {
+	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
+
 	if (!FINNHUB_API_KEY) {
-		throw new Error("Missing VITE_FINNHUB_API_KEY")
+		return buildFallbackAlerts(tickers)
 	}
 
-	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
-	const limitedTickers = tickers.slice(0, MAX_TICKERS)
+	const limitedTickers = tickers.filter((ticker) => !isCryptoTicker(ticker)).slice(0, MAX_TICKERS)
 	const quoteTickers = pickQuoteTickers(limitedTickers)
 
 	const [marketNews, companyNewsResults, quoteResults] = await Promise.all([
@@ -405,12 +459,13 @@ export async function fetchPortfolioOnlyAlerts(
 	portfolioTickers: string[],
 	portfolioHoldings: PortfolioHolding[] = []
 ): Promise<Alert[]> {
+	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
+
 	if (!FINNHUB_API_KEY) {
-		throw new Error("Missing VITE_FINNHUB_API_KEY")
+		return buildFallbackAlerts(tickers).filter((alert) => alert.relatedTickers.length > 0)
 	}
 
-	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
-	const limitedTickers = tickers.slice(0, MAX_TICKERS)
+	const limitedTickers = tickers.filter((ticker) => !isCryptoTicker(ticker)).slice(0, MAX_TICKERS)
 	const quoteTickers = pickQuoteTickers(limitedTickers)
 
 	const [companyNewsResults, quoteResults] = await Promise.all([
@@ -436,4 +491,27 @@ export async function fetchPortfolioOnlyAlerts(
 	)
 
 	return sortAlerts(merged)
+}
+
+/** High-impact company news about the given holdings from the last `hoursBack` hours. */
+export async function fetchHoldingNews(
+	portfolioTickers: string[],
+	portfolioHoldings: PortfolioHolding[] = [],
+	hoursBack = 24
+): Promise<Alert[]> {
+	if (!FINNHUB_API_KEY) return []
+
+	const tickers = [...new Set(portfolioTickers.map(normalizeTicker))].filter(Boolean)
+	const newsTickers = tickers.filter((ticker) => !isCryptoTicker(ticker)).slice(0, MAX_TICKERS)
+	const results = await Promise.all(newsTickers.map((ticker) => fetchCompanyNews(ticker, 2).catch(() => [])))
+	const cutoff = Date.now() - hoursBack * 60 * 60 * 1000
+
+	return uniqueBy(
+		results
+			.flat()
+			.map((item) => mapNewsToAlert(item, tickers, portfolioHoldings))
+			.filter((alert) => alert.impact === "high" && alert.relatedTickers.length > 0)
+			.filter((alert) => new Date(alert.timestamp).getTime() >= cutoff),
+		(alert) => alert.id
+	)
 }

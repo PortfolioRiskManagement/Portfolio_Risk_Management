@@ -1,184 +1,169 @@
-import { NavLink } from "react-router-dom"
-import { useLoading } from "../../contexts/LoadingContext"
+import { Link, NavLink } from "react-router-dom"
+import Icon, { type IconName } from "../ui/Icon"
+import { useHoldingAlerts } from "../../features/alerts/hooks/useHoldingAlerts"
 
-export default function Sidebar() {
-	const { triggerLoading } = useLoading()
+interface SidebarProps {
+	isCollapsed: boolean
+	onToggle: () => void
+	/** Drawer state on small screens, where the sidebar slides over the page. */
+	isMobileOpen: boolean
+	onMobileClose: () => void
+}
 
-	const handleLogoClick = () => {
-		triggerLoading()
-	}
+type NavItem = { to: string; label: string; icon: IconName; end?: boolean }
+
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
+	{
+		label: "Overview",
+		items: [
+			{ to: "/dashboard", label: "Dashboard", icon: "dashboard", end: true },
+			{ to: "/portfolio", label: "Portfolio", icon: "portfolio" },
+			{ to: "/assets", label: "Assets", icon: "assets" },
+		],
+	},
+	{
+		label: "Insights",
+		items: [
+			{ to: "/advisor", label: "AI Advisor", icon: "advisor" },
+			{ to: "/scenario", label: "Scenario Lab", icon: "scenario" },
+			{ to: "/news", label: "News & Impact", icon: "news" },
+			{ to: "/alerts", label: "Alerts", icon: "bell" },
+		],
+	},
+	{
+		label: "Tools",
+		items: [
+			{ to: "/creditcard", label: "Credit Cards", icon: "card" },
+			{ to: "/connections", label: "Connections", icon: "link" },
+			{ to: "/settings", label: "Settings", icon: "settings" },
+		],
+	},
+]
+
+function navItemClassName(isActive: boolean, isCollapsed: boolean) {
+	return `group relative flex items-center gap-3 rounded-xl py-2 text-sm transition-colors ${
+		isCollapsed ? "justify-center px-0" : "px-3"
+	} ${
+		isActive
+			? "bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 font-semibold text-indigo-700 dark:from-blue-500/15 dark:via-indigo-500/15 dark:to-purple-500/15 dark:text-white"
+			: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
+	}`
+}
+
+export default function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: SidebarProps) {
+	// The drawer always shows labels; collapsing only applies on large screens.
+	const collapsed = isCollapsed && !isMobileOpen
+	const { unreadCount } = useHoldingAlerts()
 
 	return (
-		<aside className="w-64 bg-zinc-900 border-r border-zinc-800 text-white p-6">
-			<style>{`
-				.logo-wrap {
-					display: inline-flex;
-					flex-direction: column;
-					align-items: center;
-					gap: 4px;
-					cursor: pointer;
-				}
+		<>
+			{isMobileOpen && (
+				<div className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden" onClick={onMobileClose} aria-hidden="true" />
+			)}
 
-				.logo-badge {
-					background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #a855f7 100%);
-					border-radius: 8px;
-					padding: 5px 12px;
-					transition: all 0.3s ease;
-					position: relative;
-					overflow: hidden;
-					display: inline-flex;
-					align-items: center;
-					justify-content: center;
-					box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-					border: 1px solid rgba(255, 255, 255, 0.1);
-				}
-
-				.logo-badge::before {
-					content: '';
-					position: absolute;
-					top: 0;
-					left: 0;
-					right: 0;
-					height: 50%;
-					background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
-					border-radius: 12px 12px 0 0;
-				}
-
-				.logo-badge:hover {
-					box-shadow: 0 6px 16px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-					transform: translateY(-1px) scale(1.01);
-				}
-
-				.logo-text {
-					font-size: 22px;
-					font-weight: 900;
-					color: white;
-					text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-					position: relative;
-					z-index: 1;
-					letter-spacing: 0.8px;
-					line-height: 1;
-				}
-
-				.logo-subtitle {
-					font-size: 9px;
-					text-transform: uppercase;
-					background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #a855f7 100%);
-					-webkit-background-clip: text;
-					background-clip: text;
-					-webkit-text-fill-color: transparent;
-					letter-spacing: 1px;
-					position: relative;
-					z-index: 1;
-					font-weight: 600;
-				}
-			`}</style>
-
-			<div className="mb-8">
+			<aside
+				className={`fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-zinc-200/80 bg-white/95 backdrop-blur-xl transition-all duration-300 dark:border-white/[0.06] dark:bg-zinc-950/95 ${
+					collapsed ? "w-[72px]" : "w-64"
+				} ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+			>
 				<button
-					onClick={handleLogoClick}
-					className="logo-wrap"
-					title="Click to reload"
+					onClick={onToggle}
+					className="absolute right-0 top-[30px] z-50 hidden h-6 w-6 translate-x-1/2 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-colors hover:text-zinc-900 lg:flex dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+					title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+					aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+					type="button"
 				>
-					<span className="logo-badge">
-						<span className="logo-text">FIN/AI</span>
-					</span>
-					<span className="logo-subtitle">Intelligence Overlay</span>
+					<Icon name="chevronLeft" className={`h-3.5 w-3.5 transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`} />
 				</button>
-			</div>
-			<nav className="space-y-1 text-zinc-400">
-				<NavLink
-					to="/"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-					end
-				>
-					📊 Dashboard
-				</NavLink>
-				<NavLink
-					to="/portfolio"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					💼 Portfolio
-				</NavLink>
-				<NavLink
-					to="/assets"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					📈 Assets
-				</NavLink>
-				<NavLink
-					to="/advisor"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					🤖 AI Advisor
-				</NavLink>
-				<NavLink
-					to="/news"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					📰 News & Impact
-				</NavLink>
-				<NavLink
-					to="/scenario"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					🧪 Scenario Lab
-				</NavLink>
-				<NavLink
-					to="/alerts"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					🔔 Alerts
-				</NavLink>
-				<NavLink
-					to="/connections"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					🔗 Connections
-				</NavLink>
-				<NavLink
-					to="/settings"
-					className={({ isActive }) =>
-						`block py-2 px-3 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors ${
-							isActive ? "bg-zinc-800 text-white font-medium" : ""
-						}`
-					}
-				>
-					⚙️ Settings
-				</NavLink>
-			</nav>
-		</aside>
+
+				{/* Brand */}
+				<div className={`flex h-[76px] shrink-0 items-center ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
+					<Link to="/dashboard" onClick={onMobileClose} className="group inline-flex items-center gap-3" aria-label="FIN/AI dashboard">
+						<span className="relative inline-flex items-center justify-center overflow-hidden rounded-lg border border-white/15 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 px-2.5 py-1.5 shadow-lg shadow-indigo-500/20 transition-transform duration-300 group-hover:-translate-y-0.5">
+							<span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
+							<span className="relative text-base font-black leading-none tracking-wide text-white">{collapsed ? "F/A" : "FIN/AI"}</span>
+						</span>
+						{!collapsed && (
+							<span className="text-[10px] font-semibold uppercase leading-tight tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+								Intelligence
+								<br />
+								Overlay
+							</span>
+						)}
+					</Link>
+					{isMobileOpen && (
+						<button
+							type="button"
+							onClick={onMobileClose}
+							className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 lg:hidden dark:text-zinc-400 dark:hover:bg-white/5"
+							aria-label="Close menu"
+						>
+							<Icon name="close" className="h-5 w-5" />
+						</button>
+					)}
+				</div>
+
+				{/* Navigation */}
+				<nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-6 pt-2">
+					{NAV_GROUPS.map((group) => (
+						<div key={group.label}>
+							{collapsed ? (
+								<div className="mx-auto mb-2 h-px w-6 bg-zinc-200 dark:bg-white/10" />
+							) : (
+								<div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">
+									{group.label}
+								</div>
+							)}
+							<div className="space-y-0.5">
+								{group.items.map((item) => (
+									<NavLink
+										key={item.to}
+										to={item.to}
+										end={item.end}
+										title={item.label}
+										onClick={onMobileClose}
+										className={({ isActive }) => navItemClassName(isActive, collapsed)}
+									>
+										{({ isActive }) => (
+											<>
+												{isActive && (
+													<span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-gradient-to-b from-blue-500 to-purple-500" />
+												)}
+												<Icon
+													name={item.icon}
+													className={`h-[18px] w-[18px] shrink-0 ${isActive ? "text-indigo-600 dark:text-indigo-300" : ""}`}
+												/>
+												{!collapsed && <span className="truncate">{item.label}</span>}
+												{item.to === "/alerts" && unreadCount > 0 && (
+													<span
+														className={`rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold leading-4 text-white ${collapsed ? "absolute right-1.5 top-1" : "ml-auto"}`}
+														aria-label={`${unreadCount} unread alerts`}
+													>
+														{unreadCount > 9 ? "9+" : unreadCount}
+													</span>
+												)}
+											</>
+										)}
+									</NavLink>
+								))}
+							</div>
+						</div>
+					))}
+				</nav>
+
+				{/* Trust note */}
+				{!collapsed && (
+					<div className="m-3 rounded-2xl border border-zinc-200/80 bg-gradient-to-br from-blue-500/[0.06] via-indigo-500/[0.06] to-purple-500/[0.08] p-4 dark:border-white/[0.06]">
+						<div className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-white">
+							<Icon name="shield" className="h-4 w-4 text-indigo-500" />
+							Read-only access
+						</div>
+						<p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+							FIN/AI can never move money or place trades.
+						</p>
+					</div>
+				)}
+			</aside>
+		</>
 	)
 }

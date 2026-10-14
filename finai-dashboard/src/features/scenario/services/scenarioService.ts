@@ -157,7 +157,7 @@ class ScenarioService {
 
 		// Calculate impact per asset
 		const affectedAssets = holdings.map(holding => {
-			const multiplier = multipliers[holding.assetClass] || -0.20
+			const multiplier = multipliers[holding.assetClass] ?? -0.20
 			const finalValue = holding.currentValue * (1 + multiplier)
 			const percentChange = multiplier * 100
 
@@ -253,7 +253,7 @@ class ScenarioService {
 					symbol: position.symbol || position.ticker,
 					quantity: position.quantity || position.shares,
 					currentValue: position.marketValue || position.value,
-					assetClass: this.determineAssetClass(position.symbol)
+					assetClass: this.determineAssetClass(position.symbol || position.ticker)
 				})
 			})
 		})

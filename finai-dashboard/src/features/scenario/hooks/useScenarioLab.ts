@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import scenarioService from '../services/scenarioService'
 import type { ScenarioImpact, PortfolioHolding } from '../types/scenario.types'
 import { useHoldings, type Holding } from '../../portfolio/hooks/useHoldings'
+import { useLivePrices } from '../../portfolio/hooks/useLivePrice'
 
 type PortfolioViewModel = {
 	totalValue: number
@@ -31,8 +32,9 @@ function inferAssetClass(type?: string): PortfolioHolding['assetClass'] {
 	return ASSET_TYPE_MAP[key] ?? 'stock'
 }
 
-function convertSharedHoldingToScenarioHolding(holding: Holding): PortfolioHolding {
-	const currentValue = Math.max(0, holding.quantity * holding.entry)
+function convertSharedHoldingToScenarioHolding(holding: Holding, price: number | undefined): PortfolioHolding {
+	// Live price; what was paid until the quote loads
+	const currentValue = Math.max(0, holding.quantity * (price ?? holding.entry))
 
 	return {
 		symbol: holding.symbol.toUpperCase(),
@@ -62,6 +64,7 @@ function buildPortfolioViewModel(nextHoldings: PortfolioHolding[]): PortfolioVie
 
 export function useScenarioLab() {
 	const { holdings: sharedHoldings } = useHoldings()
+	const prices = useLivePrices(sharedHoldings.map((h) => h.symbol))
 	const [currentPortfolio, setCurrentPortfolio] = useState<PortfolioViewModel | null>(null)
 	const [holdings, setHoldings] = useState<PortfolioHolding[]>([])
 	const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
@@ -70,12 +73,20 @@ export function useScenarioLab() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
+	// Set once the user edits the what-if portfolio, so price refreshes don't wipe their edits
+	const editedRef = useRef(false)
+
+	useEffect(() => {
+		editedRef.current = false
+	}, [sharedHoldings])
+
 	// Keep Scenario Lab portfolio in sync with the shared holdings used across app pages.
 	useEffect(() => {
-		const scenarioHoldings = sharedHoldings.map(convertSharedHoldingToScenarioHolding)
+		if (editedRef.current) return
+		const scenarioHoldings = sharedHoldings.map((h) => convertSharedHoldingToScenarioHolding(h, prices[h.symbol.toUpperCase()]))
 		setHoldings(scenarioHoldings)
 		setCurrentPortfolio(buildPortfolioViewModel(scenarioHoldings))
-	}, [sharedHoldings])
+	}, [sharedHoldings, prices])
 
 	const runScenario = async (scenarioId: string) => {
 		if (!holdings.length) {
@@ -112,6 +123,7 @@ export function useScenarioLab() {
 	}
 
 	const updateHoldings = (newHoldings: PortfolioHolding[]) => {
+		editedRef.current = true
 		setHoldings(newHoldings)
 		setCurrentPortfolio(buildPortfolioViewModel(newHoldings))
 	}

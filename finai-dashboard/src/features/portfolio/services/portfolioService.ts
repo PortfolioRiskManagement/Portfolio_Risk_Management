@@ -1,5 +1,6 @@
 import type {
   Account,
+  AccountType,
   PortfolioSummary,
   UserProfile,
   ContributionPlan,
@@ -7,78 +8,138 @@ import type {
   PortfolioInsight,
 } from '../types/portfolio.types'
 
-// Mock data for demonstration
-export const mockAccounts: Account[] = [
+import { calculateFhsaRoom, calculateRrspRoom, calculateTfsaRoom, type RoomResult } from './contributionRules'
+
+type AccountBase = Pick<Account, 'id' | 'type' | 'name' | 'purpose' | 'taxBenefit' | 'priority'>
+
+/** A holding's live market value and what was paid for it. */
+export type Position = { account: AccountType; value: number; cost: number }
+
+export const ACCOUNT_DEFINITIONS: AccountBase[] = [
   {
     id: '1',
     type: 'RRSP',
     name: 'Registered Retirement Savings Plan',
-    balance: 48520,
-    gain: 14234,
-    gainPercent: 41.5,
-    contributionRoom: 15230,
-    contributionUsed: 12000,
-    contributionLimit: 27230,
     purpose: 'Tax-deferred retirement savings account',
     taxBenefit: 'Contributions are tax-deductible. Growth is tax-deferred until withdrawal.',
-    status: 'normal',
     priority: 2,
-    recommendedAction: 'Continue contributions at current pace. Consider maximizing before year-end for tax deduction.',
   },
   {
     id: '2',
     type: 'TFSA',
     name: 'Tax-Free Savings Account',
-    balance: 31250,
-    gain: 7812,
-    gainPercent: 33.3,
-    contributionRoom: 70000,
-    contributionUsed: 25000,
-    contributionLimit: 95000,
     purpose: 'Tax-free investment growth and withdrawals',
-    taxBenefit: 'No tax on growth or withdrawals. Ideal for flexibility and tax-free compounding.',
-    status: 'underused',
+    taxBenefit: 'No tax on growth or withdrawals. Withdrawals are added back to your room the next January.',
     priority: 1,
-    recommendedAction: 'Strong underutilization detected. Prioritize TFSA contributions for maximum tax-free growth.',
   },
   {
     id: '3',
     type: 'FHSA',
     name: 'First Home Savings Account',
-    balance: 8000,
-    gain: 256,
-    gainPercent: 3.3,
-    contributionRoom: 0,
-    contributionUsed: 8000,
-    contributionLimit: 8000,
     purpose: 'Tax-free savings for your first home purchase',
-    taxBenefit: 'Contributions are tax-deductible and withdrawals for first home are tax-free.',
-    status: 'optimized',
+    taxBenefit: 'Contributions are tax-deductible and withdrawals for a qualifying first home are tax-free.',
     priority: 3,
-    recommendedAction: 'Contribution limit reached for this year. Excellent progress toward home ownership goal.',
   },
   {
     id: '4',
     type: 'PERSONAL',
     name: 'Personal Investment Account',
-    balance: 44852,
-    gain: 5816,
-    gainPercent: 14.9,
-    contributionRoom: 0,
-    contributionUsed: 0,
-    contributionLimit: 0,
     purpose: 'Non-registered taxable investment account',
     taxBenefit: 'Capital gains taxed at 50%. Dividends receive favorable tax treatment.',
-    status: 'normal',
     priority: 4,
-    recommendedAction: 'Consider moving future contributions to registered accounts to maximize tax efficiency.',
   },
 ]
+
+/**
+ * Contribution history from the profile; until it's filled in, assume what was paid for the
+ * holdings in the account is what was contributed.
+ */
+function roomFor(type: AccountType, profile: UserProfile, year: number, costBasis: number): RoomResult | null {
+  const age = profile.age ?? 0
+  if (type === 'TFSA') {
+    return calculateTfsaRoom({
+      age,
+      year,
+      totalContributions: profile.tfsaContributions ?? costBasis,
+      withdrawalsBeforeThisYear: profile.tfsaWithdrawals ?? 0,
+    })
+  }
+  if (type === 'FHSA') {
+    return calculateFhsaRoom({
+      age,
+      year,
+      yearOpened: profile.fhsaYearOpened,
+      contributionsBeforeThisYear: profile.fhsaContributionsBeforeThisYear ?? costBasis,
+      contributionsThisYear: profile.fhsaContributionsThisYear ?? 0,
+    })
+  }
+  if (type === 'RRSP') {
+    return calculateRrspRoom({
+      year,
+      annualIncome: profile.annualIncome ?? 0,
+      deductionLimitFromNoa: profile.rrspDeductionLimit,
+      contributionsThisYear: profile.rrspContributionsThisYear ?? 0,
+    })
+  }
+  return null
+}
+
+function statusFor(room: RoomResult): Account['status'] {
+  if (room.remaining < 0) return 'overused'
+  if (room.limit === 0) return 'normal'
+  if (room.remaining === 0) return 'optimized'
+  if (room.remaining / room.limit > 0.5) return 'underused'
+  return 'normal'
+}
+
+function actionFor(type: AccountType, room: RoomResult): string {
+  const left = `$${Math.abs(room.remaining).toLocaleString()}`
+  if (room.remaining < 0) {
+    return `Over-contributed by ${left}. CRA charges 1% per month on the excess until it's withdrawn.`
+  }
+  if (type === 'FHSA' && room.limit === 0) return 'Open an FHSA to start building room. Unused room only carries forward after the account exists.'
+  if (room.remaining === 0) return 'No room left this year. New room is added on January 1.'
+  if (type === 'TFSA') return `${left} of TFSA room available. Unused room carries forward indefinitely.`
+  if (type === 'FHSA') return `${left} of FHSA room this year. Up to $8,000 of unused room carries into next year.`
+  return `${left} of RRSP room. Contributions until March 1 next year can be deducted on this year's return.`
+}
+
+/**
+ * Accounts with balances from the holdings in each one, and contribution room calculated
+ * from the profile using CRA rules.
+ */
+export function buildAccounts(profile: UserProfile, positions: Position[] = [], year = new Date().getFullYear()): Account[] {
+  return ACCOUNT_DEFINITIONS.map((def) => {
+    const inAccount = positions.filter((p) => p.account === def.type)
+    const balance = inAccount.reduce((sum, p) => sum + p.value, 0)
+    const cost = inAccount.reduce((sum, p) => sum + p.cost, 0)
+    const base = {
+      ...def,
+      balance,
+      gain: balance - cost,
+      gainPercent: cost > 0 ? ((balance - cost) / cost) * 100 : 0,
+    }
+
+    const room = roomFor(def.type, profile, year, cost)
+    if (!room) {
+      return { ...base, contributionRoom: 0, contributionUsed: 0, contributionLimit: 0, status: 'normal' as const }
+    }
+    return {
+      ...base,
+      contributionLimit: room.limit,
+      contributionUsed: room.used,
+      contributionRoom: room.remaining,
+      contributionNote: room.note,
+      status: statusFor(room),
+      recommendedAction: actionFor(base.type, room),
+    }
+  })
+}
 
 export function getPortfolioSummary(accounts: Account[]): PortfolioSummary {
   const totalValue = accounts.reduce((sum, acc) => sum + acc.balance, 0)
   const totalGain = accounts.reduce((sum, acc) => sum + acc.gain, 0)
-  const totalGainPercent = (totalGain / (totalValue - totalGain)) * 100
+  const totalGainPercent = totalValue - totalGain > 0 ? (totalGain / (totalValue - totalGain)) * 100 : 0
 
   const registeredTypes = ['RRSP', 'TFSA', 'FHSA']
   const registeredBalance = accounts
@@ -88,7 +149,7 @@ export function getPortfolioSummary(accounts: Account[]): PortfolioSummary {
 
   const contributionRoomRemaining = accounts
     .filter((acc) => acc.type !== 'PERSONAL')
-    .reduce((sum, acc) => sum + acc.contributionRoom, 0)
+    .reduce((sum, acc) => sum + Math.max(0, acc.contributionRoom), 0)
 
   // Calculate health score based on various factors
   const healthScore = calculateHealthScore(accounts, contributionRoomRemaining, registeredBalance, totalValue)
@@ -114,7 +175,7 @@ function calculateHealthScore(
   let score = 50 // Base score
 
   // Bonus for high registered account usage
-  const registeredPercent = (registeredBalance / totalValue) * 100
+  const registeredPercent = totalValue > 0 ? (registeredBalance / totalValue) * 100 : 0
   if (registeredPercent > 70) score += 20
   else if (registeredPercent > 50) score += 10
 
@@ -122,7 +183,7 @@ function calculateHealthScore(
   const totalContribLimit = accounts
     .filter((acc) => acc.type !== 'PERSONAL')
     .reduce((sum, acc) => sum + acc.contributionLimit, 0)
-  const utilizationPercent = ((totalContribLimit - contributionRoomRemaining) / totalContribLimit) * 100
+  const utilizationPercent = totalContribLimit > 0 ? ((totalContribLimit - contributionRoomRemaining) / totalContribLimit) * 100 : 0
   if (utilizationPercent > 60) score += 15
   else if (utilizationPercent > 40) score += 10
 

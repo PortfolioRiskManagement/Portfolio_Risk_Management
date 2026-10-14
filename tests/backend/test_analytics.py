@@ -362,3 +362,14 @@ def test_calculate_scenario_end_to_end_with_fake_prices(service) -> None:
     assert len(result["timeline"]) > 1
     assert result["maxDrawdown"] <= 0
     assert result["volatility"] >= 0
+
+
+def test_summary_report_works_with_fewer_assets_than_clusters(monkeypatch) -> None:
+    """A 2-asset portfolio should not crash PCA/KMeans, which default to 3 components and 4 clusters."""
+    two = ["AAPL", "MSFT"]
+    monkeypatch.setattr(portfolio_analyzer.yf, "download", lambda *a, **k: _fake_prices(tickers=two))
+
+    report = PortfolioAnalyzer({"AAPL": 0.5, "MSFT": 0.5}).get_summary_report()
+
+    clustered = [asset for members in report["pca_clustering"]["clusters"].values() for asset in members]
+    assert sorted(clustered) == two

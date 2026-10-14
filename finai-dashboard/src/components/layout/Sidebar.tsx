@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom"
 import Icon, { type IconName } from "../ui/Icon"
+import { useHoldingAlerts } from "../../features/alerts/hooks/useHoldingAlerts"
 
 interface SidebarProps {
 	isCollapsed: boolean
@@ -52,6 +53,7 @@ function navItemClassName(isActive: boolean, isCollapsed: boolean) {
 export default function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: SidebarProps) {
 	// The drawer always shows labels; collapsing only applies on large screens.
 	const collapsed = isCollapsed && !isMobileOpen
+	const { unreadCount } = useHoldingAlerts()
 
 	return (
 		<>
@@ -132,6 +134,14 @@ export default function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileC
 													className={`h-[18px] w-[18px] shrink-0 ${isActive ? "text-indigo-600 dark:text-indigo-300" : ""}`}
 												/>
 												{!collapsed && <span className="truncate">{item.label}</span>}
+												{item.to === "/alerts" && unreadCount > 0 && (
+													<span
+														className={`rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold leading-4 text-white ${collapsed ? "absolute right-1.5 top-1" : "ml-auto"}`}
+														aria-label={`${unreadCount} unread alerts`}
+													>
+														{unreadCount > 9 ? "9+" : unreadCount}
+													</span>
+												)}
 											</>
 										)}
 									</NavLink>

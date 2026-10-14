@@ -4,21 +4,12 @@ import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { useHoldings } from "../hooks/useHoldings"
 import AssetCard from "../components/AssetCard"
-
-// mock current prices
-const PRICES: Record<string, number> = {
-  AAPL: 185.4,
-  TSLA: 198.5,
-  BTC: 62500,
-  ETH: 3100,
-  SPY: 485.2,
-  MSFT: 410.5,
-  NVDA: 720.3,
-}
+import { useLivePrices } from "../hooks/useLivePrice"
 
 export default function PortfolioPage() {
   const navigate = useNavigate()
   const { holdings } = useHoldings()
+  const prices = useLivePrices(holdings.map(h => h.symbol))
   const [query, setQuery] = useState("")
   const [platformFilter, setPlatformFilter] = useState("All Platforms")
   const [typeFilter, setTypeFilter] = useState("All Types")
@@ -101,7 +92,8 @@ export default function PortfolioPage() {
             })
             .filter(h => {
               if (riskFilter === "All Risk Levels") return true
-              const current = PRICES[h.symbol] ?? 0
+              const current = prices[h.symbol]
+              if (current === undefined) return false
               const pct = h.entry > 0 ? ((current - h.entry) / h.entry) * 100 : 0
               if (riskFilter === "High") return pct <= 0
               if (riskFilter === "Medium") return pct > 0 && pct <= 30
@@ -110,7 +102,7 @@ export default function PortfolioPage() {
             })
             .map((h, i) => (
               <div key={h.id} style={{ animation: `fadeUp 220ms cubic-bezier(.2,.9,.2,1) ${i * 28}ms both` }}>
-                <AssetCard holding={h} currentPrice={PRICES[h.symbol] ?? 0} />
+                <AssetCard holding={h} currentPrice={prices[h.symbol] ?? null} />
               </div>
             ))}
         </div>

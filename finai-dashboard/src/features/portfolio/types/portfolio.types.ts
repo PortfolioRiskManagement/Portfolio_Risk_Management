@@ -15,6 +15,8 @@ export interface Account {
   contributionRoom: number
   contributionUsed: number
   contributionLimit: number
+  /** How the contribution room was calculated (shown under the bar). */
+  contributionNote?: string
   purpose: string
   taxBenefit: string
   status: 'optimized' | 'underused' | 'overused' | 'normal'
@@ -47,6 +49,18 @@ export interface UserProfile {
   timeHorizon?: TimeHorizon
   investmentGoal?: InvestmentGoal
   hasDebtPriority?: boolean
+  // Registered account history, used to calculate contribution room per CRA rules
+  /** Every TFSA contribution ever made. */
+  tfsaContributions?: number
+  /** TFSA withdrawals from previous years (added back as room each Jan 1). */
+  tfsaWithdrawals?: number
+  /** Year the first FHSA was opened; room only starts then. */
+  fhsaYearOpened?: number
+  fhsaContributionsBeforeThisYear?: number
+  fhsaContributionsThisYear?: number
+  /** "RRSP deduction limit" from the latest Notice of Assessment, if known. */
+  rrspDeductionLimit?: number
+  rrspContributionsThisYear?: number
 }
 
 export interface ContributionPlan {

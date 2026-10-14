@@ -46,7 +46,7 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
       used: acc.contributionUsed,
       remaining: acc.contributionRoom,
       total: acc.contributionLimit,
-      usedPercent: (acc.contributionUsed / acc.contributionLimit) * 100,
+      usedPercent: acc.contributionLimit > 0 ? (acc.contributionUsed / acc.contributionLimit) * 100 : 0,
     }))
 
   return (

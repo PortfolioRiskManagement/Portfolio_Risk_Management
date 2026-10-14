@@ -2,27 +2,14 @@ import { Link } from "react-router-dom"
 import PageShell from "../../../components/layout/PageShell"
 import Card from "../../../components/ui/Card"
 import Icon, { type IconName } from "../../../components/ui/Icon"
-import PortfolioChart, { PERFORMANCE_DATA } from "../components/PortfolioChart"
+import PortfolioChart from "../components/PortfolioChart"
 import ConnectionsPanel from "../../connections/components/ConnectionsPanel"
 import { useMemo } from "react"
 import { useHoldings } from "../../portfolio/hooks/useHoldings"
+import { useLiveQuotes } from "../../portfolio/hooks/useLivePrice"
+import { usePortfolioHistory } from "../../portfolio/hooks/usePortfolioHistory"
+import { useHoldingAlerts } from "../../alerts/hooks/useHoldingAlerts"
 import { useAuth } from "../../../contexts/AuthContext"
-
-const PRICES: Record<string, number> = {
-  AAPL: 185.4,
-  TSLA: 198.5,
-  BTC: 62500,
-  ETH: 3100,
-  SPY: 485.2,
-  MSFT: 410.5,
-  NVDA: 720.3,
-}
-
-function inferPrice(symbol: string, fallback: number) {
-  const normalized = symbol.toUpperCase()
-  if (PRICES[normalized]) return PRICES[normalized]
-  return fallback
-}
 
 function inferType(symbol: string, rawType?: string) {
   if (rawType) return rawType.toLowerCase()
@@ -59,38 +46,24 @@ function greeting() {
 
 const money = (value: number) => `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
 
-const BRIEF: { tone: "positive" | "warning" | "info"; icon: IconName; title: string; body: string }[] = [
-  {
-    tone: "positive",
-    icon: "trendUp",
-    title: "Up 2.3% today",
-    body: "Driven by strong performance in the tech sector, led by NVDA.",
-  },
-  {
-    tone: "warning",
-    icon: "alert",
-    title: "High tech concentration (65%)",
-    body: "Consider rebalancing to reduce sector risk.",
-  },
-  {
-    tone: "info",
-    icon: "sparkle",
-    title: "Fed holds rates",
-    body: "A steady rate outlook is supportive for equities. No action needed.",
-  },
-]
+type BriefItem = { tone: "positive" | "warning" | "info"; icon: IconName; title: string; body: string }
+
+const pct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`
+
+function timeAgo(iso: string) {
+  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.round(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+}
 
 const BRIEF_TONES = {
   positive: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   info: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
 }
-
-const ACTIVITY = [
-  { text: "Synced Coinbase", time: "2m ago" },
-  { text: "Imported 3 holdings from Fidelity", time: "1h ago" },
-  { text: "Connected Robinhood", time: "Yesterday" },
-]
 
 function StatTile({ icon, label, children }: { icon: IconName; label: string; children: React.ReactNode }) {
   return (
@@ -116,18 +89,23 @@ function ScoreBar({ value, gradient }: { value: number; gradient: string }) {
 
 export default function DashboardPage() {
   const { holdings } = useHoldings()
+  const quotes = useLiveQuotes(holdings.map((h) => h.symbol))
+  const history = usePortfolioHistory(holdings)
+  const { alerts, unreadCount } = useHoldingAlerts()
   const { user } = useAuth()
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.trim().split(/\s+/)[0]
 
   const metrics = useMemo(() => {
+    // live price, or what was paid until the quote loads
+    const priceOf = (h: { symbol: string; entry: number }) => quotes[h.symbol.toUpperCase()]?.price ?? h.entry
     const investedValue = holdings.reduce((sum, h) => sum + h.entry * h.quantity, 0)
-    const totalValue = holdings.reduce((sum, h) => sum + inferPrice(h.symbol, h.entry) * h.quantity, 0)
+    const totalValue = holdings.reduce((sum, h) => sum + priceOf(h) * h.quantity, 0)
     const gain = totalValue - investedValue
     const gainPct = investedValue > 0 ? (gain / investedValue) * 100 : 0
     const platforms = new Set(holdings.map((h) => h.platform).filter(Boolean)).size
 
     const weights = holdings
-      .map((h) => inferPrice(h.symbol, h.entry) * h.quantity)
+      .map((h) => priceOf(h) * h.quantity)
       .filter((v) => v > 0)
     const valueSum = weights.reduce((sum, value) => sum + value, 0)
     const hhi = valueSum > 0
@@ -144,7 +122,7 @@ export default function DashboardPage() {
     const cryptoWeight = valueSum > 0
       ? holdings.reduce((sum, h) => {
           const isCrypto = inferType(h.symbol, h.type) === "crypto"
-          return sum + (isCrypto ? inferPrice(h.symbol, h.entry) * h.quantity : 0)
+          return sum + (isCrypto ? priceOf(h) * h.quantity : 0)
         }, 0) / valueSum
       : 0
 
@@ -154,7 +132,7 @@ export default function DashboardPage() {
 
     // Positions by current value, largest first, for the allocation list.
     const positions = holdings
-      .map((h) => ({ ...h, value: inferPrice(h.symbol, h.entry) * h.quantity }))
+      .map((h) => ({ ...h, value: priceOf(h) * h.quantity }))
       .sort((a, b) => b.value - a.value)
       .map((p) => ({ ...p, weight: valueSum > 0 ? (p.value / valueSum) * 100 : 0 }))
 
@@ -166,9 +144,26 @@ export default function DashboardPage() {
       }, {}),
     ).sort((a, b) => b[1] - a[1])
 
+    // Today's change: each position's move since yesterday's close
+    const movers = holdings
+      .map((h) => {
+        const q = quotes[h.symbol.toUpperCase()]
+        if (!q || q.changePercent === null) return null
+        const value = q.price * h.quantity
+        return { symbol: h.symbol, changePercent: q.changePercent, dayChange: value - value / (1 + q.changePercent / 100) }
+      })
+      .filter((m): m is { symbol: string; changePercent: number; dayChange: number } => m !== null)
+    const dayChange = movers.reduce((sum, m) => sum + m.dayChange, 0)
+    const dayChangePct = totalValue - dayChange > 0 ? (dayChange / (totalValue - dayChange)) * 100 : 0
+    const topMover = [...movers].sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent))[0]
+
     return {
       totalValue,
       investedValue,
+      dayChange,
+      dayChangePct,
+      topMover,
+      quotesLoaded: movers.length > 0,
       gain,
       gainPct,
       platforms,
@@ -178,14 +173,39 @@ export default function DashboardPage() {
       positions,
       byType,
     }
-  }, [holdings])
+  }, [holdings, quotes])
 
   const risk = riskLabel(metrics.riskScore)
   const diversification = diversificationLabel(metrics.diversificationScore)
   const isUp = metrics.gain >= 0
-  const periodStart = PERFORMANCE_DATA[0].value
-  const periodEnd = PERFORMANCE_DATA[PERFORMANCE_DATA.length - 1].value
-  const periodChange = ((periodEnd - periodStart) / periodStart) * 100
+  const periodStart = history?.[0]?.value ?? 0
+  const periodEnd = history?.[history.length - 1]?.value ?? 0
+  const periodChange = periodStart > 0 ? ((periodEnd - periodStart) / periodStart) * 100 : 0
+
+  const brief: BriefItem[] = []
+  if (metrics.quotesLoaded) {
+    const up = metrics.dayChange >= 0
+    brief.push({
+      tone: up ? "positive" : "warning",
+      icon: up ? "trendUp" : "alert",
+      title: `${up ? "Up" : "Down"} ${Math.abs(metrics.dayChangePct).toFixed(2)}% today (${up ? "+" : "-"}${money(Math.abs(metrics.dayChange))})`,
+      body: metrics.topMover ? `Biggest move: ${metrics.topMover.symbol} ${pct(metrics.topMover.changePercent)}.` : "Prices are flat so far today.",
+    })
+  }
+  const largest = metrics.positions[0]
+  if (largest) {
+    brief.push(
+      largest.weight > 25
+        ? { tone: "warning", icon: "alert", title: `${largest.symbol} is ${largest.weight.toFixed(0)}% of your portfolio`, body: "A single position this large drives most of your risk. Consider rebalancing." }
+        : { tone: "positive", icon: "pie", title: "No position over 25%", body: `Your largest holding is ${largest.symbol} at ${largest.weight.toFixed(0)}%.` }
+    )
+  }
+  brief.push({
+    tone: unreadCount ? "warning" : "info",
+    icon: unreadCount ? "bell" : "sparkle",
+    title: unreadCount ? `${unreadCount} new alert${unreadCount === 1 ? "" : "s"}` : "No new alerts",
+    body: unreadCount ? alerts.find((a) => !a.read)?.title ?? "" : "None of your holdings has made a big move or had major news.",
+  })
 
   return (
     <PageShell title="Dashboard" subtitle="Your portfolio at a glance">
@@ -282,13 +302,27 @@ export default function DashboardPage() {
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400">Performance</div>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-2xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">{money(periodEnd)}</span>
-                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">+{periodChange.toFixed(1)}%</span>
+                <span className="text-2xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">{history?.length ? money(periodEnd) : "—"}</span>
+                {history && history.length > 1 && (
+                  <span className={`text-sm font-semibold ${periodChange >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                    {periodChange >= 0 ? "+" : ""}
+                    {periodChange.toFixed(1)}%
+                  </span>
+                )}
               </div>
+              <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">Your current holdings at past prices</div>
             </div>
             <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-white/5 dark:text-zinc-300">Last 6 months</span>
           </div>
-          <PortfolioChart />
+          {history === null ? (
+            <div className="flex h-64 items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">Loading price history…</div>
+          ) : history.length < 2 ? (
+            <div className="flex h-64 items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">
+              {holdings.length ? "Couldn't load price history. Is the backend running (python app.py)?" : "Add a holding to see performance."}
+            </div>
+          ) : (
+            <PortfolioChart data={history} />
+          )}
         </Card>
 
         <Card
@@ -340,7 +374,7 @@ export default function DashboardPage() {
           }
         >
           <div className="space-y-4">
-            {BRIEF.map((item) => (
+            {brief.map((item) => (
               <div key={item.title} className="flex gap-3">
                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${BRIEF_TONES[item.tone]}`}>
                   <Icon name={item.icon} className="h-4 w-4" />
@@ -356,16 +390,32 @@ export default function DashboardPage() {
 
         <ConnectionsPanel />
 
-        <Card title="Recent activity" className="lg:col-span-2 xl:col-span-1">
-          <ol className="relative space-y-5 border-l border-zinc-200 pl-5 dark:border-white/10">
-            {ACTIVITY.map((item) => (
-              <li key={item.text} className="relative">
-                <span className="absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-indigo-500 dark:border-zinc-900" />
-                <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.text}</div>
-                <div className="text-xs text-zinc-500 dark:text-zinc-400">{item.time}</div>
-              </li>
-            ))}
-          </ol>
+        <Card
+          title="Recent alerts"
+          className="lg:col-span-2 xl:col-span-1"
+          action={
+            <Link to="/alerts" className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+              View all
+            </Link>
+          }
+        >
+          {alerts.length === 0 ? (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">No alerts yet. You'll see big moves and major news about your holdings here.</p>
+          ) : (
+            <ol className="relative space-y-5 border-l border-zinc-200 pl-5 dark:border-white/10">
+              {alerts.slice(0, 4).map((item) => (
+                <li key={item.id} className="relative">
+                  <span
+                    className={`absolute -left-[25px] top-1 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-zinc-900 ${
+                      item.kind === "news" ? "bg-indigo-500" : item.direction === "down" ? "bg-rose-500" : "bg-emerald-500"
+                    }`}
+                  />
+                  <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.title}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{timeAgo(item.createdAt)}</div>
+                </li>
+              ))}
+            </ol>
+          )}
         </Card>
       </div>
     </PageShell>

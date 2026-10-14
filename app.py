@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 from urllib.parse import quote
 from urllib.request import urlopen, Request
+import time
 
 from dataload.data_loader import PortfolioLoader
 from dataload.portfolio_analyzer import PortfolioAnalyzer
@@ -39,6 +40,8 @@ def analyze_portfolio():
         else:
             import pandas as pd
             df = pd.DataFrame(portfolio_data)
+            if 'Ticker' in df.columns:
+                df['Ticker'] = df['Ticker'].astype(str).str.upper().map(yahoo_symbol)
         
         analyzer = PortfolioAnalyzer(
             portfolio_data=df,
@@ -175,6 +178,20 @@ def search_stock():
         print(f"Search error: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 400
 
+CRYPTO_SYMBOLS = {"BTC", "ETH", "SOL", "ADA", "DOGE", "XRP", "LTC"}
+
+def yahoo_symbol(symbol):
+    """Yahoo lists crypto as BTC-USD, ETH-USD, etc."""
+    return f"{symbol}-USD" if symbol in CRYPTO_SYMBOLS else symbol
+
+def fetch_yahoo_chart(symbol, params):
+    chart_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(yahoo_symbol(symbol))}?{params}"
+    req = Request(chart_url, headers={"User-Agent": "Mozilla/5.0"})
+    with urlopen(req, timeout=6) as response:
+        payload = json.loads(response.read().decode('utf-8'))
+    result = payload.get('chart', {}).get('result', []) if isinstance(payload, dict) else []
+    return result[0] if result else None
+
 @app.route('/api/quote', methods=['GET', 'OPTIONS'])
 def get_quote():
     """
@@ -189,30 +206,69 @@ def get_quote():
         if not symbol:
             return jsonify({"success": False, "error": "No symbol provided"}), 400
 
-        chart_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=1d"
-        req = Request(chart_url, headers={"User-Agent": "Mozilla/5.0"})
-
-        with urlopen(req, timeout=6) as response:
-            payload = json.loads(response.read().decode('utf-8'))
-
-        result = payload.get('chart', {}).get('result', []) if isinstance(payload, dict) else []
-        if not result:
+        entry = fetch_yahoo_chart(symbol, "interval=1d&range=1d")
+        if not entry:
             return jsonify({"success": False, "error": "Symbol not found"}), 404
 
-        entry = result[0]
         meta = entry.get('meta', {}) if isinstance(entry, dict) else {}
         price = meta.get('regularMarketPrice')
         if price is None:
             return jsonify({"success": False, "error": "Price unavailable"}), 404
 
+        previous_close = meta.get('previousClose') or meta.get('chartPreviousClose')
+        change_percent = (
+            (float(price) - float(previous_close)) / float(previous_close) * 100
+            if previous_close else None
+        )
+
         return jsonify({
             "success": True,
             "symbol": symbol,
-            "price": float(price)
+            "price": float(price),
+            "previousClose": float(previous_close) if previous_close else None,
+            "changePercent": change_percent,
         }), 200
 
     except Exception as e:
         print(f"Quote error: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/history', methods=['GET', 'OPTIONS'])
+def get_history():
+    """
+    Fetch daily closing prices from Yahoo Finance
+    Query params: symbol (ticker), days (lookback window, default 30)
+    """
+    if request.method == "OPTIONS":
+        return "", 204
+
+    try:
+        symbol = request.args.get('symbol', '').strip().upper()
+        if not symbol:
+            return jsonify({"success": False, "error": "No symbol provided"}), 400
+        days = max(1, min(int(request.args.get('days', 30)), 3650))
+
+        end = int(time.time())
+        start = end - days * 86400
+        entry = fetch_yahoo_chart(symbol, f"interval=1d&period1={start}&period2={end}")
+        if not entry:
+            return jsonify({"success": False, "error": "Symbol not found"}), 404
+
+        timestamps = entry.get('timestamp') or []
+        closes = ((entry.get('indicators') or {}).get('quote') or [{}])[0].get('close') or []
+
+        # Yahoo leaves gaps as null on non-trading days; drop them
+        points = [(t * 1000, float(c)) for t, c in zip(timestamps, closes) if c is not None]
+
+        return jsonify({
+            "success": True,
+            "symbol": symbol,
+            "times": [t for t, _ in points],
+            "prices": [c for _, c in points],
+        }), 200
+
+    except Exception as e:
+        print(f"History error: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 400
 
 @app.route("/api/health", methods=["GET"])

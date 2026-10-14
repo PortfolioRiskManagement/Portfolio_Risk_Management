@@ -28,7 +28,8 @@ export default function AccountCard({ account }: Props) {
   const statusBadge = STATUS_BADGES[account.status] ?? STATUS_BADGES.normal
   const style = ACCOUNT_STYLES[account.type] ?? ACCOUNT_STYLES.PERSONAL
   // Non-registered accounts have no contribution limit, so there is no room to track.
-  const hasContributionLimit = account.contributionLimit > 0
+  const hasContributionLimit = account.type !== 'PERSONAL'
+  const isOver = account.contributionRoom < 0
   const contributionPercent = hasContributionLimit ? (account.contributionUsed / account.contributionLimit) * 100 : 0
   const isUp = account.gain >= 0
 
@@ -70,11 +71,13 @@ export default function AccountCard({ account }: Props) {
           <>
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="font-medium text-zinc-700 dark:text-zinc-300">Contribution room</span>
-              <span className="font-semibold tabular-nums text-zinc-950 dark:text-white">{formatCurrency(account.contributionRoom)} left</span>
+              <span className={`font-semibold tabular-nums ${isOver ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-950 dark:text-white'}`}>
+                {isOver ? `${formatCurrency(-account.contributionRoom)} over` : `${formatCurrency(account.contributionRoom)} left`}
+              </span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-white/[0.08]">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-500"
+                className={`h-full rounded-full transition-all duration-500 ${isOver ? 'bg-rose-500' : 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500'}`}
                 style={{ width: `${Math.min(contributionPercent, 100)}%` }}
               />
             </div>
@@ -82,6 +85,9 @@ export default function AccountCard({ account }: Props) {
               <span>{formatCurrency(account.contributionUsed)} used</span>
               <span>{formatCurrency(account.contributionLimit)} limit</span>
             </div>
+            {account.contributionNote && (
+              <p className="mt-2 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">{account.contributionNote}</p>
+            )}
           </>
         ) : (
           <div className="flex items-center justify-between text-sm">

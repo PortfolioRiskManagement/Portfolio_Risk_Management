@@ -137,7 +137,24 @@ def test_quote_endpoint_returns_price(monkeypatch) -> None:
     response = app_module.app.test_client().get("/api/quote?symbol=aapl")
 
     assert response.status_code == 200
-    assert response.get_json() == {"success": True, "symbol": "AAPL", "price": 123.45}
+    assert response.get_json() == {
+        "success": True,
+        "symbol": "AAPL",
+        "price": 123.45,
+        "previousClose": None,
+        "changePercent": None,
+    }
+
+
+def test_quote_endpoint_returns_daily_change(monkeypatch) -> None:
+    """Quote endpoint should compute the % change from the previous close."""
+    payload = {"chart": {"result": [{"meta": {"regularMarketPrice": 98.0, "chartPreviousClose": 100.0}}]}}
+    monkeypatch.setattr(app_module, "urlopen", lambda req, timeout=6: _FakeResponse(payload))
+
+    body = app_module.app.test_client().get("/api/quote?symbol=aapl").get_json()
+
+    assert body["previousClose"] == 100.0
+    assert body["changePercent"] == -2.0
 
 
 def test_quote_endpoint_unknown_symbol_returns_404(monkeypatch) -> None:
@@ -147,6 +164,48 @@ def test_quote_endpoint_unknown_symbol_returns_404(monkeypatch) -> None:
     response = app_module.app.test_client().get("/api/quote?symbol=nope")
 
     assert response.status_code == 404
+
+
+def test_quote_endpoint_maps_crypto_to_usd_pair(monkeypatch) -> None:
+    """Crypto tickers like BTC should be requested from Yahoo as BTC-USD."""
+    requested = []
+
+    def fake_urlopen(req, timeout=6):
+        requested.append(req.full_url)
+        return _FakeResponse({"chart": {"result": [{"meta": {"regularMarketPrice": 60000.0}}]}})
+
+    monkeypatch.setattr(app_module, "urlopen", fake_urlopen)
+
+    response = app_module.app.test_client().get("/api/quote?symbol=btc")
+
+    assert response.status_code == 200
+    assert "/chart/BTC-USD?" in requested[0]
+
+
+def test_history_endpoint_returns_closes_and_drops_gaps(monkeypatch) -> None:
+    """History endpoint should return daily closes in ms timestamps, skipping null closes."""
+    payload = {"chart": {"result": [{
+        "timestamp": [1000, 2000, 3000],
+        "indicators": {"quote": [{"close": [10.0, None, 12.5]}]},
+    }]}}
+    monkeypatch.setattr(app_module, "urlopen", lambda req, timeout=6: _FakeResponse(payload))
+
+    response = app_module.app.test_client().get("/api/history?symbol=aapl&days=7")
+
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "success": True,
+        "symbol": "AAPL",
+        "times": [1_000_000, 3_000_000],
+        "prices": [10.0, 12.5],
+    }
+
+
+def test_history_endpoint_requires_symbol() -> None:
+    """History endpoint should return 400 when no symbol is supplied."""
+    response = app_module.app.test_client().get("/api/history")
+
+    assert response.status_code == 400
 
 
 def test_analyze_rejects_invalid_lookback_days() -> None:

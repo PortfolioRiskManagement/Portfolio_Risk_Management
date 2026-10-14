@@ -357,6 +357,105 @@ export default function PortfolioProfile({ profile, onUpdate }: Props) {
             </div>
           </Card>
 
+          {/* Registered Accounts */}
+          <Card className="border-purple-600/30">
+            <h3 className="mb-2 flex items-center gap-2 text-lg font-bold text-zinc-950 dark:text-white">
+              <span className="inline-block w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                🏛️
+              </span>
+              Registered Accounts
+            </h3>
+            <p className="mb-5 text-sm text-zinc-500 dark:text-zinc-400">
+              Used to calculate your contribution room with CRA rules. Your exact room is in CRA My Account.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-300">TFSA: total contributed (all years)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={profile.tfsaContributions ?? ''}
+                  onChange={(e) => handleChange('tfsaContributions', e.target.value === '' ? undefined : Number(e.target.value))}
+                  placeholder="e.g., 25000"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-zinc-950 placeholder-zinc-400 transition-colors hover:border-purple-300 focus:border-purple-500 focus:outline-none dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-900 dark:text-white dark:placeholder-zinc-600 dark:hover:border-purple-600/30"
+                />
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">Every TFSA deposit you have ever made. Blank = what you paid for your TFSA holdings.</p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-300">TFSA: withdrawals before this year</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={profile.tfsaWithdrawals ?? ''}
+                  onChange={(e) => handleChange('tfsaWithdrawals', e.target.value === '' ? undefined : Number(e.target.value))}
+                  placeholder="e.g., 0"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-zinc-950 placeholder-zinc-400 transition-colors hover:border-purple-300 focus:border-purple-500 focus:outline-none dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-900 dark:text-white dark:placeholder-zinc-600 dark:hover:border-purple-600/30"
+                />
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">These are added back to your room each January 1</p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-300">FHSA: year opened</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={profile.fhsaYearOpened ?? ''}
+                  onChange={(e) => handleChange('fhsaYearOpened', e.target.value === '' ? undefined : Number(e.target.value))}
+                  placeholder="e.g., 2024"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-zinc-950 placeholder-zinc-400 transition-colors hover:border-purple-300 focus:border-purple-500 focus:outline-none dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-900 dark:text-white dark:placeholder-zinc-600 dark:hover:border-purple-600/30"
+                />
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">Leave blank if you have not opened one. Room starts that year.</p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-300">FHSA: contributed in past years</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={profile.fhsaContributionsBeforeThisYear ?? ''}
+                  onChange={(e) => handleChange('fhsaContributionsBeforeThisYear', e.target.value === '' ? undefined : Number(e.target.value))}
+                  placeholder="e.g., 8000"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-zinc-950 placeholder-zinc-400 transition-colors hover:border-purple-300 focus:border-purple-500 focus:outline-none dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-900 dark:text-white dark:placeholder-zinc-600 dark:hover:border-purple-600/30"
+                />
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">Counts toward the $40,000 lifetime limit. Blank = what you paid for your FHSA holdings.</p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-300">FHSA: contributed this year</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={profile.fhsaContributionsThisYear ?? ''}
+                  onChange={(e) => handleChange('fhsaContributionsThisYear', e.target.value === '' ? undefined : Number(e.target.value))}
+                  placeholder="e.g., 0"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-zinc-950 placeholder-zinc-400 transition-colors hover:border-purple-300 focus:border-purple-500 focus:outline-none dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-900 dark:text-white dark:placeholder-zinc-600 dark:hover:border-purple-600/30"
+                />
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">Deposits and RRSP transfers since January 1</p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-300">RRSP: contributed this year</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={profile.rrspContributionsThisYear ?? ''}
+                  onChange={(e) => handleChange('rrspContributionsThisYear', e.target.value === '' ? undefined : Number(e.target.value))}
+                  placeholder="e.g., 0"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-zinc-950 placeholder-zinc-400 transition-colors hover:border-purple-300 focus:border-purple-500 focus:outline-none dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-900 dark:text-white dark:placeholder-zinc-600 dark:hover:border-purple-600/30"
+                />
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">Deposits since January 1</p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-zinc-700 dark:text-zinc-300">RRSP: deduction limit (optional)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={profile.rrspDeductionLimit ?? ''}
+                  onChange={(e) => handleChange('rrspDeductionLimit', e.target.value === '' ? undefined : Number(e.target.value))}
+                  placeholder="e.g., 32000"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-zinc-950 placeholder-zinc-400 transition-colors hover:border-purple-300 focus:border-purple-500 focus:outline-none dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:to-zinc-900 dark:text-white dark:placeholder-zinc-600 dark:hover:border-purple-600/30"
+                />
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">From your latest Notice of Assessment. Leave blank to estimate from income.</p>
+              </div>
+            </div>
+          </Card>
+
               </div>
             </div>
 

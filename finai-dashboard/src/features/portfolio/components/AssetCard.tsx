@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom"
 import type { Holding } from "../hooks/useHoldings"
+import { accountLabel } from "../utils/accounts"
 
 type Props = {
   holding: Holding
-  currentPrice: number
+  currentPrice: number | null
 }
 
 function formatCurrency(v: number) {
@@ -11,10 +12,12 @@ function formatCurrency(v: number) {
 }
 
 export default function AssetCard({ holding, currentPrice }: Props) {
-  const total = currentPrice * holding.quantity
+  const loaded = currentPrice !== null
+  const price = currentPrice ?? 0
+  const total = price * holding.quantity
   const entryTotal = holding.entry * holding.quantity
   const diff = total - entryTotal
-  const pct = holding.entry > 0 ? ((currentPrice - holding.entry) / holding.entry) * 100 : 0
+  const pct = holding.entry > 0 ? ((price - holding.entry) / holding.entry) * 100 : 0
 
   const risk = pct > 30 ? "LOW" : pct > 0 ? "MEDIUM" : "HIGH"
 
@@ -36,7 +39,7 @@ export default function AssetCard({ holding, currentPrice }: Props) {
               <div className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs uppercase tracking-wider text-zinc-600 dark:bg-zinc-800/30 dark:text-zinc-400">{holding.type ?? 'Asset'}</div>
             </div>
             <div className="truncate text-sm text-zinc-600 dark:text-zinc-400">{holding.name}</div>
-            <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">{holding.platform}</div>
+            <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">{[accountLabel(holding.account), holding.platform].filter(Boolean).join(" · ")}</div>
           </div>
         </div>
 
@@ -53,11 +56,17 @@ export default function AssetCard({ holding, currentPrice }: Props) {
 
           <div className="flex flex-col items-end min-w-[160px]">
             <div className="text-xs text-zinc-500 dark:text-zinc-400">Current</div>
-            <div className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(currentPrice)}</div>
-            <div className={`mt-2 text-sm ${diff >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>{diff >= 0 ? '+' : '-'}{formatCurrency(Math.abs(diff))} <span className="text-zinc-500 dark:text-zinc-500">({pct.toFixed(2)}%)</span></div>
-            <div className="mt-3">
-              <div className={`text-xs px-3 py-1 rounded-full ${risk === 'HIGH' ? 'bg-rose-600 text-white' : risk === 'MEDIUM' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'}`}>{risk}</div>
-            </div>
+            {loaded ? (
+              <>
+                <div className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{formatCurrency(price)}</div>
+                <div className={`mt-2 text-sm ${diff >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>{diff >= 0 ? '+' : '-'}{formatCurrency(Math.abs(diff))} <span className="text-zinc-500 dark:text-zinc-500">({pct.toFixed(2)}%)</span></div>
+                <div className="mt-3">
+                  <div className={`text-xs px-3 py-1 rounded-full ${risk === 'HIGH' ? 'bg-rose-600 text-white' : risk === 'MEDIUM' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'}`}>{risk}</div>
+                </div>
+              </>
+            ) : (
+              <div className="text-lg font-bold text-zinc-400 dark:text-zinc-500">—</div>
+            )}
           </div>
         </div>
       </div>

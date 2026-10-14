@@ -1,22 +1,26 @@
 import { useState } from "react"
 
-// Mock data for 6-month portfolio performance
-export const PERFORMANCE_DATA = [
-  { month: "Jan", value: 104000 },
-  { month: "Feb", value: 108000 },
-  { month: "Mar", value: 112000 },
-  { month: "Apr", value: 118000 },
-  { month: "May", value: 124000 },
-  { month: "Jun", value: 132622 },
-]
+export type ChartPoint = { time: number; value: number }
 
 const WIDTH = 900
 const HEIGHT = 340
 const PADDING = { top: 16, right: 16, bottom: 32, left: 56 }
 
 function formatAxis(value: number) {
-  return `$${Math.round(value / 1000)}k`
+  if (Math.abs(value) >= 1000) return `$${Math.round(value / 1000).toLocaleString()}k`
+  return `$${Math.round(value)}`
 }
+
+/** A round step (1, 2 or 5 × 10^n) that splits the range into about 3 intervals. */
+function niceStep(range: number) {
+  const raw = range / 3 || 1
+  const magnitude = 10 ** Math.floor(Math.log10(raw))
+  const normalized = raw / magnitude
+  return (normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10) * magnitude
+}
+
+const monthLabel = (t: number) => new Date(t).toLocaleDateString(undefined, { month: "short" })
+const fullDate = (t: number) => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
 
 /** Smooth curve through the points (Catmull-Rom converted to cubic Béziers). */
 function smoothPath(points: { x: number; y: number }[]) {
@@ -34,16 +38,16 @@ function smoothPath(points: { x: number; y: number }[]) {
   }, "")
 }
 
-/** Area chart of portfolio value; hover a month to see its value. */
-export default function PortfolioChart() {
+/** Area chart of portfolio value; hover to see the value on a given date. */
+export default function PortfolioChart({ data }: { data: ChartPoint[] }) {
   const [hovered, setHovered] = useState<number | null>(null)
-  const data = PERFORMANCE_DATA
+  if (data.length < 2) return null
 
   const chartWidth = WIDTH - PADDING.left - PADDING.right
   const chartHeight = HEIGHT - PADDING.top - PADDING.bottom
 
-  // Round the axis out to the nearest $10k so the ticks land on clean values.
-  const step = 10000
+  // Round the axis out to a clean step so the ticks land on round values.
+  const step = niceStep(Math.max(...data.map((d) => d.value)) - Math.min(...data.map((d) => d.value)))
   const minValue = Math.floor(Math.min(...data.map((d) => d.value)) / step) * step
   const maxValue = Math.ceil(Math.max(...data.map((d) => d.value)) / step) * step
   const valueRange = maxValue - minValue || 1
@@ -105,22 +109,25 @@ export default function PortfolioChart() {
         <circle cx={activePoint.x} cy={activePoint.y} r="10" className="fill-indigo-500/20" />
         <circle cx={activePoint.x} cy={activePoint.y} r="5" fill="#ffffff" stroke="#6366f1" strokeWidth="3" />
 
-        {points.map((point, i) => (
-          <text
-            key={point.month}
-            x={point.x}
-            y={baseline + 22}
-            textAnchor={i === 0 ? "start" : i === points.length - 1 ? "end" : "middle"}
-            className={`text-[12px] ${i === active ? "fill-zinc-900 font-semibold dark:fill-white" : "fill-zinc-400 dark:fill-zinc-500"}`}
-          >
-            {point.month}
-          </text>
-        ))}
+        {/* Month labels at the first point of each month */}
+        {points.map((point, i) =>
+          i > 0 && monthLabel(point.time) === monthLabel(points[i - 1].time) ? null : (
+            <text
+              key={`label-${point.time}`}
+              x={point.x}
+              y={baseline + 22}
+              textAnchor={i === 0 ? "start" : "middle"}
+              className="fill-zinc-400 text-[12px] dark:fill-zinc-500"
+            >
+              {monthLabel(point.time)}
+            </text>
+          )
+        )}
 
-        {/* Invisible hover targets, one column per month */}
+        {/* Invisible hover targets, one column per point */}
         {points.map((point, i) => (
           <rect
-            key={`hit-${point.month}`}
+            key={`hit-${point.time}`}
             x={point.x - chartWidth / (points.length - 1) / 2}
             y={PADDING.top}
             width={chartWidth / (points.length - 1)}
@@ -138,8 +145,8 @@ export default function PortfolioChart() {
           top: `${((activePoint.y - 16) / HEIGHT) * 100}%`,
         }}
       >
-        <div className="font-semibold tabular-nums text-zinc-950 dark:text-white">${activePoint.value.toLocaleString()}</div>
-        <div className="text-zinc-500 dark:text-zinc-400">{activePoint.month}</div>
+        <div className="font-semibold tabular-nums text-zinc-950 dark:text-white">${Math.round(activePoint.value).toLocaleString()}</div>
+        <div className="text-zinc-500 dark:text-zinc-400">{fullDate(activePoint.time)}</div>
       </div>
     </div>
   )

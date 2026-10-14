@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import PageShell from "../../../components/layout/PageShell"
 import RiskProfileCard from "../components/RiskProfileCard"
 import DiversificationCard from "../components/DiversificationCard"
@@ -8,6 +8,8 @@ import PCAClusteringCard from "../components/PCAClusteringCard"
 import InsightsPanel from "../components/InsightsPanel"
 import ComparisonView from "../components/ComparisonView"
 import PortfolioPieChart from "../components/PortfolioPieChart"
+import { useHoldings } from "../../portfolio/hooks/useHoldings"
+import { fetchQuote } from "../../portfolio/hooks/useLivePrice"
 
 type PortfolioReport = {
     assets: string[]
@@ -57,13 +59,13 @@ export default function AdvisorPage() {
     const [originalReport, setOriginalReport] = useState<PortfolioReport | null>(null)
     const [showComparison, setShowComparison] = useState(false)
 
-    // Sampling state
-    const [portfolio, setPortfolio] = useState<PortfolioItem[]>([
-        { Ticker: "AAPL", Shares: 10, Price: 150 },
-        { Ticker: "MSFT", Shares: 10, Price: 300 },
-        { Ticker: "GOOGL", Shares: 5, Price: 140 },
-        { Ticker: "TSLA", Shares: 8, Price: 250 },
-    ])
+    // Sampling state: starts as the user's holdings; edits here are what-ifs only
+    const { holdings: userHoldings } = useHoldings()
+    // Live-value weights of the user's holdings, reused when re-analyzing with new settings
+    const holdingsWeightsRef = useRef<{ Ticker: string; Weight: number }[] | undefined>(undefined)
+    const [portfolio, setPortfolio] = useState<PortfolioItem[]>(() =>
+        userHoldings.map(h => ({ Ticker: h.symbol, Shares: h.quantity, Price: h.entry }))
+    )
     const [newTicker, setNewTicker] = useState("")
     const [newShares, setNewShares] = useState(10)
     const [newPrice, setNewPrice] = useState(100)
@@ -139,8 +141,27 @@ export default function AdvisorPage() {
         setShowComparison(true)
     }
 
+    // Analyze the user's holdings, weighted by live market value
     useEffect(() => {
-        fetchAnalysis()
+        let cancelled = false
+        async function analyzeHoldings() {
+            const priced = await Promise.all(
+                userHoldings.map(async h => ({ h, price: (await fetchQuote(h.symbol)) ?? h.entry }))
+            )
+            if (cancelled) return
+            setPortfolio(priced.map(({ h, price }) => ({ Ticker: h.symbol, Shares: h.quantity, Price: Number(price.toFixed(2)) })))
+            const total = priced.reduce((sum, { h, price }) => sum + h.quantity * price, 0)
+            if (total <= 0) {
+                setLoading(false)
+                setError("Add holdings on the Assets page to analyze your portfolio.")
+                return
+            }
+            holdingsWeightsRef.current = priced.map(({ h, price }) => ({ Ticker: h.symbol, Weight: (h.quantity * price) / total }))
+            fetchAnalysis(holdingsWeightsRef.current)
+        }
+        analyzeHoldings()
+        return () => { cancelled = true }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per visit
     }, [])
 
     const holdings = getHoldings()
@@ -181,7 +202,7 @@ export default function AdvisorPage() {
                         </div>
                         <div className="flex gap-2 items-end">
                             <button
-                                onClick={() => fetchAnalysis()}
+                                onClick={() => fetchAnalysis(holdingsWeightsRef.current)}
                                 disabled={loading}
                                 className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium py-1.5 rounded transition"
                             >

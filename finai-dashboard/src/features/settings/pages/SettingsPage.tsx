@@ -1,54 +1,15 @@
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
+import { Link } from "react-router-dom"
 import PageShell from "../../../components/layout/PageShell"
 import Card from "../../../components/ui/Card"
 import { useTheme } from "../../../hooks/useTheme"
+import { useAuth } from "../../../contexts/AuthContext"
+import { useHoldingAlerts } from "../../alerts/hooks/useHoldingAlerts"
+import { saveSettings, type AlertSettings } from "../../alerts/services/holdingAlertsService"
 
 type ThemeChoice = "light" | "dark"
 
-type SettingsState = {
-  theme: ThemeChoice
-  marketAlerts: boolean
-  weeklyDigest: boolean
-  riskWarnings: boolean
-  autoSync: boolean
-  syncIntervalMinutes: number
-  hidePortfolioValues: boolean
-}
-
-const STORAGE_KEY = "finai_settings_v1"
-
-const DEFAULT_SETTINGS: SettingsState = {
-  theme: "dark",
-  marketAlerts: true,
-  weeklyDigest: true,
-  riskWarnings: true,
-  autoSync: true,
-  syncIntervalMinutes: 15,
-  hidePortfolioValues: false,
-}
-
-function readSettings(): SettingsState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return DEFAULT_SETTINGS
-
-    const parsed = JSON.parse(raw) as Partial<SettingsState>
-    return {
-      ...DEFAULT_SETTINGS,
-      ...parsed,
-      theme: parsed.theme === "light" ? "light" : "dark",
-      syncIntervalMinutes: [5, 15, 30, 60].includes(parsed.syncIntervalMinutes ?? 15)
-        ? (parsed.syncIntervalMinutes as number)
-        : 15,
-    }
-  } catch {
-    return DEFAULT_SETTINGS
-  }
-}
-
-function writeSettings(settings: SettingsState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-}
+const THRESHOLDS = [1, 2, 3, 5]
 
 function ToggleRow({
   label,
@@ -90,52 +51,29 @@ function ToggleRow({
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
-  const [settings, setSettings] = useState<SettingsState>(() => {
-    if (typeof window === "undefined") return DEFAULT_SETTINGS
-    return readSettings()
-  })
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle")
-  const [savedAt, setSavedAt] = useState<string>("")
+  const { user, signOut } = useAuth()
+  const { settings: alertSettings } = useHoldingAlerts()
+  const [permission, setPermission] = useState(
+    typeof Notification === "undefined" ? "unsupported" : Notification.permission
+  )
 
-  useEffect(() => {
-    setSettings((prev) => (prev.theme === theme ? prev : { ...prev, theme }))
-  }, [theme])
+  function updateAlerts(patch: Partial<AlertSettings>) {
+    saveSettings({ ...alertSettings, ...patch })
+  }
 
-  useEffect(() => {
-    setSaveState("saving")
-    const timer = window.setTimeout(() => {
-      writeSettings(settings)
-      setSavedAt(new Date().toLocaleTimeString())
-      setSaveState("saved")
-    }, 250)
-
-    return () => window.clearTimeout(timer)
-  }, [settings])
-
-  const statusText = useMemo(() => {
-    if (saveState === "saving") return "Saving settings..."
-    if (saveState === "saved" && savedAt) return `Auto-saved at ${savedAt}`
-    return ""
-  }, [saveState, savedAt])
-
-  function update<K extends keyof SettingsState>(key: K, value: SettingsState[K]) {
-    setSettings((prev) => ({ ...prev, [key]: value }))
+  async function enableNotifications() {
+    if (typeof Notification === "undefined") return
+    setPermission(await Notification.requestPermission())
   }
 
   function setThemeChoice(nextTheme: ThemeChoice) {
     setTheme(nextTheme)
-    update("theme", nextTheme)
-  }
-
-  function resetDefaults() {
-    setSettings(DEFAULT_SETTINGS)
-    setTheme(DEFAULT_SETTINGS.theme)
   }
 
   return (
     <PageShell title="Settings">
       <div className="space-y-4">
-        <Card title="Profile Preferences">
+        <Card title="Appearance">
           <div className="space-y-4">
             <div>
               <div className="mb-2 text-sm font-medium text-zinc-900 dark:text-zinc-100">Theme</div>
@@ -146,7 +84,7 @@ export default function SettingsPage() {
                   aria-label="Light mode"
                   title="Light mode"
                   className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                    settings.theme === "light"
+                    theme === "light"
                       ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
                       : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
                   }`}
@@ -164,7 +102,7 @@ export default function SettingsPage() {
                   aria-label="Dark mode"
                   title="Dark mode"
                   className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                    settings.theme === "dark"
+                    theme === "dark"
                       ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
                       : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
                   }`}
@@ -178,73 +116,74 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <ToggleRow
-              label="Hide Portfolio Values"
-              description="Mask balances and total values in cards for private viewing."
-              checked={settings.hidePortfolioValues}
-              onChange={(next) => update("hidePortfolioValues", next)}
-            />
           </div>
         </Card>
 
-        <Card title="Notifications">
+        <Card title="Alerts" action={<Link to="/alerts" className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400">Open alerts →</Link>}>
           <div className="space-y-3">
-            <ToggleRow
-              label="Market Alerts"
-              description="Get alerts when holdings move above your threshold."
-              checked={settings.marketAlerts}
-              onChange={(next) => update("marketAlerts", next)}
-            />
-            <ToggleRow
-              label="Weekly Digest"
-              description="Receive a weekly summary of portfolio performance."
-              checked={settings.weeklyDigest}
-              onChange={(next) => update("weeklyDigest", next)}
-            />
-            <ToggleRow
-              label="Risk Warnings"
-              description="Warn when concentration or volatility becomes high."
-              checked={settings.riskWarnings}
-              onChange={(next) => update("riskWarnings", next)}
-            />
-          </div>
-        </Card>
-
-        <Card title="Automation">
-          <div className="space-y-3">
-            <ToggleRow
-              label="Auto-Sync Connections"
-              description="Automatically sync connected platforms in the background."
-              checked={settings.autoSync}
-              onChange={(next) => update("autoSync", next)}
-            />
-
             <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/70">
-              <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-100">Sync Interval</label>
-              <select
-                value={settings.syncIntervalMinutes}
-                onChange={(e) => update("syncIntervalMinutes", Number(e.target.value))}
-                className="w-full rounded-lg border border-zinc-300 bg-white p-2 text-zinc-900 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-              >
-                <option value={5}>Every 5 minutes</option>
-                <option value={15}>Every 15 minutes</option>
-                <option value={30}>Every 30 minutes</option>
-                <option value={60}>Every 60 minutes</option>
-              </select>
+              <div className="font-medium text-zinc-900 dark:text-zinc-100">Alert when a holding moves</div>
+              <div className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">Daily change vs. yesterday's close</div>
+              <div className="flex gap-2">
+                {THRESHOLDS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => updateAlerts({ threshold: t })}
+                    className={`flex-1 rounded-lg border px-2 py-1.5 text-sm ${
+                      alertSettings.threshold === t
+                        ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
+                        : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    {t}%+
+                  </button>
+                ))}
+              </div>
             </div>
+            <ToggleRow
+              label="Big Gains Too"
+              description="Alert on large daily gains, not just drops."
+              checked={alertSettings.includeGains}
+              onChange={(next) => updateAlerts({ includeGains: next })}
+            />
+            <ToggleRow
+              label="Major News"
+              description="Alert on earnings, downgrades, lawsuits and mergers affecting your holdings."
+              checked={alertSettings.newsAlerts}
+              onChange={(next) => updateAlerts({ newsAlerts: next })}
+            />
+            <ToggleRow
+              label="Desktop Notifications"
+              description={
+                permission === "denied"
+                  ? "Blocked by your browser. Allow notifications for this site in your browser settings."
+                  : "Show a pop-up when a new alert arrives while FIN/AI is open."
+              }
+              checked={alertSettings.browserNotifications}
+              onChange={(next) => {
+                updateAlerts({ browserNotifications: next })
+                if (next && permission === "default") enableNotifications()
+              }}
+            />
           </div>
         </Card>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">{statusText}</div>
-          <button
-            type="button"
-            onClick={resetDefaults}
-            className="rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-800 transition-colors hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
-          >
-            Reset To Defaults
-          </button>
-        </div>
+        <Card title="Account">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-xs text-zinc-500 dark:text-zinc-400">Signed in as</div>
+              <div className="font-medium text-zinc-900 dark:text-zinc-100">{user?.email ?? "—"}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => signOut()}
+              className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-950/70"
+            >
+              Sign out
+            </button>
+          </div>
+        </Card>
       </div>
     </PageShell>
   )

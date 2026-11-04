@@ -4,7 +4,7 @@ import { useConnections } from "../hooks/useConnections"
 import ProviderLogo from "./ProviderLogo"
 
 export default function ConnectionsPanel() {
-  const { connections } = useConnections()
+  const { connections, isAvailable } = useConnections()
   const navigate = useNavigate()
 
   const connectedCount = connections.filter((c) => c.connected).length
@@ -37,12 +37,21 @@ export default function ConnectionsPanel() {
             </div>
 
             <button
-              onClick={() => navigate(`/connections?provider=${encodeURIComponent(c.provider)}`)}
+              onClick={() => {
+                if (!c.connected && !isAvailable(c.provider)) {
+                  window.alert(`${c.provider} connections will be developed later.`)
+                  return
+                }
+                navigate(`/connections?provider=${encodeURIComponent(c.provider)}`)
+              }}
               type="button"
+              aria-label={c.connected ? `Manage ${c.provider}` : isAvailable(c.provider) ? `Connect ${c.provider}` : `${c.provider} connection unavailable`}
               className={
                 c.connected
                   ? "shrink-0 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-white/10 dark:text-zinc-200 dark:hover:bg-white/5"
-                  : "shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-colors hover:bg-indigo-100 dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
+                  : isAvailable(c.provider)
+                    ? "shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition-colors hover:bg-indigo-100 dark:border-indigo-400/20 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
+                    : "shrink-0 cursor-not-allowed rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-400 transition-colors hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-500 dark:hover:bg-zinc-700/60"
               }
             >
               {c.connected ? "Manage" : "Connect"}

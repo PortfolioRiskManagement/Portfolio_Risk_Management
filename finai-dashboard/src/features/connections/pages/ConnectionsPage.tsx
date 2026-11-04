@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
 export default function ConnectionsPage() {
-  const { connections, connect, disconnect } = useConnections()
+  const { connections, connect, disconnect, isAvailable } = useConnections()
   const [searchParams] = useSearchParams()
   const pre = searchParams.get("provider") || undefined
   const [selected, setSelected] = useState<string | undefined>(pre)
@@ -45,9 +45,20 @@ export default function ConnectionsPage() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => setSelected(c.provider)}
+                        onClick={() => {
+                          if (!isAvailable(c.provider)) {
+                            window.alert(`${c.provider} connections will be developed later.`)
+                            return
+                          }
+                          setSelected(c.provider)
+                        }}
                         type="button"
-                        className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600"
+                        aria-label={isAvailable(c.provider) ? `Connect ${c.provider}` : `${c.provider} connection unavailable`}
+                        className={
+                          isAvailable(c.provider)
+                            ? "rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600"
+                            : "cursor-not-allowed rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-500 dark:hover:bg-zinc-700/60"
+                        }
                       >
                         Connect
                       </button>
@@ -92,10 +103,20 @@ export default function ConnectionsPage() {
 
               <div className="pt-2">
                 <button
-                  onClick={() => selected && connect(selected, accountName || undefined)}
-                  disabled={!selected}
+                  onClick={() => {
+                    if (!selected) return
+                    if (!isAvailable(selected)) {
+                      window.alert(`${selected} connections will be developed later.`)
+                      return
+                    }
+                    connect(selected, accountName || undefined)
+                  }}
                   type="button"
-                  className="w-full rounded-lg bg-blue-600 px-3 py-2 font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-600"
+                  className={
+                    selected && isAvailable(selected)
+                      ? "w-full rounded-lg bg-blue-600 px-3 py-2 font-medium text-white transition-colors hover:bg-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600"
+                      : "w-full cursor-not-allowed rounded-lg border border-zinc-200 bg-zinc-100 px-3 py-2 font-medium text-zinc-400 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-500 dark:hover:bg-zinc-700/60"
+                  }
                 >
                   {selected ? `Connect ${selected}` : "Select a provider"}
                 </button>

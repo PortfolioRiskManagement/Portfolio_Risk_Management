@@ -16,6 +16,8 @@ const DEFAULT_PROVIDERS = [
   "Binance",
 ]
 
+const AVAILABLE_PROVIDER = "Wealthsimple"
+
 function readFromStorage(): Connection[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -53,6 +55,8 @@ export function useConnections() {
   }, [connections])
 
   function connect(provider: string, accountName?: string) {
+    if (provider !== AVAILABLE_PROVIDER) return
+
     setConnections((prev) => {
       const next = prev.map((c) =>
         c.provider === provider
@@ -71,7 +75,11 @@ export function useConnections() {
     return connections.find((c) => c.provider === provider)?.connected ?? false
   }
 
+  function isAvailable(provider: string) {
+    return provider === AVAILABLE_PROVIDER
+  }
+
   const connectedCount = connections.filter((c) => c.connected).length
 
-  return { connections, connect, disconnect, isConnected, connectedCount }
+  return { connections, connect, disconnect, isConnected, isAvailable, connectedCount }
 }

@@ -4,7 +4,7 @@ import Card from "../../../components/ui/Card"
 import Icon, { type IconName } from "../../../components/ui/Icon"
 import PortfolioChart from "../components/PortfolioChart"
 import ConnectionsPanel from "../../connections/components/ConnectionsPanel"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useHoldings } from "../../portfolio/hooks/useHoldings"
 import { useLiveQuotes } from "../../portfolio/hooks/useLivePrice"
 import { usePortfolioHistory } from "../../portfolio/hooks/usePortfolioHistory"
@@ -88,6 +88,33 @@ function ScoreBar({ value, gradient }: { value: number; gradient: string }) {
 }
 
 export default function DashboardPage() {
+  const [liveAccountValue, setLiveAccountValue] = useState<number | null>(null)
+  const [liveAccountLabel, setLiveAccountLabel] = useState<string | null>(null)
+  useEffect(() => {
+    let active = true
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 20000)
+    fetch("http://localhost:5001/api/snaptrade/account-value", { signal: controller.signal })
+      .then(async (response) => {
+        const payload = await response.json() as {
+          success?: boolean
+          accountValueCad?: number
+          accountCount?: number
+        }
+        if (!response.ok || !payload.success || typeof payload.accountValueCad !== "number") return
+        if (active) {
+          setLiveAccountValue(payload.accountValueCad)
+          setLiveAccountLabel(`${payload.accountCount ?? 0} SnapTrade accounts`)
+        }
+      })
+      .catch(() => {})
+      .finally(() => window.clearTimeout(timeout))
+    return () => {
+      active = false
+      window.clearTimeout(timeout)
+      controller.abort()
+    }
+  }, [])
   const { holdings } = useHoldings()
   const quotes = useLiveQuotes(holdings.map((h) => h.symbol))
   const history = usePortfolioHistory(holdings)
@@ -246,21 +273,31 @@ export default function DashboardPage() {
       {/* Key numbers */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile icon="layers" label="Total value">
-          <div className="text-3xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">{money(metrics.totalValue)}</div>
-          <div className="mt-2 flex items-center gap-2 text-sm">
-            <span
-              className={`rounded-md px-1.5 py-0.5 font-semibold tabular-nums ${
-                isUp ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-              }`}
-            >
-              {isUp ? "+" : ""}
-              {metrics.gainPct.toFixed(1)}%
-            </span>
-            <span className="tabular-nums text-zinc-500 dark:text-zinc-400">
-              {isUp ? "+" : "-"}
-              {money(Math.abs(metrics.gain))} all time
-            </span>
+          <div className="text-3xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">
+            {money(liveAccountValue ?? metrics.totalValue)}
           </div>
+          {liveAccountValue !== null ? (
+            <div className="mt-2 flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+              <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400">Live</span>
+              <span>{liveAccountLabel ?? "SnapTrade"}</span>
+              <span>CAD</span>
+            </div>
+          ) : (
+            <div className="mt-2 flex items-center gap-2 text-sm">
+              <span
+                className={`rounded-md px-1.5 py-0.5 font-semibold tabular-nums ${
+                  isUp ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {isUp ? "+" : ""}
+                {metrics.gainPct.toFixed(1)}%
+              </span>
+              <span className="tabular-nums text-zinc-500 dark:text-zinc-400">
+                {isUp ? "+" : "-"}
+                {money(Math.abs(metrics.gain))} all time
+              </span>
+            </div>
+          )}
         </StatTile>
 
         <StatTile icon="shield" label="Risk score">

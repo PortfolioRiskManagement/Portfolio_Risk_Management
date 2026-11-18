@@ -8,6 +8,7 @@ import time
 from dataload.data_loader import PortfolioLoader
 from dataload.portfolio_analyzer import PortfolioAnalyzer
 from scenario_service import scenario_service
+from snaptrade_service import SnapTradeUnavailable, get_account_value_cad
 
 app = Flask(__name__)
 
@@ -274,6 +275,17 @@ def get_history():
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "healthy"}), 200
+
+
+@app.route("/api/snaptrade/account-value", methods=["GET"])
+def snaptrade_account_value():
+    """Return only the aggregate account value; no account identifiers or secrets."""
+    try:
+        return jsonify(get_account_value_cad()), 200
+    except SnapTradeUnavailable as exc:
+        return jsonify({"success": False, "error": str(exc), "code": "snaptrade_unavailable"}), 502
+    except Exception as exc:
+        return jsonify({"success": False, "error": str(exc), "code": "snaptrade_unavailable"}), 502
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

@@ -10,6 +10,7 @@ import { useLiveQuotes } from "../../portfolio/hooks/useLivePrice"
 import { usePortfolioHistory } from "../../portfolio/hooks/usePortfolioHistory"
 import { useHoldingAlerts } from "../../alerts/hooks/useHoldingAlerts"
 import { useAuth } from "../../../contexts/AuthContext"
+import { useSnapTradePortfolio } from "../../portfolio/hooks/useSnapTradePortfolio"
 
 function inferType(symbol: string, rawType?: string) {
   if (rawType) return rawType.toLowerCase()
@@ -88,36 +89,26 @@ function ScoreBar({ value, gradient }: { value: number; gradient: string }) {
 }
 
 export default function DashboardPage() {
-  const [liveAccountValue, setLiveAccountValue] = useState<number | null>(null)
-  const [liveAccountLabel, setLiveAccountLabel] = useState<string | null>(null)
+  const { data: snapTradePortfolio } = useSnapTradePortfolio()
+  const [historyDays, setHistoryDays] = useState(182)
+  const [snapTradeHistory, setSnapTradeHistory] = useState<Array<{ time: number; value: number }> | null>(null)
+  const liveAccountValue = snapTradePortfolio?.accountValueCad ?? null
+  const liveAccountLabel = snapTradePortfolio ? `${snapTradePortfolio.accountCount} SnapTrade accounts` : null
+
   useEffect(() => {
     let active = true
-    const controller = new AbortController()
-    const timeout = window.setTimeout(() => controller.abort(), 20000)
-    fetch("http://localhost:5001/api/snaptrade/account-value", { signal: controller.signal })
+    fetch(`http://localhost:5001/api/snaptrade/history?days=${historyDays}`)
       .then(async (response) => {
-        const payload = await response.json() as {
-          success?: boolean
-          accountValueCad?: number
-          accountCount?: number
-        }
-        if (!response.ok || !payload.success || typeof payload.accountValueCad !== "number") return
-        if (active) {
-          setLiveAccountValue(payload.accountValueCad)
-          setLiveAccountLabel(`${payload.accountCount ?? 0} SnapTrade accounts`)
-        }
+        const payload = await response.json() as { success?: boolean; points?: Array<{ time: number; value: number }> }
+        if (active && response.ok && payload.success && payload.points) setSnapTradeHistory(payload.points)
       })
       .catch(() => {})
-      .finally(() => window.clearTimeout(timeout))
-    return () => {
-      active = false
-      window.clearTimeout(timeout)
-      controller.abort()
-    }
-  }, [])
+    return () => { active = false }
+  }, [historyDays])
   const { holdings } = useHoldings()
   const quotes = useLiveQuotes(holdings.map((h) => h.symbol))
-  const history = usePortfolioHistory(holdings)
+  const fallbackHistory = usePortfolioHistory(holdings, historyDays)
+  const history = snapTradeHistory && snapTradeHistory.length >= 2 ? snapTradeHistory : fallbackHistory
   const { alerts, unreadCount } = useHoldingAlerts()
   const { user } = useAuth()
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.trim().split(/\s+/)[0]
@@ -349,7 +340,27 @@ export default function DashboardPage() {
               </div>
               <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">Your current holdings at past prices</div>
             </div>
-            <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-white/5 dark:text-zinc-300">Last 6 months</span>
+            <div className="flex flex-wrap gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-white/5">
+              {([
+                [30, "1M"],
+                [90, "3M"],
+                [182, "6M"],
+                [365, "1Y"],
+              ] as const).map(([days, label]) => (
+                <button
+                  key={days}
+                  type="button"
+                  onClick={() => setHistoryDays(days)}
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    historyDays === days
+                      ? "bg-white text-zinc-950 shadow-sm dark:bg-zinc-700 dark:text-white"
+                      : "text-zinc-500 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
           {history === null ? (
             <div className="flex h-64 items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">Loading price history…</div>

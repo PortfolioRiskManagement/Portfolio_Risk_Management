@@ -138,6 +138,7 @@ export default function PortfolioChart({ data }: { data: ChartPoint[] }) {
         ))}
       </svg>
 
+      {hovered !== null && (
       <div
         className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs shadow-lg dark:border-white/10 dark:bg-zinc-900"
         style={{
@@ -148,6 +149,7 @@ export default function PortfolioChart({ data }: { data: ChartPoint[] }) {
         <div className="font-semibold tabular-nums text-zinc-950 dark:text-white">${Math.round(activePoint.value).toLocaleString()}</div>
         <div className="text-zinc-500 dark:text-zinc-400">{fullDate(activePoint.time)}</div>
       </div>
+      )}
     </div>
   )
 }

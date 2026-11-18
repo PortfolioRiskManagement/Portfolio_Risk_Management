@@ -9,6 +9,7 @@ from dataload.data_loader import PortfolioLoader
 from dataload.portfolio_analyzer import PortfolioAnalyzer
 from scenario_service import scenario_service
 from snaptrade_service import SnapTradeUnavailable, get_account_value_cad
+from snaptrade_service import get_snaptrade_history, get_snaptrade_portfolio
 
 app = Flask(__name__)
 
@@ -284,6 +285,26 @@ def snaptrade_account_value():
         return jsonify(get_account_value_cad()), 200
     except SnapTradeUnavailable as exc:
         return jsonify({"success": False, "error": str(exc), "code": "snaptrade_unavailable"}), 502
+    except Exception as exc:
+        return jsonify({"success": False, "error": str(exc), "code": "snaptrade_unavailable"}), 502
+
+
+@app.route("/api/snaptrade/portfolio", methods=["GET"])
+def snaptrade_portfolio():
+    try:
+        return jsonify(get_snaptrade_portfolio()), 200
+    except Exception as exc:
+        return jsonify({"success": False, "error": str(exc), "code": "snaptrade_unavailable"}), 502
+
+
+@app.route("/api/snaptrade/history", methods=["GET"])
+def snaptrade_history():
+    try:
+        days = max(30, min(int(request.args.get("days", 182)), 365))
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "error": "days must be an integer"}), 400
+    try:
+        return jsonify(get_snaptrade_history(days)), 200
     except Exception as exc:
         return jsonify({"success": False, "error": str(exc), "code": "snaptrade_unavailable"}), 502
 

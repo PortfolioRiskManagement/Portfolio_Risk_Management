@@ -3,6 +3,7 @@ import scenarioService from '../services/scenarioService'
 import type { ScenarioImpact, PortfolioHolding } from '../types/scenario.types'
 import { useHoldings, type Holding } from '../../portfolio/hooks/useHoldings'
 import { useLivePrices } from '../../portfolio/hooks/useLivePrice'
+import { useSnapTradePortfolio } from '../../portfolio/hooks/useSnapTradePortfolio'
 
 type PortfolioViewModel = {
 	totalValue: number
@@ -29,6 +30,10 @@ const ASSET_TYPE_MAP: Record<string, PortfolioHolding['assetClass']> = {
 function inferAssetClass(type?: string): PortfolioHolding['assetClass'] {
 	if (!type) return 'stock'
 	const key = type.trim().toLowerCase()
+	if (key.includes('etf')) return 'etf'
+	if (key.includes('crypto') || key.includes('cryptocurrency')) return 'crypto'
+	if (key.includes('bond') || key.includes('fixed')) return 'bond'
+	if (key.includes('commodity')) return 'commodity'
 	return ASSET_TYPE_MAP[key] ?? 'stock'
 }
 
@@ -65,6 +70,7 @@ function buildPortfolioViewModel(nextHoldings: PortfolioHolding[]): PortfolioVie
 export function useScenarioLab() {
 	const { holdings: sharedHoldings } = useHoldings()
 	const prices = useLivePrices(sharedHoldings.map((h) => h.symbol))
+	const { data: snapTradePortfolio } = useSnapTradePortfolio()
 	const [currentPortfolio, setCurrentPortfolio] = useState<PortfolioViewModel | null>(null)
 	const [holdings, setHoldings] = useState<PortfolioHolding[]>([])
 	const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
@@ -83,10 +89,17 @@ export function useScenarioLab() {
 	// Keep Scenario Lab portfolio in sync with the shared holdings used across app pages.
 	useEffect(() => {
 		if (editedRef.current) return
-		const scenarioHoldings = sharedHoldings.map((h) => convertSharedHoldingToScenarioHolding(h, prices[h.symbol.toUpperCase()]))
+		const scenarioHoldings = snapTradePortfolio?.holdings.length
+			? snapTradePortfolio.holdings.map((holding) => ({
+				symbol: holding.symbol.toUpperCase(),
+				quantity: holding.quantity,
+				currentValue: holding.value,
+				assetClass: inferAssetClass(holding.kind),
+			}))
+			: sharedHoldings.map((h) => convertSharedHoldingToScenarioHolding(h, prices[h.symbol.toUpperCase()]))
 		setHoldings(scenarioHoldings)
 		setCurrentPortfolio(buildPortfolioViewModel(scenarioHoldings))
-	}, [sharedHoldings, prices])
+	}, [sharedHoldings, prices, snapTradePortfolio])
 
 	const runScenario = async (scenarioId: string) => {
 		if (!holdings.length) {

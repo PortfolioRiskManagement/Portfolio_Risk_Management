@@ -1,4 +1,4 @@
-export type AccountType = 'RRSP' | 'TFSA' | 'FHSA' | 'PERSONAL'
+export type AccountType = 'RRSP' | 'TFSA' | 'FHSA' | 'PERSONAL' | 'CASH' | 'UNKNOWN'
 
 export type RiskTolerance = 'conservative' | 'moderate' | 'aggressive'
 export type InvestingExperience = 'beginner' | 'intermediate' | 'advanced'

@@ -30,6 +30,7 @@ const ASSET_TYPE_MAP: Record<string, PortfolioHolding['assetClass']> = {
 function inferAssetClass(type?: string): PortfolioHolding['assetClass'] {
 	if (!type) return 'stock'
 	const key = type.trim().toLowerCase()
+	if (key === 'cash') return 'cash'
 	if (key.includes('etf')) return 'etf'
 	if (key.includes('crypto') || key.includes('cryptocurrency')) return 'crypto'
 	if (key.includes('bond') || key.includes('fixed')) return 'bond'

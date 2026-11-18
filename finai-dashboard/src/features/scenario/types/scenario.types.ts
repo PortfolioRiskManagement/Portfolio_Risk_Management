@@ -48,7 +48,7 @@ export interface PortfolioHolding {
 	symbol: string
 	quantity: number
 	currentValue: number
-	assetClass: 'stock' | 'crypto' | 'bond' | 'etf' | 'commodity'
+	assetClass: 'stock' | 'crypto' | 'bond' | 'etf' | 'commodity' | 'cash'
 }
 
 export interface AssetSearchResult {

@@ -56,7 +56,9 @@ export default function PortfolioAccountsPage() {
     priority: index + 1,
   })) ?? []
 
-  const displayedAccounts = liveAccounts.length > 0 ? liveAccounts : accounts
+  const displayedAccounts = liveAccounts.length > 0
+    ? liveAccounts.filter((account) => account.balance > 0)
+    : accounts
   const displayedTotal = liveAccounts.length > 0
     ? snapTradePortfolio?.accountValueCad ?? 0
     : summary.totalValue
@@ -74,9 +76,11 @@ export default function PortfolioAccountsPage() {
               <div className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400">Total portfolio</div>
               <div className="flex items-baseline gap-2 sm:justify-end">
                 <span className="text-2xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">{formatCurrency(displayedTotal)}</span>
-                <span className={`text-sm font-semibold tabular-nums ${summary.totalGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                  {summary.totalGain >= 0 ? '+' : ''}{formatCurrency(summary.totalGain)}
-                </span>
+                {liveAccounts.length === 0 && (
+                  <span className={`text-sm font-semibold tabular-nums ${summary.totalGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    {summary.totalGain >= 0 ? '+' : ''}{formatCurrency(summary.totalGain)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -88,7 +92,7 @@ export default function PortfolioAccountsPage() {
           </div>
         </section>
 
-        <PortfolioStructureCharts accounts={accounts} />
+        <PortfolioStructureCharts accounts={displayedAccounts} />
 
         <PortfolioProfile profile={profile} onUpdate={updateProfile} />
       </div>

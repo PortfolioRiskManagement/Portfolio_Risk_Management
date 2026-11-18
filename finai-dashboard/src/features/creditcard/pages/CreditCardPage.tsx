@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import PageShell from "../../../components/layout/PageShell"
 import CreditCardResults from "../components/CreditCardResults"
 import ProfileQuestionnaireFlow from "../components/ProfileQuestionnaireFlow"
@@ -10,6 +11,7 @@ const pauseMs = 100
 const revealMs = 400
 
 export default function CreditCardPage() {
+	const navigate = useNavigate()
 	const [view, setView] = useState<"questionnaire" | "results">("questionnaire")
 	const [profile, setProfile] = useState<UserProfile | null>(null)
 	const [questionnaireVisible, setQuestionnaireVisible] = useState(true)
@@ -68,6 +70,14 @@ export default function CreditCardPage() {
 	if (view === "questionnaire") {
 		return (
 			<div className="creditcard-bg min-h-screen">
+				<button
+					type="button"
+					onClick={() => navigate(-1)}
+					className="fixed left-4 top-4 z-50 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+					aria-label="Go back"
+				>
+					← Back
+				</button>
 				<div className="mx-auto max-w-4xl px-4 pb-10 pt-[60px]">
 					<div
 						className="mb-6 text-center transition-all duration-200"

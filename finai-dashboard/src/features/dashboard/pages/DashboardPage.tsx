@@ -11,6 +11,7 @@ import { usePortfolioHistory } from "../../portfolio/hooks/usePortfolioHistory"
 import { useHoldingAlerts } from "../../alerts/hooks/useHoldingAlerts"
 import { useAuth } from "../../../contexts/AuthContext"
 import { useSnapTradePortfolio } from "../../portfolio/hooks/useSnapTradePortfolio"
+import { useConnections } from "../../connections/hooks/useConnections"
 
 function inferType(symbol: string, rawType?: string) {
   if (rawType) return rawType.toLowerCase()
@@ -90,6 +91,7 @@ function ScoreBar({ value, gradient }: { value: number; gradient: string }) {
 
 export default function DashboardPage() {
   const { data: snapTradePortfolio } = useSnapTradePortfolio()
+  const { connectedCount } = useConnections()
   const [historyDays, setHistoryDays] = useState(182)
   const [snapTradeHistory, setSnapTradeHistory] = useState<Array<{ time: number; value: number }> | null>(null)
   const liveAccountValue = snapTradePortfolio?.accountValueCad ?? null
@@ -105,7 +107,23 @@ export default function DashboardPage() {
       .catch(() => {})
     return () => { active = false }
   }, [historyDays])
-  const { holdings } = useHoldings()
+  const { holdings: sharedHoldings } = useHoldings()
+  const holdings = useMemo(() => {
+    if (!snapTradePortfolio?.holdings.length) return sharedHoldings
+    return snapTradePortfolio.holdings.map((holding) => ({
+      id: holding.id,
+      symbol: holding.symbol,
+      name: holding.name,
+      quantity: holding.quantity,
+      entry: holding.price,
+      platform: holding.platform,
+      type: holding.kind,
+      account: holding.accountType,
+      price: holding.price,
+      currency: holding.currency,
+      source: "live" as const,
+    }))
+  }, [snapTradePortfolio, sharedHoldings])
   const quotes = useLiveQuotes(holdings.map((h) => h.symbol))
   const fallbackHistory = usePortfolioHistory(holdings, historyDays)
   const history = snapTradeHistory && snapTradeHistory.length >= 2 ? snapTradeHistory : fallbackHistory
@@ -120,7 +138,9 @@ export default function DashboardPage() {
     const totalValue = holdings.reduce((sum, h) => sum + priceOf(h) * h.quantity, 0)
     const gain = totalValue - investedValue
     const gainPct = investedValue > 0 ? (gain / investedValue) * 100 : 0
-    const platforms = new Set(holdings.map((h) => h.platform).filter(Boolean)).size
+    const platforms = snapTradePortfolio?.accountCount
+      ? Math.max(connectedCount, 1)
+      : connectedCount
 
     const weights = holdings
       .map((h) => priceOf(h) * h.quantity)
@@ -191,7 +211,7 @@ export default function DashboardPage() {
       positions,
       byType,
     }
-  }, [holdings, quotes])
+  }, [holdings, quotes, connectedCount, snapTradePortfolio])
 
   const risk = riskLabel(metrics.riskScore)
   const diversification = diversificationLabel(metrics.diversificationScore)
@@ -235,7 +255,7 @@ export default function DashboardPage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            Tracking {metrics.assetsCount} holdings across {metrics.platforms || 1} platforms
+            Tracking {metrics.assetsCount} holdings across {metrics.platforms} {metrics.platforms === 1 ? "platform" : "platforms"}
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">
             {greeting()}
@@ -314,7 +334,7 @@ export default function DashboardPage() {
             <span className="text-3xl font-bold tracking-tight tabular-nums text-zinc-950 dark:text-white">{metrics.assetsCount}</span>
             <span className="text-sm text-zinc-400">holdings</span>
           </div>
-          <div className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Across {metrics.platforms || 1} platforms</div>
+          <div className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Across {metrics.platforms} {metrics.platforms === 1 ? "platform" : "platforms"}</div>
           <div className="mt-4 flex h-1.5 gap-0.5 overflow-hidden rounded-full">
             {metrics.byType.map(([type, weight]) => (
               <div key={type} className={TYPE_STYLES[type]?.bar ?? "bg-zinc-400"} style={{ width: `${weight}%` }} title={`${TYPE_STYLES[type]?.label ?? type} ${weight.toFixed(0)}%`} />

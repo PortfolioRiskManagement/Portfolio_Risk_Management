@@ -115,6 +115,8 @@ def normalize_account_category(account: dict[str, Any]) -> str:
             return category
     if "PERSONAL" in text or "NONREGISTERED" in text or "TAXABLE" in text:
         return "PERSONAL"
+    if "CASH" in text or "DEPOSIT" in text or "CHECKING" in text:
+        return "CASH"
     if "INVESTMENT" in text:
         return "PERSONAL"
     return "UNKNOWN"
@@ -148,6 +150,22 @@ def get_snaptrade_portfolio() -> dict[str, Any]:
             "balance": balance_cad,
             "currency": "CAD",
         })
+
+        account_category = normalize_account_category(account)
+        if account_category == "CASH" and balance_cad > 0:
+            normalized_holdings.append({
+                "id": f"{local_account_id}-cash",
+                "accountId": local_account_id,
+                "accountType": "CASH",
+                "symbol": "CASH",
+                "name": str(account.get("name") or "Checking account"),
+                "quantity": 1,
+                "price": balance_cad,
+                "value": balance_cad,
+                "currency": "CAD",
+                "platform": "Wealthsimple",
+                "kind": "cash",
+            })
 
         if not account_id:
             continue

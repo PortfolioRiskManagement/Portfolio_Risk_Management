@@ -59,8 +59,7 @@ export default function PortfolioChart({ data }: { data: ChartPoint[] }) {
   const linePath = smoothPath(points)
   const baseline = PADDING.top + chartHeight
   const areaPath = `${linePath} L ${points[points.length - 1].x},${baseline} L ${points[0].x},${baseline} Z`
-  const active = hovered === null ? points.length - 1 : hovered
-  const activePoint = points[active]
+  const activePoint = hovered === null ? null : points[hovered]
 
   return (
     <div className="relative">
@@ -98,16 +97,20 @@ export default function PortfolioChart({ data }: { data: ChartPoint[] }) {
         <path d={linePath} fill="none" stroke="url(#perfLine)" strokeWidth="3" strokeLinecap="round" />
 
         {/* Hover guide and marker */}
-        <line
-          x1={activePoint.x}
-          x2={activePoint.x}
-          y1={PADDING.top}
-          y2={baseline}
-          stroke="currentColor"
-          className="text-indigo-300/60 dark:text-indigo-400/30"
-        />
-        <circle cx={activePoint.x} cy={activePoint.y} r="10" className="fill-indigo-500/20" />
-        <circle cx={activePoint.x} cy={activePoint.y} r="5" fill="#ffffff" stroke="#6366f1" strokeWidth="3" />
+        {activePoint && (
+          <>
+            <line
+              x1={activePoint.x}
+              x2={activePoint.x}
+              y1={PADDING.top}
+              y2={baseline}
+              stroke="currentColor"
+              className="text-indigo-300/60 dark:text-indigo-400/30"
+            />
+            <circle cx={activePoint.x} cy={activePoint.y} r="10" className="fill-indigo-500/20" />
+            <circle cx={activePoint.x} cy={activePoint.y} r="5" fill="#ffffff" stroke="#6366f1" strokeWidth="3" />
+          </>
+        )}
 
         {/* Month labels at the first point of each month */}
         {points.map((point, i) =>
@@ -138,7 +141,7 @@ export default function PortfolioChart({ data }: { data: ChartPoint[] }) {
         ))}
       </svg>
 
-      {hovered !== null && (
+      {activePoint && (
       <div
         className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs shadow-lg dark:border-white/10 dark:bg-zinc-900"
         style={{

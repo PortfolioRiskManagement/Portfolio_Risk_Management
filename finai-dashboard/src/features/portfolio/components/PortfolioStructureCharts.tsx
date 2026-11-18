@@ -22,11 +22,13 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
   const totalValue = accounts.reduce((sum, acc) => sum + acc.balance, 0)
 
   // Account distribution
-  const accountDistribution = accounts.map((acc) => ({
+  const accountDistribution = accounts
+    .filter((acc) => acc.balance > 0)
+    .map((acc) => ({
     type: acc.type,
     name: acc.name,
     value: acc.balance,
-    percentage: (acc.balance / totalValue) * 100,
+    percentage: totalValue > 0 ? (acc.balance / totalValue) * 100 : 0,
     color: getAccountColor(acc.type),
   }))
 
@@ -36,7 +38,7 @@ export default function PortfolioStructureCharts({ accounts }: Props) {
     .filter((acc) => registeredTypes.includes(acc.type))
     .reduce((sum, acc) => sum + acc.balance, 0)
   const nonRegisteredValue = totalValue - registeredValue
-  const registeredPercent = (registeredValue / totalValue) * 100
+  const registeredPercent = totalValue > 0 ? (registeredValue / totalValue) * 100 : 0
 
   // Contribution room usage
   const contributionData = accounts

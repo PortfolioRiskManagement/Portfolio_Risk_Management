@@ -151,22 +151,6 @@ def get_snaptrade_portfolio() -> dict[str, Any]:
             "currency": "CAD",
         })
 
-        account_category = normalize_account_category(account)
-        if account_category == "CASH" and balance_cad > 0:
-            normalized_holdings.append({
-                "id": f"{local_account_id}-cash",
-                "accountId": local_account_id,
-                "accountType": "CASH",
-                "symbol": "CASH",
-                "name": str(account.get("name") or "Checking account"),
-                "quantity": 1,
-                "price": balance_cad,
-                "value": balance_cad,
-                "currency": "CAD",
-                "platform": "Wealthsimple",
-                "kind": "cash",
-            })
-
         if not account_id:
             continue
         try:
@@ -177,6 +161,28 @@ def get_snaptrade_portfolio() -> dict[str, Any]:
             positions = positions_payload.get("results", []) if isinstance(positions_payload, dict) else []
         except Exception:
             positions = []
+
+        account_category = normalize_account_category(account)
+        if account_category == "CASH" and balance_cad > 0:
+            account_name = str(account.get("name") or "Cash account")
+            symbol = "CASH"
+            if "MSB" in account_name.upper():
+                symbol = "MSB"
+            elif "CHECK" in account_name.upper():
+                symbol = "CHECKING"
+            normalized_holdings.append({
+                "id": f"{local_account_id}-cash",
+                "accountId": local_account_id,
+                "accountType": "CASH",
+                "symbol": symbol,
+                "name": account_name,
+                "quantity": 1,
+                "price": balance_cad,
+                "value": balance_cad,
+                "currency": "CAD",
+                "platform": "Wealthsimple",
+                "kind": "cash",
+            })
 
         for position_index, position in enumerate(positions if isinstance(positions, list) else [], start=1):
             instrument = position.get("instrument") if isinstance(position, dict) else None

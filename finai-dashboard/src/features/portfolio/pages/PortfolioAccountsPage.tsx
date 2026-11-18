@@ -87,7 +87,18 @@ export default function PortfolioAccountsPage() {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {displayedAccounts.map((account) => (
-              <AccountCard key={account.id} account={account} />
+              <AccountCard
+                key={account.id}
+                account={account}
+                holdings={snapTradePortfolio?.holdings
+                  .filter((holding) => holding.accountId === account.id)
+                  .map((holding) => ({
+                    symbol: holding.symbol,
+                    name: holding.name,
+                    quantity: holding.quantity,
+                    value: holding.value,
+                  }))}
+              />
             ))}
           </div>
         </section>

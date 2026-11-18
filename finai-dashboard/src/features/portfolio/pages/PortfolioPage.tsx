@@ -92,7 +92,7 @@ export default function PortfolioPage() {
             })
             .filter(h => {
               if (riskFilter === "All Risk Levels") return true
-              const current = prices[h.symbol]
+              const current = h.source === "live" ? (prices[h.symbol] ?? h.price) : prices[h.symbol]
               if (current === undefined) return false
               const pct = h.entry > 0 ? ((current - h.entry) / h.entry) * 100 : 0
               if (riskFilter === "High") return pct <= 0
@@ -102,7 +102,7 @@ export default function PortfolioPage() {
             })
             .map((h, i) => (
               <div key={h.id} style={{ animation: `fadeUp 220ms cubic-bezier(.2,.9,.2,1) ${i * 28}ms both` }}>
-                <AssetCard holding={h} currentPrice={prices[h.symbol] ?? null} />
+                <AssetCard holding={h} currentPrice={prices[h.symbol] ?? h.price ?? null} />
               </div>
             ))}
         </div>

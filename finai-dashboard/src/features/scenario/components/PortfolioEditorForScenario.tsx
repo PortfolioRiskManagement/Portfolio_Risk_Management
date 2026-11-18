@@ -215,7 +215,9 @@ export function PortfolioEditorForScenario({ holdings, onUpdateHoldings, totalVa
 							</span>
 							<span className="font-semibold text-white">{holding.symbol}</span>
 							<span className="text-zinc-500">
-								${(holding.currentValue / 1000).toFixed(0)}K
+								{holding.currentValue >= 1000
+									? `$${(holding.currentValue / 1000).toFixed(1)}K`
+									: `$${(holding.currentValue / 1000).toFixed(2)}K`}
 							</span>
 						</div>
 					))}

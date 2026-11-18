@@ -1,5 +1,6 @@
-import { useSyncExternalStore } from "react"
+import { useEffect, useSyncExternalStore } from "react"
 import type { AccountType } from "../types/portfolio.types"
+import { fetchSnapTradePortfolio } from "./useSnapTradePortfolio"
 
 export type Holding = {
   id: string
@@ -11,6 +12,10 @@ export type Holding = {
   type?: string
   /** Which account holds it (TFSA, RRSP, FHSA or a personal/taxable account). */
   account?: AccountType
+  source?: "live" | "manual"
+  price?: number
+  value?: number
+  currency?: string
 }
 
 const STORAGE_KEY = "finai_holdings_v1"
@@ -133,5 +138,32 @@ export function replaceHoldings(next: Holding[]) {
 
 export function useHoldings() {
   const holdings = useSyncExternalStore(subscribe, getSnapshot)
+  useEffect(() => {
+    let active = true
+    fetchSnapTradePortfolio().then((provider) => {
+      if (!active || !provider) return
+      const live = provider.holdings
+        .filter((holding) => holding.quantity > 0 && holding.value > 0)
+        .map((holding): Holding => ({
+          id: holding.id,
+          symbol: holding.symbol,
+          name: holding.name,
+          quantity: holding.quantity,
+          entry: holding.price,
+          price: holding.price,
+          value: holding.value,
+          currency: holding.currency,
+          platform: holding.platform,
+          type: holding.kind,
+          account: holding.accountType,
+          source: "live",
+        }))
+      if (live.length > 0) {
+        current = live
+        listeners.forEach((listener) => listener())
+      }
+    })
+    return () => { active = false }
+  }, [])
   return { holdings, addHolding, updateHolding, removeHolding, replaceHoldings }
 }

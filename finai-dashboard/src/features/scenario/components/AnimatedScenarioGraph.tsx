@@ -123,7 +123,7 @@ export function AnimatedScenarioGraph({
 			const label = val >= 1_000_000
 				? `$${(val / 1_000_000).toFixed(1)}M`
 				: val >= 1000
-				? `$${(val / 1000).toFixed(0)}K`
+				? `$${(val / 1000).toFixed(1)}K`
 				: `$${val.toFixed(0)}`
 			ctx.fillText(label, padL - 8, y + 4)
 		}

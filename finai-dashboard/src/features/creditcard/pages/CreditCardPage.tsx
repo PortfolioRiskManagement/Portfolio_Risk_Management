@@ -73,7 +73,8 @@ export default function CreditCardPage() {
 				<button
 					type="button"
 					onClick={() => navigate(-1)}
-					className="fixed left-4 top-4 z-50 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+					style={{ left: "calc(50% - 280px)" }}
+					className="fixed top-[88px] z-50 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
 					aria-label="Go back"
 				>
 					← Back

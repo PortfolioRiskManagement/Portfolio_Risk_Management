@@ -6,6 +6,7 @@ import Icon, { type IconName } from '../../../components/ui/Icon'
 
 interface Props {
   account: Account
+  holdings?: Array<{ symbol: string; name: string; quantity: number; value?: number }>
 }
 
 const STATUS_BADGES: Record<string, { text: string; className: string }> = {
@@ -22,7 +23,7 @@ const ACCOUNT_STYLES: Record<string, { icon: IconName; tile: string }> = {
   PERSONAL: { icon: 'portfolio', tile: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' },
 }
 
-export default function AccountCard({ account }: Props) {
+export default function AccountCard({ account, holdings = [] }: Props) {
   const [showDetails, setShowDetails] = useState(false)
 
   const statusBadge = STATUS_BADGES[account.status] ?? STATUS_BADGES.normal
@@ -111,6 +112,22 @@ export default function AccountCard({ account }: Props) {
         className={`overflow-hidden transition-all duration-300 ease-in-out ${showDetails ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
       >
         <div className="space-y-3 border-t border-zinc-200/80 pt-4 text-sm dark:border-white/[0.06]">
+          {holdings.length > 0 && (
+            <div className="space-y-2">
+              {holdings.map((holding) => (
+                <div key={holding.symbol} className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-zinc-950 dark:text-white">{holding.symbol}</div>
+                    <div className="truncate text-xs text-zinc-500 dark:text-zinc-400">{holding.name}</div>
+                  </div>
+                  <div className="text-right tabular-nums">
+                    <div className="font-semibold text-zinc-950 dark:text-white">{holding.quantity} units</div>
+                    {holding.value !== undefined && <div className="text-xs text-zinc-500 dark:text-zinc-400">{formatCurrency(holding.value)}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-zinc-500 dark:text-zinc-400">Role in portfolio</span>
             <span className="font-semibold text-zinc-950 dark:text-white">Priority #{account.priority}</span>

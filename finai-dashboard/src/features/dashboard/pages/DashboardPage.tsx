@@ -173,6 +173,7 @@ export default function DashboardPage() {
       .map((h) => ({ ...h, value: priceOf(h) * h.quantity }))
       .sort((a, b) => b.value - a.value)
       .map((p) => ({ ...p, weight: valueSum > 0 ? (p.value / valueSum) * 100 : 0 }))
+      .filter((p) => p.weight > 0)
 
     const byType = Object.entries(
       positions.reduce<Record<string, number>>((acc, p) => {
@@ -180,7 +181,7 @@ export default function DashboardPage() {
         acc[type] = (acc[type] ?? 0) + p.weight
         return acc
       }, {}),
-    ).sort((a, b) => b[1] - a[1])
+    ).sort((a, b) => b[1] - a[1]).filter(([, weight]) => weight > 0)
 
     // Today's change: each position's move since yesterday's close
     const movers = holdings

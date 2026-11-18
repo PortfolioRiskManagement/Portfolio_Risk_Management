@@ -13,7 +13,7 @@ function formatCurrency(v: number) {
 
 export default function AssetCard({ holding, currentPrice }: Props) {
   const loaded = currentPrice !== null
-  const price = currentPrice ?? 0
+  const price = currentPrice ?? holding.price ?? 0
   const total = price * holding.quantity
   const entryTotal = holding.entry * holding.quantity
   const diff = total - entryTotal

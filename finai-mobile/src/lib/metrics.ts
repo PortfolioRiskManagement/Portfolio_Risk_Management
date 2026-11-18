@@ -8,6 +8,9 @@ export const TYPE_META: Record<Holding['type'], { label: string; color: string }
   stock: { label: 'Stocks', color: '#3b82f6' },
   etf: { label: 'ETFs', color: '#6366f1' },
   crypto: { label: 'Crypto', color: '#a855f7' },
+  cash: { label: 'Cash', color: '#10b981' },
+  bond: { label: 'Bonds', color: '#f59e0b' },
+  commodity: { label: 'Commodities', color: '#eab308' },
 };
 
 export function portfolioMetrics(holdings: Holding[]) {

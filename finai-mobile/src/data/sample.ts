@@ -9,7 +9,7 @@ export type Holding = {
   /** Average price paid per unit. */
   entry: number;
   platform: string;
-  type: 'stock' | 'etf' | 'crypto';
+  type: 'stock' | 'etf' | 'crypto' | 'cash' | 'bond' | 'commodity';
 };
 
 export const SAMPLE_HOLDINGS: Holding[] = [
@@ -44,7 +44,7 @@ export const PERFORMANCE = [
 
 export type Account = {
   id: string;
-  type: 'RRSP' | 'TFSA' | 'FHSA' | 'PERSONAL';
+  type: 'RRSP' | 'TFSA' | 'FHSA' | 'PERSONAL' | 'CASH';
   name: string;
   purpose: string;
   balance: number;

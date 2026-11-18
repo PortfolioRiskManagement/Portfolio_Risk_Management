@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 import { Badge, Body, Card, CardHeader, Divider, Heading, IconTile, Label, Screen, ScoreBar, type IconName, type Tone } from '../components/ui';
 import { SAMPLE_ACCOUNTS, type Account } from '../data/sample';
+import { useStore } from '../lib/store';
 import { money, percent, signedMoney } from '../lib/format';
 import { brand, useTheme } from '../lib/theme';
 import type { AppScreenProps, TabProps } from '../navigation/types';
@@ -11,6 +12,7 @@ export const ACCOUNT_META: Record<Account['type'], { icon: IconName; color: stri
   TFSA: { icon: 'trending-up', color: brand.emerald, short: 'TFSA' },
   FHSA: { icon: 'home-outline', color: brand.purple, short: 'FHSA' },
   PERSONAL: { icon: 'briefcase-outline', color: brand.indigo, short: 'Personal' },
+  CASH: { icon: 'wallet-outline', color: brand.emerald, short: 'Cash' },
 };
 
 export const STATUS: Record<Account['status'], { text: string; tone: Tone | 'neutral' }> = {
@@ -57,10 +59,29 @@ function ContributionRoom({ account }: { account: Account }) {
 
 export default function PortfolioScreen({ navigation }: TabProps<'Portfolio'>) {
   const { colors } = useTheme();
-  const total = SAMPLE_ACCOUNTS.reduce((sum, a) => sum + a.balance, 0);
-  const totalGain = SAMPLE_ACCOUNTS.reduce((sum, a) => sum + a.gain, 0);
-  const registered = SAMPLE_ACCOUNTS.filter((a) => a.type !== 'PERSONAL').reduce((sum, a) => sum + a.balance, 0);
-  const registeredPct = (registered / total) * 100;
+  const { liveAccounts, liveAccountValue } = useStore();
+  const accounts: Account[] = liveAccounts.length > 0
+    ? liveAccounts.map((account, index) => ({
+        id: account.id,
+        type: account.type === 'UNKNOWN' ? 'PERSONAL' : account.type,
+        name: account.name,
+        purpose: account.type === 'CASH' ? 'Cash and deposit account' : 'Investment account',
+        balance: account.balance,
+        gain: 0,
+        gainPercent: 0,
+        contributionRoom: 0,
+        contributionUsed: 0,
+        contributionLimit: 0,
+        taxBenefit: account.type === 'PERSONAL' ? 'Capital gains are taxable.' : 'Tax treatment is determined by the account category.',
+        status: 'normal',
+        recommendedAction: 'View account details for the latest SnapTrade balance.',
+      }))
+    : SAMPLE_ACCOUNTS;
+  const visibleAccounts = liveAccounts.length > 0 ? accounts.filter((account) => account.balance > 0) : accounts;
+  const total = liveAccountValue ?? visibleAccounts.reduce((sum, a) => sum + a.balance, 0);
+  const totalGain = liveAccounts.length > 0 ? 0 : SAMPLE_ACCOUNTS.reduce((sum, a) => sum + a.gain, 0);
+  const registered = visibleAccounts.filter((a) => ['RRSP', 'TFSA', 'FHSA'].includes(a.type)).reduce((sum, a) => sum + a.balance, 0);
+  const registeredPct = total > 0 ? (registered / total) * 100 : 0;
 
   return (
     <Screen>
@@ -76,12 +97,12 @@ export default function PortfolioScreen({ navigation }: TabProps<'Portfolio'>) {
           <Text style={{ color: colors.positive, fontWeight: '700' }}>{signedMoney(totalGain)}</Text>
         </View>
         <View style={{ flexDirection: 'row', height: 8, borderRadius: 999, overflow: 'hidden', gap: 2, marginTop: 16, marginBottom: 10 }}>
-          {SAMPLE_ACCOUNTS.map((a) => (
+          {visibleAccounts.map((a) => (
             <View key={a.id} style={{ flex: a.balance, backgroundColor: ACCOUNT_META[a.type].color }} />
           ))}
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-          {SAMPLE_ACCOUNTS.map((a) => (
+          {visibleAccounts.map((a) => (
             <View key={a.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ACCOUNT_META[a.type].color }} />
               <Text style={{ color: colors.textMuted, fontSize: 12 }}>
@@ -109,7 +130,7 @@ export default function PortfolioScreen({ navigation }: TabProps<'Portfolio'>) {
         </View>
       </Card>
 
-      {SAMPLE_ACCOUNTS.map((account) => (
+      {visibleAccounts.map((account) => (
         <Pressable key={account.id} onPress={() => navigation.navigate('AccountDetail', { id: account.id })} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
           <Card>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 }}>
@@ -136,7 +157,25 @@ export default function PortfolioScreen({ navigation }: TabProps<'Portfolio'>) {
 
 export function AccountDetailScreen({ route }: AppScreenProps<'AccountDetail'>) {
   const { colors } = useTheme();
-  const account = SAMPLE_ACCOUNTS.find((a) => a.id === route.params.id);
+  const { liveAccounts } = useStore();
+  const live = liveAccounts.find((a) => a.id === route.params.id);
+  const account: Account | undefined = live
+    ? {
+        id: live.id,
+        type: live.type === 'UNKNOWN' ? 'PERSONAL' : live.type,
+        name: live.name,
+        purpose: live.type === 'CASH' ? 'Cash and deposit account' : 'Investment account',
+        balance: live.balance,
+        gain: 0,
+        gainPercent: 0,
+        contributionRoom: 0,
+        contributionUsed: 0,
+        contributionLimit: 0,
+        taxBenefit: 'Tax treatment is determined by the account category.',
+        status: 'normal',
+        recommendedAction: 'View the latest balance in your linked account.',
+      }
+    : SAMPLE_ACCOUNTS.find((a) => a.id === route.params.id);
   if (!account) return null;
 
   return (

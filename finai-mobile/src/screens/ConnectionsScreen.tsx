@@ -7,7 +7,7 @@ import { useTheme } from '../lib/theme';
 
 export default function ConnectionsScreen() {
   const { colors } = useTheme();
-  const { connected, setConnected } = useStore();
+  const { connected, setConnected, refreshLive } = useStore();
   const linkedCount = PROVIDERS.filter((p) => connected[p.name]).length;
 
   // Real brokerage linking is being built separately; for now this only records the choice on the device.
@@ -19,6 +19,7 @@ export default function ConnectionsScreen() {
       ]);
     } else {
       setConnected(name, true);
+      if (name === 'Wealthsimple') refreshLive();
     }
   }
 

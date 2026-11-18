@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import PerformanceChart from '../components/PerformanceChart';
 import { Badge, Card, CardHeader, IconTile, Label, Screen, ScoreBar, toneColor, type IconName } from '../components/ui';
@@ -8,6 +8,7 @@ import { displayName, useAuth } from '../lib/auth';
 import { money, percent, signedMoney } from '../lib/format';
 import { diversificationLabel, portfolioMetrics, riskLabel, TYPE_META } from '../lib/metrics';
 import { useStore } from '../lib/store';
+import { fetchSnapTradeHistory } from '../lib/snaptrade';
 import { useTheme } from '../lib/theme';
 import type { TabProps } from '../navigation/types';
 
@@ -33,18 +34,30 @@ function Stat({ icon, label, children }: { icon: IconName; label: string; childr
 export default function DashboardScreen({ navigation }: TabProps<'Dashboard'>) {
   const { colors } = useTheme();
   const { user } = useAuth();
-  const { holdings } = useStore();
+  const { holdings, liveAccountValue, liveAccounts, connected, refreshLive } = useStore();
+  const [historyDays, setHistoryDays] = useState(182);
+  const [performance, setPerformance] = useState(PERFORMANCE);
+  useEffect(() => {
+    fetchSnapTradeHistory(historyDays).then((points) => {
+      if (points.length < 2) return;
+      setPerformance(points.map((point) => ({
+        month: new Date(point.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        value: point.value,
+      })));
+    });
+  }, [historyDays]);
   const [refreshing, setRefreshing] = useState(false);
   const m = useMemo(() => portfolioMetrics(holdings), [holdings]);
   const risk = riskLabel(m.riskScore);
   const diversification = diversificationLabel(m.diversificationScore);
   const firstName = displayName(user).split(/\s+/)[0];
-  const periodChange = ((PERFORMANCE[PERFORMANCE.length - 1].value - PERFORMANCE[0].value) / PERFORMANCE[0].value) * 100;
+  const periodChange = ((performance[performance.length - 1].value - performance[0].value) / performance[0].value) * 100;
   const big = { color: colors.text, fontSize: 26, fontWeight: '800' as const, letterSpacing: -0.6, fontVariant: ['tabular-nums' as const] };
 
   // Sample data only for now; refreshing just gives the familiar pull-down feedback.
   function refresh() {
     setRefreshing(true);
+    refreshLive();
     setTimeout(() => setRefreshing(false), 700);
   }
 
@@ -55,7 +68,7 @@ export default function DashboardScreen({ navigation }: TabProps<'Dashboard'>) {
         <View style={[styles.syncPill, { borderColor: colors.border, backgroundColor: colors.surfaceMuted }]}>
           <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.positive }} />
           <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '600' }}>
-            {holdings.length} holdings across {m.platforms || 1} platforms
+            {holdings.length} holdings across {Object.values(connected).filter(Boolean).length || (liveAccounts.length > 0 ? 1 : 0)} {(Object.values(connected).filter(Boolean).length || (liveAccounts.length > 0 ? 1 : 0)) === 1 ? 'platform' : 'platforms'}
           </Text>
         </View>
         <Text style={{ color: colors.text, fontSize: 28, fontWeight: '800', letterSpacing: -0.8, marginTop: 10 }}>
@@ -68,17 +81,28 @@ export default function DashboardScreen({ navigation }: TabProps<'Dashboard'>) {
       <Card>
         <Label>Total value</Label>
         <Text style={{ color: colors.text, fontSize: 38, fontWeight: '800', letterSpacing: -1.2, marginTop: 6, fontVariant: ['tabular-nums'] }}>
-          {money(m.totalValue)}
+          {money(liveAccountValue ?? m.totalValue)}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6, marginBottom: 16 }}>
           <Badge text={percent(m.gainPct)} tone={m.gain >= 0 ? 'positive' : 'negative'} />
           <Text style={{ color: colors.textMuted, fontSize: 14 }}>{signedMoney(m.gain)} all time</Text>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <Label>Last 6 months</Label>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {([
+              [30, '1M'],
+              [90, '3M'],
+              [182, '6M'],
+              [365, '1Y'],
+            ] as const).map(([days, label]) => (
+              <Pressable key={days} onPress={() => setHistoryDays(days)} style={{ paddingHorizontal: 8, paddingVertical: 4 }}>
+                <Text style={{ color: historyDays === days ? colors.accent : colors.textMuted, fontWeight: historyDays === days ? '800' : '600', fontSize: 12 }}>{label}</Text>
+              </Pressable>
+            ))}
+          </View>
           <Text style={{ color: colors.positive, fontWeight: '700', fontSize: 13 }}>{percent(periodChange)}</Text>
         </View>
-        <PerformanceChart data={PERFORMANCE} />
+        <PerformanceChart data={performance} />
       </Card>
 
       {/* Risk + diversification */}
@@ -108,7 +132,9 @@ export default function DashboardScreen({ navigation }: TabProps<'Dashboard'>) {
         <CardHeader title="Total assets" action="View all" onAction={() => navigation.navigate('Holdings')} />
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
           <Text style={big}>{holdings.length}</Text>
-          <Text style={{ color: colors.textMuted, fontSize: 14 }}>holdings · {m.platforms || 1} platforms</Text>
+          <Text style={{ color: colors.textMuted, fontSize: 14 }}>
+            holdings · {Object.values(connected).filter(Boolean).length || (liveAccounts.length > 0 ? 1 : 0)} {Object.values(connected).filter(Boolean).length || (liveAccounts.length > 0 ? 1 : 0) === 1 ? 'platform' : 'platforms'}
+          </Text>
         </View>
         <View style={styles.stackBar}>
           {m.byType.map((t) => (

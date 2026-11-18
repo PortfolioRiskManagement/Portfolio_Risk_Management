@@ -8,6 +8,7 @@ import { displayName, friendlyAuthError, useAuth } from '../lib/auth';
 import { useStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
 import { brand, useTheme, type ThemePreference } from '../lib/theme';
+import type { TabProps } from '../navigation/types';
 
 const THEMES: { value: ThemePreference; label: string; icon: IconName }[] = [
   { value: 'system', label: 'Auto', icon: 'phone-portrait-outline' },
@@ -15,7 +16,7 @@ const THEMES: { value: ThemePreference; label: string; icon: IconName }[] = [
   { value: 'dark', label: 'Dark', icon: 'moon-outline' },
 ];
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }: TabProps<'Settings'>) {
   const { colors, preference, setPreference } = useTheme();
   const { user, signOut } = useAuth();
   const { resetHoldings } = useStore();
@@ -103,6 +104,20 @@ export default function SettingsScreen() {
             );
           })}
         </View>
+      </Card>
+
+      <Card style={{ paddingVertical: 4 }}>
+        <Pressable onPress={() => navigation.navigate('ScenarioLab')} style={styles.row}>
+          <Ionicons name="flask-outline" size={20} color={colors.textMuted} />
+          <Text style={{ flex: 1, color: colors.text, fontSize: 15 }}>Scenario Lab</Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSubtle} />
+        </Pressable>
+        <Divider />
+        <Pressable onPress={() => navigation.navigate('CreditCard')} style={styles.row}>
+          <Ionicons name="card-outline" size={20} color={colors.textMuted} />
+          <Text style={{ flex: 1, color: colors.text, fontSize: 15 }}>Credit Card Assistant</Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSubtle} />
+        </Pressable>
       </Card>
 
       {/* About */}

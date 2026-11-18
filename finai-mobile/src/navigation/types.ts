@@ -20,6 +20,8 @@ export type AppStackParamList = {
   AddHolding: undefined;
   HoldingDetail: { id: string };
   AccountDetail: { id: string };
+  ScenarioLab: undefined;
+  CreditCard: undefined;
 };
 
 export type AuthScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, T>;

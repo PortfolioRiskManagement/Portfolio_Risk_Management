@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { SAMPLE_HOLDINGS, type Holding } from '../data/sample';
+import { fetchSnapTradePortfolio, type SnapTradeAccount } from './snaptrade';
 
 // Holdings and connection status live on the device for now (sample data plus anything the
 // person adds). Swap this for Supabase once real brokerage connections are available.
@@ -10,6 +11,10 @@ const CONNECTIONS_KEY = 'finai_connections_v1';
 
 type StoreValue = {
   holdings: Holding[];
+  liveAccounts: SnapTradeAccount[];
+  liveAccountValue: number | null;
+  liveLoading: boolean;
+  refreshLive: () => Promise<void>;
   addHolding: (holding: Omit<Holding, 'id'>) => void;
   removeHolding: (id: string) => void;
   resetHoldings: () => void;
@@ -21,6 +26,9 @@ const StoreContext = createContext<StoreValue | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [holdings, setHoldings] = useState<Holding[]>(SAMPLE_HOLDINGS);
+  const [liveAccounts, setLiveAccounts] = useState<SnapTradeAccount[]>([]);
+  const [liveAccountValue, setLiveAccountValue] = useState<number | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
   const [connected, setConnectedState] = useState<Record<string, boolean>>({});
   const [loaded, setLoaded] = useState(false);
 
@@ -32,6 +40,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {})
       .finally(() => setLoaded(true));
+  }, []);
+
+  async function refreshLive() {
+    setLiveLoading(true);
+    const provider = await fetchSnapTradePortfolio();
+    if (provider) {
+      setLiveAccounts(provider.accounts.filter((account) => account.balance > 0));
+      setLiveAccountValue(provider.accountValueCad);
+      setConnectedState((prev) => ({ ...prev, Wealthsimple: true }));
+      const liveHoldings = provider.holdings
+        .filter((holding) => holding.quantity > 0 && holding.value > 0)
+        .map((holding): Holding => ({
+          id: holding.id,
+          symbol: holding.symbol,
+          name: holding.name,
+          quantity: holding.quantity,
+          entry: holding.price,
+          platform: holding.platform,
+          type: holding.kind,
+        }));
+      if (liveHoldings.length > 0) setHoldings(liveHoldings);
+    }
+    setLiveLoading(false);
+  }
+
+  useEffect(() => {
+    refreshLive();
   }, []);
 
   useEffect(() => {
@@ -58,6 +93,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     <StoreContext.Provider
       value={{
         holdings,
+        liveAccounts,
+        liveAccountValue,
+        liveLoading,
+        refreshLive,
         addHolding,
         removeHolding: (id) => setHoldings((prev) => prev.filter((h) => h.id !== id)),
         resetHoldings: () => setHoldings(SAMPLE_HOLDINGS),

@@ -255,6 +255,16 @@ class ScenarioService:
     
     def _calculate_asset_impact(self, symbol, asset_class, start_date, end_date, current_value):
         """Calculate impact on a single asset"""
+        if asset_class == 'cash':
+            return {
+                'symbol': symbol,
+                'name': symbol,
+                'initialValue': float(current_value),
+                'finalValue': float(current_value),
+                'percentChange': 0.0,
+                'contribution': 0.0,
+                'sourceSymbol': 'CASH',
+            }
         try:
             series, used_symbol, used_proxy = self._get_effective_series(
                 symbol,

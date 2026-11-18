@@ -12,6 +12,8 @@ import DashboardScreen from '../screens/DashboardScreen';
 import HoldingsScreen, { AddHoldingScreen, HoldingDetailScreen } from '../screens/HoldingsScreen';
 import PortfolioScreen, { AccountDetailScreen } from '../screens/PortfolioScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import ScenarioLabScreen from '../screens/ScenarioLabScreen';
+import CreditCardScreen from '../screens/CreditCardScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import type { AppStackParamList, AuthStackParamList, TabParamList } from './types';
 
@@ -92,6 +94,8 @@ export default function RootNavigator() {
           <AppStack.Screen name="Tabs" component={TabNavigator} />
           <AppStack.Screen name="HoldingDetail" component={HoldingDetailScreen} options={detailOptions} />
           <AppStack.Screen name="AccountDetail" component={AccountDetailScreen} options={detailOptions} />
+          <AppStack.Screen name="ScenarioLab" component={ScenarioLabScreen} options={{ ...detailOptions, headerShown: false }} />
+          <AppStack.Screen name="CreditCard" component={CreditCardScreen} options={{ ...detailOptions, headerShown: false }} />
           <AppStack.Screen
             name="AddHolding"
             component={AddHoldingScreen}

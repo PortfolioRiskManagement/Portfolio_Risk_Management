@@ -196,6 +196,11 @@ class PortfolioAnalyzer:
     # ML: PCA + CLUSTERING
     # ==================================================
     def ml_similarity_analysis(self, n_components=3, n_clusters=4):
+        # Small portfolios can't support more components/clusters than they have assets
+        n_assets = self.returns.shape[1]
+        n_components = min(n_components, n_assets)
+        n_clusters = min(n_clusters, n_assets)
+
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(self.returns)
 

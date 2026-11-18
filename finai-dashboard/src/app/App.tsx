@@ -1,26 +1,24 @@
 import { BrowserRouter } from "react-router-dom"
 import AppRoutes from "./routes"
-import { LoadingProvider } from "../contexts/LoadingContext"
-import LoadingScreen from "../components/LoadingScreen"
-import { useLoading } from "../contexts/LoadingContext"
+import { ThemeProvider } from "../hooks/useTheme"
+import { AuthProvider } from "../contexts/AuthContext"
+import AlertsMonitor from "../features/alerts/components/AlertsMonitor"
 
 function AppContent() {
-	const { isLoading } = useLoading()
-
 	return (
-		<>
-			<LoadingScreen isVisible={isLoading} />
-			<BrowserRouter>
-				<AppRoutes />
-			</BrowserRouter>
-		</>
+		<BrowserRouter>
+			<AlertsMonitor />
+			<AppRoutes />
+		</BrowserRouter>
 	)
 }
 
 export default function App() {
 	return (
-		<LoadingProvider>
-			<AppContent />
-		</LoadingProvider>
+		<ThemeProvider>
+			<AuthProvider>
+				<AppContent />
+			</AuthProvider>
+		</ThemeProvider>
 	)
 }

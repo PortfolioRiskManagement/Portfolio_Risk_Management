@@ -32,13 +32,13 @@ export default function PortfolioPieChart({ holdings }: Props) {
 					<path key={idx} d={item.path} fill={item.color} stroke="#0f172a" strokeWidth="2" />
 				))}
 			</svg>
-			<div className="space-y-2 w-full lg:w-auto">
+			<div className="w-full space-y-2 lg:w-auto">
 				{pathData.map((item, idx) => (
 					<div key={idx} className="flex items-center gap-3">
 						<div className="w-4 h-4 rounded" style={{ backgroundColor: item.color }} />
 						<div className="flex-1">
-							<p className="text-sm font-medium text-white">{item.Ticker}</p>
-							<p className="text-xs text-zinc-400">{item.Percentage.toFixed(1)}% • ${item.Value.toFixed(2)}</p>
+							<p className="text-sm font-medium text-zinc-950 dark:text-white">{item.Ticker}</p>
+							<p className="text-xs text-zinc-500 dark:text-zinc-400">{item.Percentage.toFixed(1)}% • ${item.Value.toFixed(2)}</p>
 						</div>
 					</div>
 				))}

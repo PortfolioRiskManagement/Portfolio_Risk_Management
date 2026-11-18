@@ -18,16 +18,16 @@ type Props = {
 export default function AlertCard({ alert, showTickers = false }: Props) {
 	const impactStyles = {
 		high: {
-			card: "bg-red-950/30 border-red-800/60",
-			badge: "bg-red-500/15 text-red-300 border border-red-500/30",
+			card: "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800/60",
+			badge: "border border-red-200 bg-red-100 text-red-700 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300",
 		},
 		medium: {
-			card: "bg-yellow-950/30 border-yellow-800/60",
-			badge: "bg-yellow-500/15 text-yellow-300 border border-yellow-500/30",
+			card: "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-800/60",
+			badge: "border border-yellow-200 bg-yellow-100 text-yellow-800 dark:border-yellow-500/30 dark:bg-yellow-500/15 dark:text-yellow-300",
 		},
 		low: {
-			card: "bg-blue-950/30 border-blue-800/60",
-			badge: "bg-blue-500/15 text-blue-300 border border-blue-500/30",
+			card: "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800/60",
+			badge: "border border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300",
 		},
 	}
 
@@ -74,16 +74,16 @@ export default function AlertCard({ alert, showTickers = false }: Props) {
 
 					<div className="flex-1 min-w-0">
 						<div className="flex flex-wrap items-center gap-2 mb-2">
-							<span className="text-[11px] px-2 py-1 rounded-md bg-white/10 text-zinc-300 border border-white/10">
+							<span className="rounded-md border border-white/60 bg-white/80 px-2 py-1 text-[11px] text-zinc-600 dark:border-white/10 dark:bg-white/10 dark:text-zinc-300">
 								{currentCategory.label}
 							</span>
 						</div>
 
-						<h3 className="text-sm font-semibold text-white mb-1 leading-5">
+						<h3 className="mb-1 text-sm font-semibold leading-5 text-zinc-950 dark:text-white">
 							{alert.title}
 						</h3>
 
-						<p className="text-xs text-zinc-300 leading-5">
+						<p className="text-xs leading-5 text-zinc-700 dark:text-zinc-300">
 							{alert.description}
 						</p>
 					</div>
@@ -99,13 +99,13 @@ export default function AlertCard({ alert, showTickers = false }: Props) {
 			</div>
 
 			{showTickers && alert.relatedTickers.length > 0 && (
-				<div className="mt-4 pt-4 border-t border-white/10">
-					<p className="text-[11px] text-zinc-400 mb-2">Affected Assets</p>
+				<div className="mt-4 border-t border-zinc-200 pt-4 dark:border-white/10">
+					<p className="mb-2 text-[11px] text-zinc-500 dark:text-zinc-400">Affected Assets</p>
 					<div className="flex flex-wrap gap-2">
 						{alert.relatedTickers.map((ticker) => (
 							<span
 								key={ticker}
-								className="text-xs font-medium px-2.5 py-1 rounded-md bg-white/10 text-white border border-white/10"
+								className="rounded-md border border-white/60 bg-white/80 px-2.5 py-1 text-xs font-medium text-zinc-900 dark:border-white/10 dark:bg-white/10 dark:text-white"
 							>
 								{ticker}
 							</span>
@@ -114,8 +114,8 @@ export default function AlertCard({ alert, showTickers = false }: Props) {
 				</div>
 			)}
 
-			<div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between gap-3 text-xs">
-				<span className="text-zinc-400 truncate">
+			<div className="mt-4 flex items-center justify-between gap-3 border-t border-zinc-200 pt-4 text-xs dark:border-white/10">
+				<span className="truncate text-zinc-500 dark:text-zinc-400">
 					{alert.source} • {getTimeAgo(alert.timestamp)}
 				</span>
 

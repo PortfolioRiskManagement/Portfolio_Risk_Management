@@ -4,4 +4,7 @@ yfinance>=0.2.32
 scikit-learn>=1.4.0
 flask>=3.0.0
 flask-cors>=4.0.0
+python-dotenv>=1.0.0
+snaptrade-python-sdk==13.1.0
 setuptools>=68.0.0
+pytest>=8.0.0
